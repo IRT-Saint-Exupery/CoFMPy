@@ -1,0 +1,9 @@
+black
+pylint
+pytest
+pytest-cov
+tox
+mkdocs
+mkdocs-material
+mkdocstrings[python]
+mkdocs-gallery

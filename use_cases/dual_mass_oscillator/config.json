@@ -1,0 +1,40 @@
+{
+    "fmus": [
+        {
+            "id": "System1",
+            "path": "DualMassOscillator.System1.fmu",
+            "initialization": {"m1": 1.0, "k1": 10.0, "c1": 0.2, "x1_start": 0.0}
+        },
+        {
+            "id": "System2",
+            "path": "DualMassOscillator.System2.fmu",
+            "initialization": {
+                "m2": 1.0,
+                "k2": 10.0,
+                "c2": 0.5,
+                "k3": 20.0,
+                "c3": 0.3,
+                "x2_start": 0.5
+            }
+        }
+    ],
+    "connections": [
+        {
+            "source": {"id": "System1", "variable": "x1"},
+            "target": {"id": "System2", "variable": "x1"}
+        },
+        {
+            "source": {"id": "System1", "variable": "v1"},
+            "target": {"id": "System2", "variable": "v1"}
+        },
+        {
+            "source": {"id": "System1", "variable": "a1"},
+            "target": {"id": "System2", "variable": "a1"}
+        },
+        {
+            "source": {"id": "System2", "variable": "F"},
+            "target": {"id": "System1", "variable": "F"}
+        }
+    ]
+
+}
