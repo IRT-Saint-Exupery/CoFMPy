@@ -1,0 +1,88 @@
+site_name: CoFMPy
+site_description: "A Python library for Cosimulation based on FMI standard"
+site_url:
+repo_name: cofmpy
+repo_url:
+
+nav:
+  - Home: index.md
+  - Getting started: getting_started.md
+  - User guide:
+    - Configuration file: user_guide/configuration_file.md
+    - Proper Initialization: user_guide/cosimulation_initialization.md
+    - Managing data sources: user_guide/data_sources.md
+    - Helpers : user_guide/helpers.md
+    - Advanced usage:
+      - Create your own data stream handler: user_guide/advanced/custom_stream_handler.md
+  - Examples: generated/gallery
+  - API documentation:
+    - api/index.md
+    - Coordinator: api/coordinator.md
+    - Master: api/master.md
+    - FMU Wrappers: api/wrappers.md
+    - ConfigParser: api/config_parser.md
+    - GraphEngine: api/graph_engine.md
+  - Contributing: contributing.md
+
+theme:
+  name: material
+  logo: assets/logo_cofmpy_light.png
+  favicon: assets/favicon_cofmpy_light.png
+  palette:
+    - scheme: default
+      primary: dark
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/gitlab
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            merge_init_into_class: true
+            docstring_section_style: spacy
+            separate_signature: true
+  - gallery:
+      conf_script: docs/gallery_conf.py
+      examples_dirs: docs/examples
+      gallery_dirs: docs/generated/gallery  # where to save generated gallery
+
+markdown_extensions:
+  - footnotes
+  - extra
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - codehilite
+  - toc:
+      baselevel: 1
+      permalink: true
+      toc_depth: 1-4
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+      clickable_checkbox: true
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra_css:
+  - css/custom.css
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - js/custom.js

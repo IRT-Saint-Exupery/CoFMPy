@@ -1,0 +1,30 @@
+name: CoFMPy pytests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: "0 2 * * 0" # Run tests every Sunday at 2am
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.10", "3.13"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox
+    - name: Pytest with tox (Python ${{ matrix.python-version }})
+      run: tox -e py$(echo ${{ matrix.python-version }} | tr -d .)

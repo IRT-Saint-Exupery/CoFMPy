@@ -1,9 +1,6 @@
 <div align="center">
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo_cofmpy_dark.png">
-        <source media="(prefers-color-scheme: light)" srcset="docs/assets/logo_cofmpy_light.png">
-        <img src="docs/assets/logo_cofmpy_light.png" alt="CoFMPy logo">
-    </picture>
+    <img src="./assets/logo_cofmpy_dark.png#only-dark" width="75%" alt="Logo CoFMPy" align="center" />
+    <img src="./assets/logo_cofmpy_light.png#only-light" width="75%" alt="Logo CoFMPy" align="center" />
 </div>
 <br>
 
@@ -16,6 +13,7 @@ provides a seamless interface to orchestrate complex physics simulations and han
 data exchange between FMUs.
 
 The documentation is available online: https://irt-saint-exupery.github.io/CoFMPy/
+
 
 ## 🐾 Installation
 
@@ -83,16 +81,10 @@ Union nor the granting authority can be held responsible for them. The project i
 supported by the Clean Aviation Joint Undertaking and its Members.
 
 <div style="display: flex; align-items: center; gap: 20px;">
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo_hecate_dark.png" width="48%">
-        <source media="(prefers-color-scheme: light)" srcset="docs/assets/logo_hecate_light.png" width="48%">
-        <img src="docs/assets/logo_hecate_light.png" alt="HECATE logo">
-    </picture>
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo_IRT_dark.png" width="48%">
-        <source media="(prefers-color-scheme: light)" srcset="docs/assets/logo_IRT_light.png" width="48%">
-        <img src="docs/assets/logo_IRT_light.png" alt="IRT Saint Exupéry logo">
-    </picture>
+    <img src="./assets/logo_hecate_dark.png#only-dark" width="48%" alt="Logo HECATE" />
+    <img src="./assets/logo_hecate_light.png#only-light" width="48%" alt="Logo HECATE" />
+    <img src="./assets/logo_IRT_dark.png#only-dark" width="48%" alt="Logo IRT Saint Exupéry" />
+    <img src="./assets/logo_IRT_light.png#only-light" width="48%" alt="Logo IRT Saint Exupéry" />
 </div>
 
 ## 📝 License
