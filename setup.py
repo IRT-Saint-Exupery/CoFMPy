@@ -70,6 +70,7 @@ setuptools.setup(
     author="IRT Saint Exupéry - HECATE project team",
     description="FMUs co-simulation in Python",
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url="https://github.com/IRT-Saint-Exupery/CoFMPy",
     license="BSD-2-Clause",
     packages=setuptools.find_namespace_packages(),
@@ -80,7 +81,6 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
-        "License :: OSI Approved :: BSD License",
     ],
     entry_points={
         "console_scripts": [
