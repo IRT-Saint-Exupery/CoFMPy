@@ -9,37 +9,40 @@ The use case is a simple system with an AC voltage source and a resistor. The AC
 source generates a sinusoidal voltage signal, and the resistor consumes the power from
 the source. The resistor has a variable resistance that can be changed during the
 simulation.
+
+![source resistor system](../../assets/source_resistor.png)
+
 """
 
 # %%
-# We will first download all necessary ressources such as FMUs (source and resistor) and
-# the configuration file from the public link provided below.
+# We will first download all necessary resources such as the FMUs (source and resistor)
+# and the configuration file from the public link provided below.
 import os
 import urllib.request
 import zipfile
 
 url = "https://share-is.pf.irt-saintexupery.com/s/39zaG9HkQWnePbi/download"
 
-# Local path to ressources folder
-ressources_path = "example1.zip"
+# Local path to resources folder
+resources_path = "example1.zip"
 
 # Download and unzip the file
-urllib.request.urlretrieve(url, ressources_path)
-with zipfile.ZipFile(ressources_path, "r") as zip_ref:
+urllib.request.urlretrieve(url, resources_path)
+with zipfile.ZipFile(resources_path, "r") as zip_ref:
     zip_ref.extractall(".")
 
 # Remove the zip file
-os.remove(ressources_path)
+os.remove(resources_path)
 
-print("Ressources unzipped in example1 folder!")
+print("Resources unzipped in example1 folder!")
 
 # %%
-# Now that we have all the necessary ressources, we can start the example.
+# Now that we have all the necessary resources, we can start the example.
 #
-# The base object in CoFMPy is the [**Coordinator**](/api/coordinator). It manages all
-# the components of CoFMPy: the Master algorithm, the graph engine, the data stream
-# handlers, etc. In this tutorial, we only deal with the Coordinator that communicates
-# for us.
+# The base object in CoFMPy is the [**Coordinator**](../../api/coordinator.md). It
+# manages all the components of CoFMPy: the Master algorithm, the graph engine, the data
+# stream handlers, etc. In this tutorial, we only deal with the Coordinator that
+# communicates automatically with the different components.
 #
 # We will first import the Coordinator object from CoFMPy and create an instance of it.
 
@@ -50,12 +53,12 @@ coordinator = Coordinator()
 # %%
 # ## The JSON configuration file
 #
-# The first step is to create the JSON configuration file based on your system. This
-# file must contain the information about the FMUs, the connections between them, and
-# the simulation settings. For more information, check the page on [how to create a JSON
-# configuration file](/user_guide/configuration_file), see this page. The system also
-# requires input data to run the simulation (here, the variable resistor from a CSV
-# file).
+# The first step is to create the JSON configuration file based on your simulation
+# system. This file must contain the information about the FMUs, the connections between
+# them, and the simulation settings. For more information, check the page on [how to
+# create a JSON configuration file](../../user_guide/configuration_file.md), see this
+# page. The system also requires input data to run the simulation (here, the variable
+# resistor from a CSV file).
 #
 # Here is the content of the configuration file for this example:
 
@@ -99,11 +102,17 @@ print("CSV path for resistance value R:", csv_data_handler.path)
 print("CSV data for R (as Pandas dataframe):\n", csv_data_handler.data.head())
 
 # %%
+# You can also visualize the graph of the system using the `plot_graph` method. This
+# method will plot the connections between the FMUs in the system.
+
+coordinator.graph_engine.plot_graph()
+
+# %%
 # ## Running the simulation
 #
 # After loading the configuration file, you can run the simulation by calling the
-# [`do_step` method](/api/coordinator/#cofmpy.coordinator.Coordinator.do_step). This
-# method will run the simulation for a given time step via the Master algorithm.
+# [`do_step` method](../../api/coordinator.md#cofmpy.coordinator.Coordinator.do_step).
+# This method will run the simulation for a given time step via the Master algorithm.
 #
 # The `do_step` method will save the results in the data storages defined in the
 # configuration file. You can access the data storages using the `data_storages`
@@ -112,7 +121,7 @@ print("CSV data for R (as Pandas dataframe):\n", csv_data_handler.data.head())
 
 print(f"Current time of the co-simulation: {coordinator.master.current_time}")
 
-time_step = 0.05
+time_step = 0.01
 coordinator.do_step(time_step)
 
 print(
@@ -121,7 +130,7 @@ print(
 )
 
 # Run N steps
-N = 30
+N = 100
 for _ in range(N):
     coordinator.do_step(time_step)
 
@@ -132,42 +141,33 @@ print(
 
 # %%
 # It is possible to run the simulation until a specific end time by using the
-# [`run_simulation` method](/api/coordinator/#cofmpy.coordinator.Coordinator.run_simulation).
-# This method will run the simulation until the end time and return the results of the
-# simulation.
-# TODO: Should we restart the simulation before running it? (init_simulation) or recreate
-# the coordinator object?
-end_time = 2.0
+# [`run_simulation`
+# method](../../api/coordinator.md#cofmpy.coordinator.Coordinator.run_simulation). This
+# method will run the simulation until the end time and return the results of the
+# simulation. Note that you should recreate a new Coordinator from scratch. It is not
+# possible to mix both `do_step` and `run_simulation` methods in the same Coordinator
+# object.
+#
+# At the end of the simulation, you can also manually save results to a CSV file:
 
-results = coordinator.run_simulation(time_step, end_time)
-print(f"Current time of the co-simulation: {coordinator.master.current_time:.2f}")
-
+coordinator.save_results("simulation_results.csv")
 
 # %%
 # ## Visualizing the results
 #
-# The simulation results are stored in the data storages. You can access the results via
-# the `data_storages` attribute of the Coordinator object.
+# Results can be accessible directly in the Master object or in the CSV file we just
+# saved.
 
-print("Data storages:\n", coordinator.data_storages)
+import pandas as pd
 
-# %%
-# You can visualize the results stored in the data storages.
-#
-# The default data storage is created for the results of the simulation: it stores the
-# data for all outputs in a single CSV file. You can access the results via
-# `coordinator.data_storages["results"]`.
-
-default_storage = coordinator.data_storages["results"]
-results = default_storage.load("results")
+results = pd.read_csv("simulation_results.csv")
 print(results.head(10))
 
 # %%
 
-results.plot(x="t")
+results.plot(x="time", grid=True)
+
 
 # %%
-# You can also visualize the graph of the system using the `plot_graph` method. This
-# method will plot the connections between the FMUs in the system.
-
-coordinator.graph_engine.plot_graph()
+# We can observe that the change of resistance value at t = 0.42s effectively changes
+# the current $I = U/R$ flowing through the resistor.

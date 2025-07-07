@@ -466,13 +466,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#extracting-fmu-information-with-extract_fmu" class="md-nav__link">
+  <a href="#extracting-fmu-information-with-cofmpy-extract-fmu" class="md-nav__link">
     <span class="md-ellipsis">
-      📦 Extracting FMU Information with extract_fmu
+      📦 Extracting FMU Information with cofmpy-extract-fmu
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="📦 Extracting FMU Information with extract_fmu">
+    <nav class="md-nav" aria-label="📦 Extracting FMU Information with cofmpy-extract-fmu">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -906,13 +906,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#extracting-fmu-information-with-extract_fmu" class="md-nav__link">
+  <a href="#extracting-fmu-information-with-cofmpy-extract-fmu" class="md-nav__link">
     <span class="md-ellipsis">
-      📦 Extracting FMU Information with extract_fmu
+      📦 Extracting FMU Information with cofmpy-extract-fmu
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="📦 Extracting FMU Information with extract_fmu">
+    <nav class="md-nav" aria-label="📦 Extracting FMU Information with cofmpy-extract-fmu">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -946,7 +946,10 @@
 
 
 <h1 id="cofmpy-helper-scripts">🛠️ CoFMPy Helper Scripts<a class="headerlink" href="#cofmpy-helper-scripts" title="Permanent link">&para;</a></h1>
-<p>CoFMPy provides a set of <strong>helper scripts</strong> designed to simplify working with <strong>Functional Mock-up Units (FMUs)</strong> and co-simulation workflows. These scripts offer <strong>debugging tools, model extraction utilities, and automation features</strong> to enhance user experience.</p>
+<p>CoFMPy provides a set of <strong>helper scripts</strong> designed to simplify working with
+<strong>Functional Mock-up Units (FMUs)</strong> and co-simulation workflows. These scripts offer
+<strong>debugging tools, model extraction utilities, and automation features</strong> to enhance user
+experience.</p>
 <hr />
 <h2 id="available-helper-scripts">📜 Available Helper Scripts<a class="headerlink" href="#available-helper-scripts" title="Permanent link">&para;</a></h2>
 <table>
@@ -958,7 +961,7 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="#extract_fmu"><code>extract_fmu</code></a></td>
+<td><a href="#extracting-fmu-information-with-cofmpy-extract-fmu"><code>cofmpy-extract-fmu</code></a></td>
 <td>Extracts and displays all metadata from an FMU file.</td>
 </tr>
 <tr>
@@ -967,21 +970,25 @@
 </tr>
 </tbody>
 </table>
-<h2 id="extracting-fmu-information-with-extract_fmu">📦 Extracting FMU Information with <code>extract_fmu</code><a class="headerlink" href="#extracting-fmu-information-with-extract_fmu" title="Permanent link">&para;</a></h2>
-<p>The <code>extract_fmu</code> helper script is a command-line tool designed to <strong>extract and display all relevant information</strong> from an FMU (Functional Mock-up Unit) file. It helps users quickly inspect FMU metadata, including:</p>
+<h2 id="extracting-fmu-information-with-cofmpy-extract-fmu">📦 Extracting FMU Information with <code>cofmpy-extract-fmu</code><a class="headerlink" href="#extracting-fmu-information-with-cofmpy-extract-fmu" title="Permanent link">&para;</a></h2>
+<p>The <code>cofmpy-extract-fmu</code> helper script is a command-line tool designed to <strong>extract and
+display all relevant information</strong> from an FMU (Functional Mock-up Unit) file. It helps
+users quickly inspect FMU metadata, including:</p>
 <ul>
 <li><strong>Inputs, outputs, and parameters</strong></li>
-<li><strong>Integration step size</strong></li>
 <li><strong>Default values and variable types</strong></li>
+<li><strong>Integration step size</strong></li>
 </ul>
-<p>This tool is particularly useful for <strong>debugging, documentation, and ensuring FMU compatibility</strong> before running co-simulations.</p>
+<p>This tool is particularly useful for <strong>debugging, documentation, and ensuring FMU
+compatibility</strong> before running co-simulations.</p>
 <hr />
 <h3 id="usage">📜 Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
-<p>The extract_fmu script is executed from the command line with the following syntax:</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>extract_fmu.py<span class="w"> </span>&lt;path_to_fmu_file&gt;
+<p>The <code>cofmpy-extract-fmu</code> script is executed from the command line with the following
+syntax:</p>
+<div class="highlight"><pre><span></span><code>cofmpy-extract-fmu<span class="w"> </span>&lt;path_to_fmu_file&gt;
 </code></pre></div>
 <p>For example, if you have an FMU file named <code>model.fmu</code> in the current directory, run:</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>extract_fmu.py<span class="w"> </span>model.fmu
+<div class="highlight"><pre><span></span><code>cofmpy-extract-fmu<span class="w"> </span>model.fmu
 </code></pre></div>
 <p>This will extract and display all the FMU metadata in a well-structured table.</p>
 

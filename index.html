@@ -304,15 +304,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#graphical-interface" class="md-nav__link">
-    <span class="md-ellipsis">
-      🖥️ Graphical Interface
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#python-interface" class="md-nav__link">
     <span class="md-ellipsis">
       🐍 Python interface
@@ -944,15 +935,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#graphical-interface" class="md-nav__link">
-    <span class="md-ellipsis">
-      🖥️ Graphical Interface
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#python-interface" class="md-nav__link">
     <span class="md-ellipsis">
       🐍 Python interface
@@ -1026,26 +1008,33 @@ It offers advanced master coordination features, such as solving algebraic loops
 FMUs and managing the interaction between various simulation components. This library
 provides a seamless interface to orchestrate complex physics simulations and handle the
 data exchange between FMUs.</p>
-<p>CoFMPy can be used in two different ways: either from a web interface or directly in a
-Python script. The documentation is available online.</p>
+<p>The documentation is available online: https://irt-saint-exupery.github.io/CoFMPy/</p>
 <h2 id="installation">🐾 Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>CoFMPy is available on PyPI and can be installed using <code>pip</code>:</p>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>cofmpy
 </code></pre></div>
-<h2 id="graphical-interface">🖥️ Graphical Interface<a class="headerlink" href="#graphical-interface" title="Permanent link">&para;</a></h2>
-<p>The web interface allows users to interact with the cosimulation through a user-friendly
-graphical interface.</p>
-<p>You can start the web application by running the following command:</p>
+<!--
+## 🖥️ Graphical Interface
+
+The web interface allows users to interact with the cosimulation through a user-friendly
+graphical interface.
+
+You can start the web application by running the following command:
+
 <div class="highlight"><pre><span></span><code>streamlit<span class="w"> </span>run<span class="w"> </span>cofmpy/webapp/main.py
 </code></pre></div>
-<p>Once the web application is running, you can access it by opening your web browser and
+
+Once the web application is running, you can access it by opening your web browser and
 navigating to the provided URL. From there, you can explore the various features and
-functionalities of CoFMPy's web interface.</p>
-<p>This web interface is still under development, and additional features and improvements
-will be added in the future.</p>
+functionalities of CoFMPy's web interface.
+
+This web interface is still under development, and additional features and improvements
+will be added in the future.
+-->
+
 <h2 id="python-interface">🐍 Python interface<a class="headerlink" href="#python-interface" title="Permanent link">&para;</a></h2>
-<p>The Python interface allows users to use CoFMPy in a more granular way. A high-level
-API is provided to reproduce the same functionalities as the graphical interface.
+<p>The Python interface allows users to use CoFMPy and run co-simulation. A high-level
+API is provided to easily run and visualize a co-simulation system.
 Advanced users can also dive deeper into the structure of CoFMPy for a more advanced
 control of the components.</p>
 <p>Under the hood, CoFMPy is controlled by a component called the <em>Coordinator</em>. It is the
@@ -1080,7 +1069,7 @@ supported by the Clean Aviation Joint Undertaking and its Members.</p>
 </div>
 
 <h2 id="license">📝 License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
-<p>The package is released under <a href="https://choosealicense.com/licenses/mit">MIT license</a>.</p>
+<p>The package is released under the <a href="https://opensource.org/license/bsd-2-clause">2-Clause BSD License</a>.</p>
 
 
 
