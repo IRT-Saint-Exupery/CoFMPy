@@ -1,8 +1,7 @@
 site_name: CoFMPy
 site_description: "A Python library for Cosimulation based on FMI standard"
-site_url:
 repo_name: cofmpy
-repo_url:
+repo_url: https://github.com/IRT-Saint-Exupery/CoFMPy
 
 nav:
   - Home: index.md
@@ -40,7 +39,7 @@ theme:
         icon: material/toggle-switch
         name: Switch to light mode
   icon:
-    repo: fontawesome/brands/gitlab
+    repo: fontawesome/brands/github
 
 plugins:
   - search
