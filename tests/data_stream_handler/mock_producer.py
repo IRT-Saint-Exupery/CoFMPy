@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 # Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+# The 2-Clause BSD License
 #
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
@@ -11,22 +14,23 @@
 #    materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
-# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
-# WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-# DAMAGE.
-import time
-import threading
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import subprocess
+import threading
+import time
 from pathlib import Path
 
 import pandas as pd
 from confluent_kafka import Producer
+
 
 def try_start_kafka_docker(yml_path: str, command="up", options=None):
     try:
@@ -38,10 +42,7 @@ def try_start_kafka_docker(yml_path: str, command="up", options=None):
             command_line = ["docker-compose", "-f", str(yml_path), command, options]
 
         result = subprocess.run(
-            command_line,
-            check=True,
-            capture_output=True,
-            text=True
+            command_line, check=True, capture_output=True, text=True
         )
         print("✅ Docker Compose Output:", result)
         return True
@@ -53,17 +54,17 @@ def try_start_kafka_docker(yml_path: str, command="up", options=None):
 
 class MockProducerThreaded:
     def __init__(
-            self,
-            df,
-            topic,
-            uri="localhost:9092",
-            prev_delay=5,
-            max_retries=500,
-            end_thread=True,
-            create_delay=0.1,
-            send_delay=0.1,
-            retry_delay=0.1
-        ):
+        self,
+        df,
+        topic,
+        uri="localhost:9092",
+        prev_delay=5,
+        max_retries=500,
+        end_thread=True,
+        create_delay=0.1,
+        send_delay=0.1,
+        retry_delay=0.1,
+    ):
         """
         Init: load configuration.
         """

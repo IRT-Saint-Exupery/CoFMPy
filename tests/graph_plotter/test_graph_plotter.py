@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 # Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+# The 2-Clause BSD License
 #
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
@@ -11,23 +14,27 @@
 #    materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
-# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
-# WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-# DAMAGE.
-import pytest
-import networkx as nx
-import plotly.graph_objects as go
-from unittest.mock import patch, MagicMock, Mock
-import numpy as np
-from cofmpy.graph_plotter import GraphPlotter
-from pathlib import Path
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import os
+from pathlib import Path
+from unittest.mock import MagicMock
+from unittest.mock import Mock
+from unittest.mock import patch
+
+import networkx as nx
+import numpy as np
+import plotly.graph_objects as go
+import pytest
+
+from cofmpy.graph_plotter import GraphPlotter
 
 
 DEFAULT_CONFIG = {
@@ -210,7 +217,9 @@ def test_generate_color_map_default(plotter):
 
     assert isinstance(color_map, dict)
     assert set(color_map.keys()) == set(elements)
-    assert all(color.startswith("rgba(") for color in color_map.values())  # Check RGBA format
+    assert all(
+        color.startswith("rgba(") for color in color_map.values()
+    )  # Check RGBA format
 
 
 def test_generate_color_map_empty(plotter):
@@ -244,7 +253,9 @@ def test_create_node_trace(sample_graph, plotter):
     plotter.node_positions = {"A": (1, 2), "B": (2, 3)}
     plotter.color_map = {"A": "rgba(255, 0, 0, 1)", "B": "rgba(0, 255, 0, 1)"}
 
-    node_trace = plotter._create_node_trace(node_list[0], "A", size_map, plotter.color_map)
+    node_trace = plotter._create_node_trace(
+        node_list[0], "A", size_map, plotter.color_map
+    )
     assert isinstance(node_trace, go.Scatter)
     assert node_trace.marker["color"] == "rgba(255, 0, 0, 1)"
     assert node_trace.marker["size"] > 0
@@ -325,7 +336,9 @@ def test_create_layout(plotter):
 
     # Extract actual updatemenus
     actual_updatemenus = layout.updatemenus
-    expected_updatemenus = [{"buttons": buttons, "direction": "down", "showactive": True}]
+    expected_updatemenus = [
+        {"buttons": buttons, "direction": "down", "showactive": True}
+    ]
 
     assert isinstance(layout, go.Layout)
     assert actual_updatemenus is not None
@@ -336,7 +349,9 @@ def test_create_layout(plotter):
     # Ensure buttons structure matches
     actual_buttons = actual_updatemenus[0]["buttons"]
     assert len(actual_buttons) == len(buttons)
-    assert all(actual_buttons[i]["label"] == buttons[i]["label"] for i in range(len(buttons)))
+    assert all(
+        actual_buttons[i]["label"] == buttons[i]["label"] for i in range(len(buttons))
+    )
 
 
 def test_generate_dropdown_options(plotter, mdgraph):

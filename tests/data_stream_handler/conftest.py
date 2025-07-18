@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 # Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+# The 2-Clause BSD License
 #
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
@@ -11,18 +14,19 @@
 #    materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
-# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
-# WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-# DAMAGE.
-import pytest
-import pandas as pd
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import numpy as np
+import pandas as pd
+import pytest
+
 from tests.data_stream_handler.mock_producer import MockProducerThreaded
 
 expected_results = {
@@ -274,6 +278,7 @@ expected_results = {
     },
 }
 
+
 @pytest.fixture
 def kafka_resistor_test():
     config = {
@@ -378,7 +383,12 @@ def literal_two_resistors_test():
                     "unit": "Ohm",
                     "id": "source_literal_na",
                 },
-                "target": {"id": "resistor_1", "variable": "R", "unit": "Ohm", "type": "fmu"},
+                "target": {
+                    "id": "resistor_1",
+                    "variable": "R",
+                    "unit": "Ohm",
+                    "type": "fmu",
+                },
             },
             {
                 "source": {
@@ -387,7 +397,12 @@ def literal_two_resistors_test():
                     "unit": "Ohm",
                     "id": "source_literal_na",
                 },
-                "target": {"id": "resistor_2", "variable": "R", "unit": "Ohm", "type": "fmu"},
+                "target": {
+                    "id": "resistor_2",
+                    "variable": "R",
+                    "unit": "Ohm",
+                    "type": "fmu",
+                },
             },
         ],
         "root": "",
@@ -405,30 +420,80 @@ def kakfa_two_resistors_test():
             {"id": "resistor_1", "path": "tests/data/resistor3.fmu"},
             {"id": "resistor_2", "path": "tests/data/resistor3.fmu"},
         ],
-            "connections": [
-        {"source": {"id": "source", "variable": "V", "unit": "V", "type": "fmu"},
-         "target": {"id": "resistor_1", "variable": "V_in", "unit": "V", "type": "fmu"}},
-        {"source": {"id": "source", "variable": "V", "unit": "V", "type": "fmu"},
-         "target": {"id": "resistor_2", "variable": "V_in", "unit": "V", "type": "fmu"}},
-        {"source": {"type": "kafka", "uri": "localhost:9092", "topic": "dummy_topic",
-                    "group_id": "my_group", "variable": "R1", "unit": "Ohm",
-                    "interpolation": "previous", "id": "source_kafka_R"},
-         "target": {"id": "resistor_1", "variable": "R", "unit": "Ohm", "type": "fmu"}},
-        {"source": {"type": "kafka", "uri": "localhost:9092", "topic": "dummy_topic",
-                    "group_id": "my_group", "variable": "R2", "unit": "Ohm",
-                    "interpolation": "previous", "id": "source_kafka_R"},
-         "target": {"id": "resistor_2", "variable": "R", "unit": "Ohm", "type": "fmu"}}
-    ],
+        "connections": [
+            {
+                "source": {"id": "source", "variable": "V", "unit": "V", "type": "fmu"},
+                "target": {
+                    "id": "resistor_1",
+                    "variable": "V_in",
+                    "unit": "V",
+                    "type": "fmu",
+                },
+            },
+            {
+                "source": {"id": "source", "variable": "V", "unit": "V", "type": "fmu"},
+                "target": {
+                    "id": "resistor_2",
+                    "variable": "V_in",
+                    "unit": "V",
+                    "type": "fmu",
+                },
+            },
+            {
+                "source": {
+                    "type": "kafka",
+                    "uri": "localhost:9092",
+                    "topic": "dummy_topic",
+                    "group_id": "my_group",
+                    "variable": "R1",
+                    "unit": "Ohm",
+                    "interpolation": "previous",
+                    "id": "source_kafka_R",
+                },
+                "target": {
+                    "id": "resistor_1",
+                    "variable": "R",
+                    "unit": "Ohm",
+                    "type": "fmu",
+                },
+            },
+            {
+                "source": {
+                    "type": "kafka",
+                    "uri": "localhost:9092",
+                    "topic": "dummy_topic",
+                    "group_id": "my_group",
+                    "variable": "R2",
+                    "unit": "Ohm",
+                    "interpolation": "previous",
+                    "id": "source_kafka_R",
+                },
+                "target": {
+                    "id": "resistor_2",
+                    "variable": "R",
+                    "unit": "Ohm",
+                    "type": "fmu",
+                },
+            },
+        ],
         "root": "",
         "loop_solver": "jacobi",
         "edge_sep": " -> ",
     }
 
-    data_to_send = pd.DataFrame({"t": [0, 1.3, 2.9], "R1": [0.5, 10.0, 1.2], "R2": [0.5, 0, 5]})
+    data_to_send = pd.DataFrame(
+        {"t": [0, 1.3, 2.9], "R1": [0.5, 10.0, 1.2], "R2": [0.5, 0, 5]}
+    )
 
     producer = MockProducerThreaded(
-        data_to_send, "dummy_topic",  prev_delay=5, max_retries=50,
-        end_thread=True, create_delay=0.1, send_delay=0.1, retry_delay=0.1
+        data_to_send,
+        "dummy_topic",
+        prev_delay=5,
+        max_retries=50,
+        end_thread=True,
+        create_delay=0.1,
+        send_delay=0.1,
+        retry_delay=0.1,
     )
 
     return config, expected_results, producer

@@ -123,8 +123,8 @@ The corresponding JSON description is:
 ```json
 {
     "source": {
-        "type": "literal", 
-        "values": {"0": 100, "12.5": 250}, 
+        "type": "literal",
+        "values": {"0": 100, "12.5": 250},
         "interpolation": "linear"
     },
     "target": {"id": "resistor", "variable": "R", "unit": "Ohm"}
@@ -281,14 +281,14 @@ effectively. A full JSON example is provided in the "Examples" section.
 ## Interpolation reference
 
 Interpolation is used when the system
-needs a value between two time points when data external to FMUs is used (literal, csv, kafka, etc.). 
+needs a value between two time points when data external to FMUs is used (literal, csv, kafka, etc.).
 
 The interpolation uses `cofmpy.utils.Interpolator` class which supports a wide variety of interpolation methods. The currently tested methods are:
 - `previous`, which returns the value at the previous time point (default value)
 - `linear`, which calculates a linearly interpolated value between the previous and
   next points.
 
-The other methods will log the following warning:  
+The other methods will log the following warning:
 `Method '{method}' is in beta version. We recommend using 'linear' or 'previous'`
 
 For more details, please refer to: `./notebooks/interpolator.ipynb`
