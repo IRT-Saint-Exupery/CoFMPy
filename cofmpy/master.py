@@ -463,9 +463,9 @@ class Master:
                         self._results[(fmu_id, output_name)].extend(value)
                     # add each output to the output dict, [FMU_ID][Var] as key
                     self._output_dict[fmu_id][output_name] = value
+        self.current_time += step_size
         if record_outputs:
             self._results["time"].append(self.current_time)
-        self.current_time += step_size
         # Return the output value for this step
         return self._output_dict
     
