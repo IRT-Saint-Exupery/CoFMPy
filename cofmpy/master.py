@@ -449,18 +449,13 @@ class Master:
 
         """
         self.set_inputs(input_dict=input_dict)
+        targets = defaultdict(list)
         for fmu_ids in self.sequence_order:
             # out = {"fmu_id" : {"output_name" : value}}
             out = self.solve_loop(fmu_ids, step_size, self.loop_solver)
+            self.apply_outputs_to_inputs(out, targets, record_outputs)
             for fmu_id, fmu_output_dict in out.items():
                 for output_name, value in fmu_output_dict.items():
-                    # If output is connected, transfer the value to the connected FMU(s)
-                    if (fmu_id, output_name) in self.connections:
-                        for target_fmu, target_variable in self.connections[
-                            (fmu_id, output_name)
-                        ]:
-                            self._input_dict[target_fmu][target_variable] = value
-
                     # add each output to the result dict, (FMU_ID + Var) as key
                     if record_outputs:
                         self._results[(fmu_id, output_name)].extend(value)
@@ -471,3 +466,21 @@ class Master:
         self.current_time += step_size
         # Return the output value for this step
         return self._output_dict
+    
+    def apply_outputs_to_inputs(self, out, targets, record_outputs):
+        for fmu_id, fmu_output_dict in out.items():
+            for output_name, value in fmu_output_dict.items():
+                # If output is connected, transfer the value to the connected FMU(s)
+                if (fmu_id, output_name) in self.connections:
+                    for target_fmu, target_variable in self.connections[(fmu_id, output_name)]:
+                        self._input_dict[target_fmu][target_variable] = value
+                        
+                        if (target_fmu, target_variable) in targets:
+                            new_value = [value[0] + targets[(target_fmu, target_variable)][0]]
+                            #print('Multiple target for '+target_fmu+'/'+target_variable+'/'+str(value)+'/'+str(targets[(target_fmu, target_variable)])+'/'+str(new_value))
+                            
+                            targets[(target_fmu, target_variable)] = new_value
+
+                            self._input_dict[target_fmu][target_variable] = new_value
+                        else:
+                            targets[(target_fmu, target_variable)] = value
