@@ -229,8 +229,13 @@ class Coordinator:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
         # Get data from inbound data stream handlers
+        import math
+        absValue = math.fabs(self.master.current_time-0.0005)
+        if absValue < 1e-7:
+            for key, handler in self.stream_handlers.items():
+                print("value at "+str(self.master.current_time)+" for "+str(key)+" is "+str(handler.get_data(self.master.current_time)))
         data = {
-            key: handler.get_data(self.master.current_time)
+            key: handler.get_data(self.master.current_time+step_size)   # Get value for current_time + step_size
             for key, handler in self.stream_handlers.items()
         }
         data_for_master = self._dict_tuple_to_dict_of_dict(data)
