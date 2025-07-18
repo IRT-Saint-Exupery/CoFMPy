@@ -40,7 +40,7 @@ By default, CoFMPy uses **SciPy's `fsolve`** with its **default arguments**. How
 
 To modify these settings, pass the desired options using `fixed_point_kwargs`:
 
- 
+
 
 ```python
  # Customize fixed point solver
@@ -50,8 +50,8 @@ To modify these settings, pass the desired options using `fixed_point_kwargs`:
       "tolerance": 1e-5,
       "max_iterations": 100,
   }
-  
-  coordinator.start(config_path, fixed_point_init=True, fixed_point_kwargs=fixed_point_kwargs)  
+
+  coordinator.start(config_path, fixed_point_init=True, fixed_point_kwargs=fixed_point_kwargs)
 ```
 
 ### Supported Solvers

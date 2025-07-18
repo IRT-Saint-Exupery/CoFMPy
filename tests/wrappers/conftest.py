@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 # Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+# The 2-Clause BSD License
 #
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
@@ -11,29 +14,54 @@
 #    materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
-# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
-# WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-# DAMAGE.
-import pytest
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import os
-from fmpy.model_description import ModelDescription
-from fmpy.fmi2 import FMU2Slave, FMICallException
+
+import pytest
+from fmpy.fmi2 import FMICallException
+from fmpy.fmi2 import FMU2Slave
 from fmpy.fmi3 import FMU3Slave
-from cofmpy.wrappers import FmuHandlerFactory, Fmu2Handler, Fmu3Handler
+from fmpy.model_description import ModelDescription
+
+from cofmpy.wrappers import Fmu2Handler
+from cofmpy.wrappers import Fmu3Handler
+from cofmpy.wrappers import FmuHandlerFactory
 
 description_keys = [
-    "fmiVersion", "modelName", "guid", "description", "author", "version",
-    "copyright", "license", "generationTool", "generationDateAndTime",
-    "variableNamingConvention", "numberOfContinuousStates", "numberOfEventIndicators",
-    "defaultExperiment", "coSimulation", "modelExchange", "scheduledExecution",
-    "buildConfigurations", "unitDefinitions", "typeDefinitions", "modelVariables",
-    "outputs", "derivatives", "clockedStates", "eventIndicators", "initialUnknowns"
+    "fmiVersion",
+    "modelName",
+    "guid",
+    "description",
+    "author",
+    "version",
+    "copyright",
+    "license",
+    "generationTool",
+    "generationDateAndTime",
+    "variableNamingConvention",
+    "numberOfContinuousStates",
+    "numberOfEventIndicators",
+    "defaultExperiment",
+    "coSimulation",
+    "modelExchange",
+    "scheduledExecution",
+    "buildConfigurations",
+    "unitDefinitions",
+    "typeDefinitions",
+    "modelVariables",
+    "outputs",
+    "derivatives",
+    "clockedStates",
+    "eventIndicators",
+    "initialUnknowns",
 ]
 factory_class = FmuHandlerFactory
 description_class = ModelDescription
@@ -67,8 +95,10 @@ PARAMS_DICT = {
         "input_dict": {"input_real": [1.0]},
         "expected_results": [46.0, -51.0],
         "expected_get_var": {
-            "input_real": [1.0], "output_real": [0.0],
-            "fixed_param": [42], "string_var": [b"Hello"],
+            "input_real": [1.0],
+            "output_real": [0.0],
+            "fixed_param": [42],
+            "string_var": [b"Hello"],
         },
         "expected_get_causality": ["input", "output", "parameter", "parameter"],
         "expected_var_types": ["Real", "Real", "Integer", "String"],
@@ -94,12 +124,24 @@ PARAMS_DICT = {
         "input_dict": {"h": [1.0], "v": [0.0]},
         "expected_results": [0.14, 2.65],
         "expected_get_var": {
-            "h": [1.0], "v": [0.0], "time": [0.0], "der(h)": [0.0],
-            "der(v)": [-9.81], "g": [-9.81], "e": [0.7], "v_min": [0.1],
+            "h": [1.0],
+            "v": [0.0],
+            "time": [0.0],
+            "der(h)": [0.0],
+            "der(v)": [-9.81],
+            "g": [-9.81],
+            "e": [0.7],
+            "v_min": [0.1],
         },
         "expected_get_causality": [
-            "independent", "output", "local", "output", "local", "parameter",
-            "parameter", "local",
+            "independent",
+            "output",
+            "local",
+            "output",
+            "local",
+            "parameter",
+            "parameter",
+            "local",
         ],
         "expected_var_types": ["Float64"] * 8,
     },

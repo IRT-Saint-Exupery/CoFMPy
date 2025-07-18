@@ -1,5 +1,31 @@
+# -*- coding: utf-8 -*-
+# Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+# The 2-Clause BSD License
+#
+# Redistribution and use in source and binary forms, with or without modification, are
+# permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this list of
+#    conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this list
+#    of conditions and the following disclaimer in the documentation and/or other
+#    materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 # test_kafka_data_stream_handler.py
 import pytest
+
 pytest.skip("Skipping this test file", allow_module_level=True)
 import unittest
 from unittest.mock import patch, MagicMock, call
@@ -10,7 +36,6 @@ from cofmpy.data_stream_handler import KafkaDataStreamHandler
 
 
 class TestKafkaDataStreamHandler(unittest.TestCase):
-
     def setUp(self):
         self.var_name = "MySignal"
         self.topic = "test_topic"
@@ -21,10 +46,12 @@ class TestKafkaDataStreamHandler(unittest.TestCase):
             "uri": "localhost:9092",
             "group_id": "test_group",
             "interpolation": "previous",
-            "timeout": self.t_out
+            "timeout": self.t_out,
         }
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.KafkaDataStreamHandler.start_consuming")
+    @patch(
+        "cofmpy.data_stream_handler.kafka_data_stream_handler.KafkaDataStreamHandler.start_consuming"
+    )
     @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
     @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Interpolator")
     def test_init_and_config_validation(self, mock_interp, mock_consumer, mock_start):
@@ -40,13 +67,10 @@ class TestKafkaDataStreamHandler(unittest.TestCase):
         handler.stop_consuming()
 
     def test_validate_config_defaults(self):
-        config = {
-            "topic": "t",
-            "variable": "v",
-            "uri": "server:1234",
-            "group_id": "g"
-        }
-        handler_args = KafkaDataStreamHandler._validate_config(KafkaDataStreamHandler, config)
+        config = {"topic": "t", "variable": "v", "uri": "server:1234", "group_id": "g"}
+        handler_args = KafkaDataStreamHandler._validate_config(
+            KafkaDataStreamHandler, config
+        )
         positional, optional = handler_args
 
         self.assertEqual(optional[0], "previous")
@@ -92,10 +116,7 @@ class TestKafkaDataStreamHandler(unittest.TestCase):
     def test_get_data_interpolates(self, mock_consumer_class, mock_interp_class):
         handler = KafkaDataStreamHandler(**self.config)
 
-        handler.data = pd.DataFrame({
-            "t": [1.0, 2.0, 3.0],
-            "value": [20.0, 21.0, 22.0]
-        })
+        handler.data = pd.DataFrame({"t": [1.0, 2.0, 3.0], "value": [20.0, 21.0, 22.0]})
 
         handler.timeout = -1  # Skip sleep logic
 
@@ -106,7 +127,7 @@ class TestKafkaDataStreamHandler(unittest.TestCase):
         result = handler.get_data(2.5)
         mock_interp.assert_called_once()
         self.assertEqual(result, [21.5])
-        
+
     @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.logger")
     def test_handle_message_with_error(self, mock_logger):
         mock_message = MagicMock()
@@ -168,4 +189,3 @@ class TestKafkaDataStreamHandler(unittest.TestCase):
         handler._consume()
 
         handler._handle_message.assert_called_with(mock_msg)
-
