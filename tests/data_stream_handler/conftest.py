@@ -13,6 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
+<<<<<<< HEAD
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -22,13 +23,42 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+=======
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+# WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+# DAMAGE.
+import json
+import logging
+import pytest
+import pandas as pd
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 import numpy as np
 import pandas as pd
 import pytest
 
 from tests.data_stream_handler.mock_producer import MockProducerThreaded
 
-expected_results = {
+logging.getLogger("cofmpy.data_stream_handler.kafka_data_stream_handler").setLevel(logging.DEBUG)
+
+# === Constants ===
+
+DATA_2R = pd.DataFrame({"t": [0, 1.3, 2.9], "R1": [0.5, 10.0, 1.2], "R2": [0.5, 0, 5]})
+RESISTOR_PATH = "Resistor.fmu"
+
+FMUS = [
+    {"id": "source", "path": "tests/data/source.fmu"},
+    {"id": "resistor_1", "path": RESISTOR_PATH},
+    {"id": "resistor_2", "path": RESISTOR_PATH},
+]
+
+TWO_RESISTORS_RESULTS = {
     ("source", "V"): {
         0.0: 0.0,
         0.05: 6.180339887498948,
@@ -277,6 +307,7 @@ expected_results = {
     },
 }
 
+<<<<<<< HEAD
 
 @pytest.fixture
 def kafka_resistor_test():
@@ -287,56 +318,96 @@ def kafka_resistor_test():
         "group_id": "test_group",
         "interpolation": "previous",
         "timeout": 2,
+=======
+CONFIG_OPTIONS = {
+    "root": "",
+    "loop_solver": "jacobi",
+    "edge_sep": " -> ",
+}
+
+SOURCE_CONNECTIONS = [
+    {
+        "source": {"id": "source", "variable": "V", "unit": "V", "type": "fmu"},
+        "target": {"id": "resistor_1", "variable": "V_in", "unit": "V", "type": "fmu"},
+    },
+    {
+        "source": {"id": "source", "variable": "V", "unit": "V", "type": "fmu"},
+        "target": {"id": "resistor_2", "variable": "V_in", "unit": "V", "type": "fmu"},
+    },
+]
+
+# === Helper Functions ===
+
+
+def make_kafka_config(
+    variable,
+    topic="dummy_topic",
+    uri="localhost:9092",
+    group_id="my_group",
+    interpolation="previous",
+    unit="Ohm",
+    timeout=2,
+    backend_conf_path="",
+    first_msg_timeout=35,
+    max_retries=3,
+    retry_delay=0.02,
+    first_delay=4,
+    offset_reset="earliest",
+    max_buffer_len=10,
+    thread_lifetime=np.inf,
+):
+    return {
+        "type": "kafka",
+        "uri": uri,
+        "topic": topic,
+        "group_id": group_id,
+        "variable": variable,
+        "unit": unit,
+        "interpolation": interpolation,
+        "id": f"source_kafka_{variable}",
+        "timeout": timeout,
+        "backend_conf_path": backend_conf_path,
+        "first_msg_timeout": first_msg_timeout,
+        "max_retries": max_retries,
+        "retry_delay": retry_delay,
+        "first_delay": first_delay,
+        "offset_reset": offset_reset,
+        "max_buffer_len": max_buffer_len,
+        "thread_lifetime": thread_lifetime,
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
     }
 
-    expected_result = np.array(
-        [
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            1.0,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            2.5,
-            1.2,
-            1.2,
-            1.2,
-            1.2,
-            1.2,
-            1.2,
-            1.2,
-            1.2,
-            1.2,
-            1.2,
-            1.2,
-        ]
-    )
+
+def make_literal_config(values, source_id="source_literal_na", unit="Ohm"):
+    return {
+        "type": "literal",
+        "values": {str(t): v for t, v in zip(DATA_2R["t"], values)},
+        "unit": unit,
+        "id": source_id,
+    }
+
+
+def make_source_target(source, target_id):
+    return {
+        "source": source,
+        "target": {"id": target_id, "variable": "R", "unit": "Ohm", "type": "fmu"},
+    }
+
+
+# === Fixtures ===
+
+
+@pytest.fixture
+def kafka_resistor_test():
+
+    var_name = "R"
+    topic_name = "dummy_topic"
+
+    expected_result = np.array([1.0] * 13 + [2.5] * 16 + [1.2] * 11)
 
     mock_producer = MockProducerThreaded(
-        pd.DataFrame({"t": [0, 1.3, 2.9], "R": [1, 2.5, 1.2]}),
-        "test_topic",
+        pd.DataFrame({"t": [0, 1.3, 2.9], var_name: [1, 2.5, 1.2]}),
+        topic=topic_name,
         prev_delay=1,
         max_retries=100,
         end_thread=True,
@@ -345,17 +416,47 @@ def kafka_resistor_test():
         retry_delay=0.1,
     )
 
-    return config, expected_result, mock_producer
+    kafka_config = make_kafka_config(var_name, topic=topic_name)
+
+    return kafka_config, expected_result, mock_producer
+
+
+@pytest.fixture
+def kafka_two_resistors_test(generate_fmus):
+    config = {
+        "fmus": FMUS,
+        "connections": SOURCE_CONNECTIONS
+        + [
+            make_source_target(make_kafka_config("R1"), "resistor_1"),
+            make_source_target(make_kafka_config("R2"), "resistor_2"),
+        ],
+    }
+    config.update(CONFIG_OPTIONS)
+
+    producer = MockProducerThreaded(
+        DATA_2R,
+        "dummy_topic",
+        prev_delay=5,
+        max_retries=50,
+        end_thread=True,
+        create_delay=0.1,
+        send_delay=0.1,
+        retry_delay=0.1,
+    )
+
+    return config, TWO_RESISTORS_RESULTS, producer
 
 
 @pytest.fixture
 def literal_two_resistors_test():
     config = {
-        "fmus": [
-            {"id": "source", "path": "tests/data/source.fmu"},
-            {"id": "resistor_1", "path": "tests/data/resistor3.fmu"},
-            {"id": "resistor_2", "path": "tests/data/resistor3.fmu"},
+        "fmus": FMUS,
+        "connections": SOURCE_CONNECTIONS
+        + [
+            make_source_target(make_literal_config(DATA_2R["R1"]), "resistor_1"),
+            make_source_target(make_literal_config(DATA_2R["R2"]), "resistor_2"),
         ],
+<<<<<<< HEAD
         "connections": [
             {
                 "source": {"id": "source", "variable": "V", "unit": "V", "type": "fmu"},
@@ -407,11 +508,15 @@ def literal_two_resistors_test():
         "root": "",
         "loop_solver": "jacobi",
         "edge_sep": " -> ",
+=======
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
     }
-    return config, expected_results
+    config.update(CONFIG_OPTIONS)
+    return config, TWO_RESISTORS_RESULTS
 
 
 @pytest.fixture
+<<<<<<< HEAD
 def kakfa_two_resistors_test():
     config = {
         "fmus": [
@@ -494,5 +599,94 @@ def kakfa_two_resistors_test():
         send_delay=0.1,
         retry_delay=0.1,
     )
+=======
+def dummy_config(generate_backend_config_json):
+    return {
+        "uri": "localhost:9092",
+        "topic": "test-topic",
+        "group_id": "test-group",
+        "interpolation": "previous",
+        "variable": "value",
+        "timeout": 0.1,
+        "kafka_backend_conf": "backend_config.json",
+    }
 
-    return config, expected_results, producer
+
+@pytest.fixture
+def generate_backend_config_json(tmp_path):
+    config_data = {
+        "first_msg_timeout": 35,
+        "retry_delay": 0.02,
+        "first_delay": 4,
+        "max_retries": 3,
+        "offset_reset": "earliest",
+        "max_buffer_len": 10,
+        "thread_lifetime": np.inf,
+    }
+    file_path = tmp_path / "backend_config.json"
+    with file_path.open("w") as f:
+        json.dump(config_data, f)
+    yield file_path
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
+
+@pytest.fixture(scope="module")
+def generate_csv(tmp_path_factory):
+    base_dir = tmp_path_factory.mktemp("csv_test_data")
+
+    csv_data = {
+        "r1.csv": "t,variable\n0,0.5\n1.3,10.0\n2.9,1.2",
+        "r2.csv": "t,variable\n0,0.5\n1.3,0.0\n2.9,5.0",
+    }
+
+    paths = []
+    for fname, content in csv_data.items():
+        path = base_dir / fname
+        path.write_text(content)
+        paths.append(path)
+
+    yield paths
+
+import os
+@pytest.fixture(scope="module")
+def generate_fmus():
+    """
+    Fixture to generate the FMU files before running tests (using pythonfmu).
+    The FMUs are then deleted after the tests.
+    """
+    script_fnames = ("resistor_fmu.py",)
+    fmu_fnames = ("Resistor.fmu",)
+
+    current_test_filepath = os.path.dirname(os.path.abspath(__file__))
+    for fmu_script in script_fnames:
+        fmu_script_path = os.path.join(current_test_filepath, fmu_script)
+        os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
+
+    yield
+
+    for fmu_file in fmu_fnames:
+        os.remove(fmu_file)
+
+@pytest.fixture
+def csv_two_resistors_test(generate_csv, generate_fmus):
+    r1_path, r2_path = generate_csv
+
+    def make_csv_source(path):
+        return {
+            "type": "csv",
+            "path": path,
+            "variable": "variable",
+            "unit": "Ohm",
+            "id": "source_csv_na",
+        }
+
+    config = {
+        "fmus": FMUS,
+        "connections": SOURCE_CONNECTIONS
+        + [
+            make_source_target(make_csv_source(r1_path), "resistor_1"),
+            make_source_target(make_csv_source(r2_path), "resistor_2"),
+        ],
+    }
+    config.update(CONFIG_OPTIONS)
+
+    return config, TWO_RESISTORS_RESULTS

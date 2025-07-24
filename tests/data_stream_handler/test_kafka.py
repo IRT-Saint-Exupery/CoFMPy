@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
 # Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
 #
 # The 2-Clause BSD License
 #
+=======
+# Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
 #
@@ -13,6 +18,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
+<<<<<<< HEAD
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -55,66 +61,96 @@ class TestKafkaDataStreamHandler(unittest.TestCase):
     @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Interpolator")
     def test_init_and_config_validation(self, mock_interp, mock_consumer, mock_start):
         handler = KafkaDataStreamHandler(**self.config)
+=======
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+# WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+# DAMAGE.
+from unittest.mock import patch, MagicMock
+import pytest
+from cofmpy.data_stream_handler.kafka_data_stream_handler import KafkaDataStreamHandler
 
-        self.assertEqual(handler.topic, self.topic)
-        self.assertEqual(handler.var_name, self.var_name)
-        self.assertEqual(handler.timeout, self.t_out)
-        self.assertTrue(isinstance(handler.data, pd.DataFrame))
-        self.assertTrue(mock_consumer.called)
-        self.assertTrue(mock_interp.called)
+from sortedcontainers import SortedDict
 
-        handler.stop_consuming()
 
+@pytest.fixture
+def handler(dummy_config):
+    with patch(
+        "cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer"
+    ) as mock_consumer, patch(
+        "cofmpy.data_stream_handler.kafka_data_stream_handler.KafkaThreadManager"
+    ) as mock_thread_mgr:
+
+        mock_consumer.return_value = MagicMock()
+        mock_thread_mgr.return_value = MagicMock()
+        return KafkaDataStreamHandler(dummy_config)
+
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
+
+def test_initialization(handler):
+    assert handler.consumer is not None
+    assert handler.config.topic == "test-topic"
+    assert isinstance(handler.data, SortedDict)
+    assert not handler._subscribed
+
+
+<<<<<<< HEAD
     def test_validate_config_defaults(self):
         config = {"topic": "t", "variable": "v", "uri": "server:1234", "group_id": "g"}
         handler_args = KafkaDataStreamHandler._validate_config(
             KafkaDataStreamHandler, config
         )
         positional, optional = handler_args
+=======
+def test_handle_message_stores_data(handler):
+    handler.alias_mapping = {("node", "endpoint"): "variable"}
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 
-        self.assertEqual(optional[0], "previous")
-        self.assertEqual(optional[1], 2)
+    fake_message = {"t": 1.0, "variable": 42.0}
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    def test_lazy_subscribe(self, mock_consumer):
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.consumer = MagicMock()
-        handler._subscribed = False
+    with patch(
+        "cofmpy.data_stream_handler.kafka_data_stream_handler.parse_kafka_message",
+        return_value=fake_message,
+    ):
+        msg = MagicMock()
+        msg.error.return_value = None
 
-        handler._lazy_subscribe()
-        handler.consumer.subscribe.assert_called_once_with([self.topic])
-        self.assertTrue(handler._subscribed)
+        handler._handle_message(msg)
+        assert 1.0 in handler.data
+        assert handler.data[1.0]["variable"] == 42.0
 
-    def test_parse_kafka_message(self):
-        class MockMsg:
-            def value(self):
-                return b"{'t': 1, 'temperature': 22}"
 
-        result = KafkaDataStreamHandler.parse_kafka_message(MockMsg())
-        self.assertEqual(result["t"].iloc[0], 1.0)
-        self.assertEqual(result["temperature"].iloc[0], 22.0)
+def test_lazy_subscribe_subscribes_once(handler):
+    handler._lazy_subscribe()
+    handler.consumer.subscribe.assert_called_once_with(["test-topic"])
+    assert handler._subscribed
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Interpolator")
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    def test_handle_message_updates_data(self, mock_consumer_class, mock_interp_class):
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.data = pd.DataFrame(columns=["t", "value"])
+    # Calling again shouldn't resubscribe
+    handler._lazy_subscribe()
+    handler.consumer.subscribe.assert_called_once()  # still only once
 
-        # Mock Kafka message
-        mock_msg = MagicMock()
-        mock_msg.error.return_value = None
-        mock_msg.value.return_value = b'{"t": 1, "value": 22.5}'
 
-        handler._handle_message(mock_msg)
+def test_get_data_returns_interpolated_value(handler):
+    # Setup: inject mock data and mock interpolator
+    handler.alias_mapping = {("node", "endpoint"): "variable"}
+    handler._subscribed = True
+    handler.thread_manager.running = True
 
-        self.assertEqual(handler.data.shape[0], 1)
-        self.assertIn("value", handler.data.columns)
+    handler.data[0.0] = {"variable": 1.0}
+    handler.data[1.0] = {"variable": 2.0}
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Interpolator")
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    def test_get_data_interpolates(self, mock_consumer_class, mock_interp_class):
-        handler = KafkaDataStreamHandler(**self.config)
+    with patch(
+        "cofmpy.data_stream_handler.kafka_data_stream_handler.lookup_with_window",
+        return_value=(True, [0.0, 1.0], [{"variable": 1.0}, {"variable": 2.0}]),
+    ), patch.object(handler, "interpolator", return_value=[{"node": 2.0}]) as mock_interp:
 
+<<<<<<< HEAD
         handler.data = pd.DataFrame({"t": [1.0, 2.0, 3.0], "value": [20.0, 21.0, 22.0]})
 
         handler.timeout = -1  # Skip sleep logic
@@ -131,12 +167,20 @@ class TestKafkaDataStreamHandler(unittest.TestCase):
     def test_handle_message_with_error(self, mock_logger):
         mock_message = MagicMock()
         mock_message.error.return_value = MagicMock(code=lambda: 1)
+=======
+        result = handler.get_data(0.5)
+        assert result is not None
+        mock_interp.assert_called_once()
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.consumer = MagicMock()
 
-        handler._handle_message(mock_message)
+def test_is_equivalent_stream_matches(handler):
+    config = {
+        "config": {"uri": "localhost:9092", "topic": "test-topic", "group_id": "test-group"}
+    }
+    assert handler.is_equivalent_stream(config)
 
+<<<<<<< HEAD
         mock_logger.error.assert_called()
 
     def test_handle_message_valid(self):
@@ -188,3 +232,11 @@ class TestKafkaDataStreamHandler(unittest.TestCase):
         handler._consume()
 
         handler._handle_message.assert_called_with(mock_msg)
+=======
+
+def test_is_equivalent_stream_mismatch(handler):
+    config = {
+        "config": {"uri": "wronghost:9092", "topic": "test-topic", "group_id": "test-group"}
+    }
+    assert not handler.is_equivalent_stream(config)
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)

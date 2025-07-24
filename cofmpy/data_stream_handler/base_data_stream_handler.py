@@ -41,7 +41,8 @@ class BaseDataStreamHandler:
 
     @abstractmethod
     def __init__(self):
-        pass
+        # Mapping (dict[tuple[str, str]:[str]]): {(node, endpoint): name_in_stream}
+        self.alias_mapping = {}
 
     @classmethod
     def register_handler(cls, subclass):
@@ -80,7 +81,7 @@ class BaseDataStreamHandler:
                 f"Unknown handler type '{handler_type}'."
                 f"Available types: {list(cls._handlers_registry.keys())}"
             )
-        return cls._handlers_registry[handler_type](**config_dict["config"])
+        return cls._handlers_registry[handler_type](config_dict["config"])
 
     @abstractmethod
     def get_data(self, t: float):
@@ -93,3 +94,32 @@ class BaseDataStreamHandler:
         Returns:
             pd.Series: data at the requested time.
         """
+
+    @abstractmethod
+    def is_equivalent_stream(self, config: dict) -> bool:
+        """
+        Check if the current data stream handler instance is equivalent to
+        another that would be created with the given config.
+        Useful to detect multiple similar child instances.
+        Eeach child class should implement criteria to decide wether two instances
+        are equivalent or not.
+
+        Args:
+            config (dict): config for the data stream handler to compare.
+
+        Returns:
+            bool: True if the handlers are equivalent, False otherwise.
+        """
+        # TODO: make sure to add logs in child classes
+
+    def add_variable(self, endpoint: tuple, stream_alias: str):
+        """
+        Add a new variable to the data stream handler.
+
+        Args:
+            endpoint (tuple): key of the variable to add in the format:
+                (node_name, endpoint_name).
+            stream_alias (str): alias, relative to the data stream,
+                of the variable to add.
+        """
+        self.alias_mapping.update({endpoint: stream_alias})

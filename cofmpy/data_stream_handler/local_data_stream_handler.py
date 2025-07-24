@@ -32,6 +32,8 @@ import pandas as pd
 from ..utils import Interpolator
 from .base_data_stream_handler import BaseDataStreamHandler
 
+logger = logging.getLogger(__name__)
+
 
 class LocalDataStreamHandler(BaseDataStreamHandler):
     """
@@ -47,15 +49,19 @@ class LocalDataStreamHandler(BaseDataStreamHandler):
     # Type name of the handler (used in the configuration file and handler registration)
     type_name = "literal"
 
-    def __init__(self, values, interpolation="previous"):
-        if not values:
-            logging.warning("Given dict is empty, no value will be used")
+    def __init__(self, config):
+        super().__init__()
 
-        self.values = values
-        self.interpolator = Interpolator(interpolation)
+        if "values" not in config:
+            logger.error(f"'values' not found in 'config'. Handler: ({self})")
+        if "interpolation" not in config:
+            logger.info("Interpolation method not provided, using default 'previous'.")
 
-        list_t = [float(t) for t in values]
-        list_values = [float(val) for val in values.values()]
+        self.values = config.get("values", {})
+        self.interpolator = Interpolator(config.get("interpolation", "previous"))
+
+        list_t = [float(t) for t in self.values]
+        list_values = [float(val) for val in self.values.values()]
         self.data = pd.DataFrame.from_dict({"t": list_t, "values": list_values})
 
     def get_data(self, t: float):
@@ -68,9 +74,39 @@ class LocalDataStreamHandler(BaseDataStreamHandler):
         Returns:
             float: data at the requested time.
         """
-        if t < self.data["t"].values[0]:
-            logging.warning(
-                f"Timestamp {t} is before available data range. "
-                "Extrapolated variable value will be used instead"
-            )
-        return self.interpolator(self.data["t"], self.data["values"], [t])[0]
+        out_dict = {}
+        for (node, endpoint), _ in self.alias_mapping.items():
+            out_dict[(node, endpoint)] = self.interpolator(
+                self.data["t"], self.data["values"], [t]
+            )[0]
+
+        return out_dict
+
+    def is_equivalent_stream(self, config: dict) -> bool:
+        """
+        Check if the current data stream handler instance is equivalent to
+        another that would be created with the given config.
+        This local data handler is always considered as unique.
+
+        Args:
+            config (dict): config for the data stream handler to compare.
+
+        Returns:
+            bool: True if the handlers are equivalent, False otherwise.
+        """
+        logger.debug(f"Not used (each handler is unique): {config}")
+
+        return False
+
+    def add_variable(self, endpoint: tuple, stream_alias: str):
+        """
+        Add a new variable to the data stream handler.
+
+        Args:
+            endpoint (tuple): key of the variable to add in the format:
+                (node_name, endpoint_name).
+            stream_alias (str): not used since values are passed direcly
+                in config under 'values' key.
+        """
+        logger.debug(f"Argument not used: {stream_alias}")
+        self.alias_mapping.update({endpoint: "values"})

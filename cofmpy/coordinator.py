@@ -25,6 +25,11 @@
 """
 Coordinator class
 """
+<<<<<<< HEAD
+=======
+from collections import defaultdict
+
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 import pandas as pd
 
 from .config_parser import ConfigParser
@@ -98,9 +103,7 @@ class Coordinator:
         self.start_graph_engine(self.config_parser.graph_config)
 
         # 3. Start Master
-        self.config_parser.master_config["sequence_order"] = (
-            self.graph_engine.sequence_order
-        )
+        self.config_parser.master_config["sequence_order"] = self.graph_engine.sequence_order
         self.start_master(
             self.config_parser.master_config,
             fixed_point_init=fixed_point_init,
@@ -125,8 +128,9 @@ class Coordinator:
         for fmu_id, outputs in self.master.get_outputs().items():
             for output_name in outputs:
                 output_names.append(f"{fmu_id}.{output_name}")
-        for stream in self.stream_handlers:
-            output_names.append(f"{stream[0]}.{stream[1]}")
+        for handler in self.stream_handlers:
+            for (node, endpoint), _ in handler.alias_mapping.items():
+                output_names.append(f"{node}.{endpoint}")
         self.data_storages["results"].save("results", [["t"] + output_names])
 
     def get_results(self) -> dict:
@@ -166,9 +170,7 @@ class Coordinator:
             config["edge_sep"],
         )
 
-    def start_master(
-        self, config: dict, fixed_point_init=False, fixed_point_kwargs=None
-    ):
+    def start_master(self, config: dict, fixed_point_init=False, fixed_point_kwargs=None):
         """
         Start the master algorithm with the given configuration.
 
@@ -196,13 +198,24 @@ class Coordinator:
         Load the stream handlers from the given dictionary of configurations.
 
         Args:
-            stream_handlers_config (dict): dictionary containing the configurations for
-                the stream handlers.
+            stream_handlers (dict): dictionary containing the configurations for the
+                stream handlers.
         """
-        self.stream_handlers = {
-            key: BaseDataStreamHandler.create_handler(config)
-            for key, config in stream_handlers_config.items()
-        }
+
+        self.stream_handlers = []
+
+        for key, config in stream_handlers_config.items():
+            # Check if the stream handler already exists
+            for dh in self.stream_handlers:
+                if dh.is_equivalent_stream(config):
+                    break
+            else:
+                # If not (break not executed), create a new stream handler
+                dh = BaseDataStreamHandler.create_handler(config)
+                self.stream_handlers.append(dh)
+
+            # Add variable to the stream handler for mapping
+            dh.add_variable(key, config["config"].get("variable"))
 
     def load_data_storages(self, data_storages_config: dict):
         """
@@ -229,12 +242,16 @@ class Coordinator:
         if self.master is None:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
-        # Get data from inbound data stream handlers
-        data = {
-            key: handler.get_data(self.master.current_time)
-            for key, handler in self.stream_handlers.items()
-        }
-        data_for_master = self._dict_tuple_to_dict_of_dict(data)
+        # Format: [{(fmu1, var1): value}, {(fmu2, var2): value, (fmu3, var3): value}]
+        data = [dh.get_data(self.master.current_time) for dh in self.stream_handlers]
+
+        # Format: {(fmu1, var1): value}, (fmu2, var2): value, (fmu3, var3): value}
+        data = {k: v for d in data for k, v in d.items()}
+
+        # Format: {fmu1: {var1: value1}, fmu2: {var2: value2}, fmu3: {var3: value3}}
+        data_for_master = defaultdict(dict)
+        for (fmu, var), val in data.items():
+            data_for_master[fmu][var] = [val]
 
         # Do step in the master
         outputs = self.master.do_step(step_size, input_dict=data_for_master)

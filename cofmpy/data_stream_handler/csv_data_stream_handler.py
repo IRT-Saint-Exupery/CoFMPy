@@ -25,10 +25,18 @@
 """
 This module contains the child class for CSV data stream handler.
 """
+<<<<<<< HEAD
+=======
+
+import logging
+
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 import pandas as pd
 
 from ..utils import Interpolator
 from .base_data_stream_handler import BaseDataStreamHandler
+
+logger = logging.getLogger(__name__)
 
 
 class CsvDataStreamHandler(BaseDataStreamHandler):
@@ -39,7 +47,8 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
     # Type name of the handler (used in the configuration file and handler registration)
     type_name = "csv"
 
-    def __init__(self, path, variable, interpolation="previous"):
+    # def __init__(self, path, variable, interpolation="previous"):
+    def __init__(self, config):
         """
         Constructor for CSV data stream handler.
 
@@ -53,12 +62,20 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
                 Usually: 'linear', 'cubic', 'quadratic', 'previous', 'nearest', 'spline'.
                 Defaults to 'previous.
         """
-        self.path = path
-        self.variable_name = variable
+        super().__init__()
 
-        self.interpolator = Interpolator(interpolation)
-        self.data = pd.read_csv(path)
-        self.data = self.data[["t", self.variable_name]]
+        if "path" not in config:
+            logger.error(f"'path' not found in 'config'. Handler: ({self})")
+        if "interpolation" not in config:
+            logger.info("Interpolation method not provided, using default 'previous'.")
+
+        self.path = config.get("path")
+        self.interpolator = Interpolator(config.get("interpolation", "previous"))
+
+        if self.path:
+            self.data = pd.read_csv(self.path)
+        else:
+            logger.error(f"Failed to initialize: {self}")
 
     def get_data(self, t: float):
         """
@@ -68,6 +85,31 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
             t (float): timestamp to get the data.
 
         Returns:
-            float: data value at the requested time.
+            dict: for the requested time, returns dict of values associated to endpoints
+                under the data handler scope (see BaseDataStreamHandler.is_equivalent_stream).
+                Format : {(fmu_i, var_j): value_1, (fmu_k, var_l): value_2}, ...}
         """
-        return self.interpolator(self.data["t"], self.data[self.variable_name], [t])[0]
+        out_dict = {}
+        for (node, endpoint), stream_alias in self.alias_mapping.items():
+            out_dict[(node, endpoint)] = self.interpolator(
+                self.data["t"], self.data[stream_alias], [t]
+            )[0]
+
+        return out_dict
+
+    def is_equivalent_stream(self, config: dict) -> bool:
+        """
+        Check if the current data stream handler instance is equivalent to
+        another that would be created with the given config.
+        This csv data handler groups all variables present in one same csv into one
+        handler instance.
+
+        Args:
+            config (dict): config for the data stream handler to compare.
+
+        Returns:
+            bool: True if the handlers are equivalent, False otherwise.
+        """
+
+        # equivalence item: csv path (self.path)
+        return config["config"]["path"] == self.path

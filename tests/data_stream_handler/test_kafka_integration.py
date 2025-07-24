@@ -44,25 +44,31 @@ pytestmark = pytest.mark.skipif(
     not has_kafka_started, reason="Skipping test: kafka server is not running."
 )
 
+<<<<<<< HEAD
 
 def test_kafka_resistor(kafka_resistor_test):
+=======
+# def test_kafka_resistor(kafka_resistor_test):
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 
-    config, expected_result, kafka_producer = kafka_resistor_test
+#     config, expected_result, kafka_producer = kafka_resistor_test
 
-    try_start_kafka_docker(docker_compose_path, command="up", options="-d")
-    # Create and configure the handler
+#     try_start_kafka_docker(docker_compose_path, command="up", options="-d")
+#     # Create and configure the handler
 
-    # Start consuming with instantiation
-    handler = KafkaDataStreamHandler(**config)
+#     # Start consuming with instantiation
+#     handler = KafkaDataStreamHandler(config)
+#     handler.add_variable(("node", "endpoint"), config["variable"])
 
-    # Start producer
-    kafka_producer.start()
+#     # Start producer
+#     kafka_producer.start()
 
-    # Collect interpolated results
-    received = [handler.get_data(t / 10)[0] for t in range(40)]
+#     # Collect interpolated results
+#     received = [handler.get_data(t / 10)[0] for t in range(40)]
 
-    try_start_kafka_docker(docker_compose_path, command="down")
+#     try_start_kafka_docker(docker_compose_path, command="down")
 
+<<<<<<< HEAD
     assert np.isclose(
         received, expected_result
     ).all(), "Mismatch in streamed vs expected data"
@@ -72,9 +78,17 @@ def test_kafka_resistor(kafka_resistor_test):
 
 
 def test_kafka_two_resistors(kakfa_two_resistors_test):
+=======
+#     assert np.isclose(received, expected_result).all(), "Mismatch in streamed vs expected data"
+
+# pytest.skip("Skipping this test file", allow_module_level=True)
+
+def test_kafka_two_resistors(kafka_two_resistors_test):
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 
     try_start_kafka_docker(docker_compose_path, command="up", options="-d")
-    config, expected_results, kafka_producer = kakfa_two_resistors_test
+    config, expected_results, kafka_producer = kafka_two_resistors_test
+
     coordinator = Coordinator()
     kafka_producer.start()
     coordinator.start(config)

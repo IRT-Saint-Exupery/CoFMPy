@@ -13,6 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
+<<<<<<< HEAD
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -22,14 +23,26 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+=======
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+# WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+# DAMAGE.
+import logging
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 import pytest
 
 from cofmpy.data_stream_handler.csv_data_stream_handler import CsvDataStreamHandler
 
-TEST_DATA_PREVIOUS = [(2, 30), (1.5, 20), (3, 40)]
-TEST_DATA_OO_RANGE = [(0, 10), (3.5, 40), (5, 40)]
-TEST_DATA_LINEAR = [(1.5, 25), (2.5, 35)]
+# === Test Data ===
 
+<<<<<<< HEAD
 
 def get_csv_content():
     """
@@ -41,56 +54,93 @@ def get_csv_content():
 2,30
 3,40
 """
+=======
+TEST_DATA_PREVIOUS = [(1.3, 10), (1.5, 10), (2.9, 1.2)]
+TEST_DATA_OUT_OF_RANGE = [(-1, 0.5), (3.5, 1.2), (5, 1.2)]
+TEST_DATA_LINEAR = [(1.5, 8.9), (2.4, 3.95)]
+
+
+# === Fixtures ===
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 
 
 @pytest.fixture
-def csv_file(tmp_path):
-    """
-    Fixture that writes mock CSV data to a temporary file.
-    """
-    path = tmp_path / "test_data.csv"
-    path.write_text(get_csv_content())
-    return str(path)
+def csv_config(generate_csv):
+    """Returns a CSV config dictionary using the first generated CSV file."""
+    return {
+        "path": generate_csv[0],
+        "variable": "variable",
+    }
 
+<<<<<<< HEAD
 
 def test_csv_handler_initialization(csv_file):
     handler = CsvDataStreamHandler(csv_file, "variable")
     assert handler.path == csv_file
     assert handler.variable_name == "variable"
+=======
+@pytest.fixture
+def csv_handler_init(csv_config):
+    """Initializes a CsvDataStreamHandler with default 'previous' interpolation."""
+    handler = CsvDataStreamHandler(csv_config)
+    var_name = ("node", "endpoint")
+    handler.add_variable(var_name, "variable")
+    return handler, var_name
+
+
+# === Tests ===
+
+def test_csv_handler_initialization(csv_config):
+    """Check CSV handler setup with default and custom interpolation methods."""
+    handler = CsvDataStreamHandler(csv_config)
+    assert handler.path == csv_config["path"]
+>>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
     assert handler.interpolator.method == "previous"
     assert not handler.data.empty
-    handler = CsvDataStreamHandler(csv_file, "variable", "spline")
+
+    csv_config["interpolation"] = "spline"
+    handler = CsvDataStreamHandler(csv_config)
     assert handler.interpolator.method == "spline"
 
 
-def test_get_data_previous_interpolation(csv_file):
-    handler = CsvDataStreamHandler(csv_file, "variable")
-    for (x_, y_) in TEST_DATA_PREVIOUS:
-        interp_y = handler.get_data(x_)
-        assert isinstance(interp_y, float)
-        assert interp_y == y_
+@pytest.mark.parametrize("x_input, expected", TEST_DATA_PREVIOUS)
+def test_get_data_previous_interpolation(csv_handler_init, x_input, expected):
+    """Verify 'previous' interpolation returns correct results."""
+    handler, var_name = csv_handler_init
+    result = handler.get_data(x_input)[var_name]
+    assert isinstance(result, float)
+    assert result == expected
 
 
-def test_get_data_linear_interpolation(tmp_path):
-    csv_file = tmp_path / "test_data.csv"
-    csv_file.write_text(get_csv_content())
-    handler = CsvDataStreamHandler(str(csv_file), "variable", interpolation="linear")
-    for (x_, y_) in TEST_DATA_LINEAR:
-        interp_y = handler.get_data(x_)
-        assert isinstance(interp_y, float)
-        assert interp_y == y_
+@pytest.mark.parametrize("x_input, expected", TEST_DATA_LINEAR)
+def test_get_data_linear_interpolation(csv_handler_init, x_input, expected):
+    """Verify 'linear' interpolation returns correct interpolated values."""
+    handler, var_name = csv_handler_init
+    handler.interpolator.method = "linear"
+    result = handler.get_data(x_input)[var_name]
+    assert isinstance(result, float)
+    assert result == expected
 
 
-def test_get_data_out_of_range(csv_file):
-    handler = CsvDataStreamHandler(csv_file, "variable", interpolation="previous")
-    for (x_, y_) in TEST_DATA_OO_RANGE:
-        interp_y = handler.get_data(x_)
-        assert isinstance(interp_y, float)
-        assert interp_y == y_
+@pytest.mark.parametrize("x_input, expected", TEST_DATA_OUT_OF_RANGE)
+def test_get_data_out_of_range(csv_handler_init, x_input, expected):
+    """Test data points outside the provided time range (extrapolation or boundary)."""
+    handler, var_name = csv_handler_init
+    result = handler.get_data(x_input)[var_name]
+    assert isinstance(result, float)
+    assert result == expected
 
 
-def test_invalid_interpolation(tmp_path):
-    csv_file = tmp_path / "test_data.csv"
-    csv_file.write_text(get_csv_content())
+def test_invalid_interpolation(csv_config):
+    """Ensure unsupported interpolation methods raise a ValueError."""
+    csv_config["interpolation"] = "invalid"
     with pytest.raises(ValueError, match="Unregistered method 'invalid'."):
-        CsvDataStreamHandler(str(csv_file), "variable", interpolation="invalid")
+        CsvDataStreamHandler(csv_config)
+
+def test_csv_empty(caplog):
+    """Test that empty config doesn't break handler, but logs warnings."""
+    with caplog.at_level(logging.DEBUG):
+        CsvDataStreamHandler({})
+        assert "'path' not found in 'config'." in caplog.text 
+        assert "Interpolation method not provided, using default" in caplog.text
+        assert "Failed to initialize:" in caplog.text
