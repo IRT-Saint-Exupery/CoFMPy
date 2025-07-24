@@ -42,7 +42,8 @@ repos:
     rev: v3.0.0a5
     hooks:
       - id: pylint
-        args: [--enable=unused-import --max-line-length=80, --disable=all]
+        args: [--rcfile=.pylintrc]
+        files: ^cofmpy/
 
 
   - repo: https://github.com/commitizen-tools/commitizen

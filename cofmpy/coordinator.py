@@ -22,7 +22,6 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 """
 Coordinator class
 """
@@ -99,9 +98,9 @@ class Coordinator:
         self.start_graph_engine(self.config_parser.graph_config)
 
         # 3. Start Master
-        self.config_parser.master_config[
-            "sequence_order"
-        ] = self.graph_engine.sequence_order
+        self.config_parser.master_config["sequence_order"] = (
+            self.graph_engine.sequence_order
+        )
         self.start_master(
             self.config_parser.master_config,
             fixed_point_init=fixed_point_init,
