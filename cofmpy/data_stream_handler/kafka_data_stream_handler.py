@@ -65,7 +65,9 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         logger.debug("Parsed KafkaHandlerConfig: %s", vars(self.config))
 
         self.interpolator = Interpolator(self.config.interpolation)
-        logger.debug("Initializing Interpolator with method: %s", self.interpolator.method)
+        logger.debug(
+            "Initializing Interpolator with method: %s", self.interpolator.method
+        )
         self.consumer = self._create_consumer()
         self.thread_manager = KafkaThreadManager(
             self.consumer, self._handle_message, self.config.thread_lifetime
@@ -100,7 +102,9 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             logger.debug("Subscribing to Kafka topic: %s", self.config.topic)
             self.consumer.subscribe([self.config.topic])
             self._subscribed = True
-            logger.info("Kafka subscription completed for topic '%s'.", self.config.topic)
+            logger.info(
+                "Kafka subscription completed for topic '%s'.", self.config.topic
+            )
 
     def _handle_message(self, message):
         """Handles kafka exceptions given a single message
@@ -132,7 +136,9 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             self.data[message["t"]] = message
             if self._first_msg is None:
                 self._first_msg = message
-                logger.info("First Kafka message stored at timestamp: %s", message["t"])
+                logger.info(
+                    "First Kafka message stored at timestamp: %s", message["t"]
+                )
                 logger.info("self.data: %s", self.data)
 
     def _build_out_dict(self, ts_list, val_list, ts):
@@ -207,8 +213,8 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         # First-time handling with extended timeout
         if data_len == 0:
             logger.info(
-                "Waiting for first Kafka message (timeout = %f)", 
-                self.config.first_msg_timeout
+                "Waiting for first Kafka message (timeout = %f)",
+                self.config.first_msg_timeout,
             )
             start_time = time.time()
             while time.time() - start_time < self.config.first_msg_timeout:
@@ -218,15 +224,17 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
                     )
                 if status:
                     logger.debug(
-                        "Successfully executed lookup on %s,%s, %s", 
-                        self.data, 
-                        t, 
-                        min_pts
+                        "Successfully executed lookup on %s,%s, %s",
+                        self.data,
+                        t,
+                        min_pts,
                     )
                     logger.debug(
                         "Lookup returned: %s,%s, %s", status, ts_list, val_list
                     )
-                    logger.debug("Found interpolation window for ts %f: %s", t, ts_list)
+                    logger.debug(
+                        "Found interpolation window for ts %f: %s", t, ts_list
+                    )
                     time.sleep(self.config.first_delay)
                     out_dict = self._build_out_dict(ts_list, val_list, t)
                     logger.debug(
