@@ -27,7 +27,6 @@ import threading
 import time
 from pathlib import Path
 
-import pandas as pd
 from confluent_kafka import Producer
 
 

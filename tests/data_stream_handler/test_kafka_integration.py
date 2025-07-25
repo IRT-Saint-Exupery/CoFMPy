@@ -30,74 +30,51 @@ import pytest
 
 from cofmpy.coordinator import Coordinator
 from cofmpy.data_stream_handler import KafkaDataStreamHandler
-from tests.data_stream_handler.mock_producer import try_start_kafka_docker
 
-docker_compose_path = "./tests/data_stream_handler/docker-compose.yml"
 
-# try_start_kafka_docker(docker_compose_path, command="down")
+@pytest.fixture(scope="module", autouse=True)
+def kafka_docker():
+    from tests.data_stream_handler.mock_producer import try_start_kafka_docker
 
-has_kafka_started = try_start_kafka_docker(
-    docker_compose_path, command="up", options="-d"
-)
+    yml_path = "./tests/data_stream_handler/docker-compose.yml"
 
-pytestmark = pytest.mark.skipif(
-    not has_kafka_started, reason="Skipping test: kafka server is not running."
-)
+    # Start Kafka
+    started = try_start_kafka_docker(yml_path, command="up", options="-d")
+    if not started:
+        pytest.skip("Kafka server did not start.")
 
-<<<<<<< HEAD
+    # Wait for Kafka to stabilize (can be tuned)
+    time.sleep(5)
+
+    yield  # Run tests
+
+    # Tear down
+    try_start_kafka_docker(yml_path, command="down")
+
 
 def test_kafka_resistor(kafka_resistor_test):
-=======
-# def test_kafka_resistor(kafka_resistor_test):
->>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 
-#     config, expected_result, kafka_producer = kafka_resistor_test
+    config, expected_values, kafka_producer = kafka_resistor_test
+    conn_name = ("node", "endpoint")
 
-#     try_start_kafka_docker(docker_compose_path, command="up", options="-d")
-#     # Create and configure the handler
+    handler = KafkaDataStreamHandler(config)
+    handler.add_variable(conn_name, config["variable"])
 
-#     # Start consuming with instantiation
-#     handler = KafkaDataStreamHandler(config)
-#     handler.add_variable(("node", "endpoint"), config["variable"])
+    kafka_producer.start()
+    received_values = [handler.get_data(t / 10)[conn_name] for t in range(40)]
 
-#     # Start producer
-#     kafka_producer.start()
+    assert np.isclose(received_values, expected_values).all(), "Mismatch in streamed vs expected data"
 
-#     # Collect interpolated results
-#     received = [handler.get_data(t / 10)[0] for t in range(40)]
-
-#     try_start_kafka_docker(docker_compose_path, command="down")
-
-<<<<<<< HEAD
-    assert np.isclose(
-        received, expected_result
-    ).all(), "Mismatch in streamed vs expected data"
-
-
-# pytest.skip("Skipping this test file", allow_module_level=True)
-
-
-def test_kafka_two_resistors(kakfa_two_resistors_test):
-=======
-#     assert np.isclose(received, expected_result).all(), "Mismatch in streamed vs expected data"
-
-# pytest.skip("Skipping this test file", allow_module_level=True)
 
 def test_kafka_two_resistors(kafka_two_resistors_test):
->>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
-
-    try_start_kafka_docker(docker_compose_path, command="up", options="-d")
     config, expected_results, kafka_producer = kafka_two_resistors_test
 
     coordinator = Coordinator()
     kafka_producer.start()
     coordinator.start(config)
+
     for _ in range(80):
         coordinator.do_step(0.05)
 
-    results = pd.DataFrame(coordinator.get_results())
-    results = results.set_index("time")
-
-    try_start_kafka_docker(docker_compose_path, command="down")
-
+    results = pd.DataFrame(coordinator.get_results()).set_index("time")
     assert results.to_dict() == expected_results

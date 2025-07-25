@@ -25,12 +25,9 @@
 """
 This module contains the child class for CSV data stream handler.
 """
-<<<<<<< HEAD
-=======
 
 import logging
 
->>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 import pandas as pd
 
 from ..utils import Interpolator

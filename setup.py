@@ -50,6 +50,7 @@ requirements = [
     "pythonfmu==0.6.3",
     "scikit-learn",
     "scipy",
+    "sortedcontainers",
     "streamlit==1.12.0",
     "tqdm",
     "nbformat>=4.2.0",

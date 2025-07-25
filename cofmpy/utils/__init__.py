@@ -25,12 +25,8 @@
 """
 Utility functions for the Co-simulation FMU Python toolbox.
 """
-<<<<<<< HEAD
-=======
 
 from .interpolate import Interpolator, lookup_with_window
->>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 from .fixed_point_init import FixedPointInitializer
-from .interpolate import Interpolator
 
 __all__ = ["Interpolator", "lookup_with_window", "FixedPointInitializer"]

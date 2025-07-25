@@ -128,7 +128,9 @@ class KafkaThreadManager:
             self.thread = threading.Thread(target=self._consume_loop)
             self.thread.daemon = True
             self.thread.start()
-            logger.info(f"Kafka consumer started consuming in thread '{self.thread.name}'")
+            logger.info(
+                f"Kafka consumer started consuming in thread '{self.thread.name}'"
+            )
 
     def _consume_loop(self):
         """Consuming loop."""
@@ -185,5 +187,5 @@ def parse_kafka_message(msg) -> Union[dict, str]:
         return data
 
     except Exception as e:
-        logger.error(f"Failed to parse Kafka message: {e}")
+        logger.error(f"Failed to parse message ({raw}) due to: {e}")
         return raw

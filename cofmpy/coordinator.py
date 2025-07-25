@@ -25,11 +25,8 @@
 """
 Coordinator class
 """
-<<<<<<< HEAD
-=======
 from collections import defaultdict
 
->>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 import pandas as pd
 
 from .config_parser import ConfigParser

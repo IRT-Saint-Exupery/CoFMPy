@@ -123,7 +123,6 @@ class CoordinatorCheck(unittest.TestCase):
             ("resistor", "I"): 2.0,
         }
         my_dict_of_dict = {"source": {"V": [1.0]}, "resistor": {"I": [2.0]}}
-        print(my_coordinator._dict_tuple_to_dict_of_dict(my_dict))
         self.assertEqual(
             my_coordinator._dict_tuple_to_dict_of_dict(my_dict), my_dict_of_dict
         )
@@ -177,7 +176,6 @@ class CoordinatorCheck(unittest.TestCase):
         var_names = my_coordinator.get_variable_names()
         var_types = [my_coordinator.get_variable_type(name) for name in var_names]
 
-        print(var_types)
         expected_var_types = ["Real"] * 7
         assert var_types == expected_var_types
 

@@ -14,20 +14,6 @@
 #    materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
-<<<<<<< HEAD
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
-# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""
-This module contains the child class for Kafka data stream handler.
-"""
-import json
-=======
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 # OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 # SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -42,22 +28,12 @@ This module contains the child class for Kafka data stream handler.
 """
 
 import time
-import threading
->>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 import logging
 import threading
-import time
 
-<<<<<<< HEAD
-import pandas as pd
-from confluent_kafka import Consumer
-from confluent_kafka import KafkaError
-from confluent_kafka import KafkaException
-=======
 from confluent_kafka import Consumer, KafkaError, KafkaException
->>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
-
 from sortedcontainers import SortedDict
+
 from ..utils import Interpolator, lookup_with_window
 from .base_data_stream_handler import BaseDataStreamHandler
 from .kafka_utils import KafkaHandlerConfig, KafkaThreadManager, parse_kafka_message
@@ -291,7 +267,6 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         Returns:
             bool: True if the handlers are equivalent, False otherwise.
         """
-
         # equivalent items: {uri, topic, group_id}
         uri = f"{self.config.server_url}:{self.config.port}"
         topic = self.config.topic

@@ -28,15 +28,12 @@ Co-simulation FMU Python toolbox.
 """
 import logging
 import warnings
-<<<<<<< HEAD
 from typing import Iterable
 
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.interpolate import make_interp_spline
-=======
 from sortedcontainers import SortedDict
->>>>>>> 851984e (add support for multiple data streams grouped by data handler, update tests)
 
 logger = logging.getLogger(__name__)
 

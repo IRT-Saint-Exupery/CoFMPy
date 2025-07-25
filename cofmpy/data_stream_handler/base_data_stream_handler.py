@@ -110,7 +110,6 @@ class BaseDataStreamHandler:
         Returns:
             bool: True if the handlers are equivalent, False otherwise.
         """
-        # TODO: make sure to add logs in child classes
 
     def add_variable(self, endpoint: tuple, stream_alias: str):
         """
