@@ -180,7 +180,7 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
 
         Notes:
             - If the consumer thread is not running, an error is logged and None is returned.
-            - The first message is awaited with a longer timeout to better handle sparse 
+            - The first message is awaited with a longer timeout to better handle sparse
                 data sources.
         """
         if not self.thread_manager.running:
@@ -207,21 +207,31 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         # First-time handling with extended timeout
         if data_len == 0:
             logger.info(
-                "Waiting for first Kafka message (timeout = %f)", self.config.first_msg_timeout
+                "Waiting for first Kafka message (timeout = %f)", 
+                self.config.first_msg_timeout
             )
             start_time = time.time()
             while time.time() - start_time < self.config.first_msg_timeout:
                 with self._data_lock:
-                    status, ts_list, val_list = lookup_with_window(self.data, t, min_pts)
+                    status, ts_list, val_list = lookup_with_window(
+                        self.data, t, min_pts
+                    )
                 if status:
                     logger.debug(
-                        "Successfully executed lookup on %s,%s, %s", self.data, t, min_pts
+                        "Successfully executed lookup on %s,%s, %s", 
+                        self.data, 
+                        t, 
+                        min_pts
                     )
-                    logger.debug("Lookup returned: %s,%s, %s", status, ts_list, val_list)
+                    logger.debug(
+                        "Lookup returned: %s,%s, %s", status, ts_list, val_list
+                    )
                     logger.debug("Found interpolation window for ts %f: %s", t, ts_list)
                     time.sleep(self.config.first_delay)
                     out_dict = self._build_out_dict(ts_list, val_list, t)
-                    logger.debug("Returning interpolated data for ts %f: %s", t, out_dict)
+                    logger.debug(
+                        "Returning interpolated data for ts %f: %s", t, out_dict
+                    )
                     return out_dict
                 time.sleep(self.config.retry_delay)
             logger.warning("Timeout exceeded while waiting for first message.")
@@ -232,7 +242,9 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             start_time = time.time()
             while time.time() - start_time < self.config.timeout:
                 with self._data_lock:
-                    status, ts_list, val_list = lookup_with_window(self.data, t, min_pts)
+                    status, ts_list, val_list = lookup_with_window(
+                        self.data, t, min_pts
+                    )
                 if status:
                     out_dict = self._build_out_dict(ts_list, val_list, t)
                     return out_dict

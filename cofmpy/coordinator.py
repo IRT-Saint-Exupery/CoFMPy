@@ -100,7 +100,9 @@ class Coordinator:
         self.start_graph_engine(self.config_parser.graph_config)
 
         # 3. Start Master
-        self.config_parser.master_config["sequence_order"] = self.graph_engine.sequence_order
+        self.config_parser.master_config["sequence_order"] = (
+            self.graph_engine.sequence_order
+        )
         self.start_master(
             self.config_parser.master_config,
             fixed_point_init=fixed_point_init,
@@ -167,7 +169,9 @@ class Coordinator:
             config["edge_sep"],
         )
 
-    def start_master(self, config: dict, fixed_point_init=False, fixed_point_kwargs=None):
+    def start_master(
+        self, config: dict, fixed_point_init=False, fixed_point_kwargs=None
+    ):
         """
         Start the master algorithm with the given configuration.
 

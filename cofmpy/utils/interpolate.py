@@ -46,9 +46,9 @@ def lookup_with_window(sorted_dic: SortedDict, ts: float, n_previous: int = 1):
     If `ts` exists in the dictionary, returns the exact match.
 
     If `ts` is not present:
-        - If n_previous == 0, and there is a value before `ts`, returns the immediate 
+        - If n_previous == 0, and there is a value before `ts`, returns the immediate
             previous value.
-        - Otherwise, tries to return up to `n_previous` values before `ts`, and the 
+        - Otherwise, tries to return up to `n_previous` values before `ts`, and the
             next value after `ts`.
         - If there are not enough values on both sides, returns (False, [], []).
 
@@ -162,7 +162,8 @@ class Interpolator:
         """
         if self.method not in self._registry:
             raise ValueError(
-                f"Unregistered method '{self.method}'. " f"Available: {set(self._registry)}"
+                f"Unregistered method '{self.method}'. "
+                f"Available: {set(self._registry)}"
             )
         if self.method not in ("linear", "previous"):
             warnings.warn(
@@ -180,7 +181,9 @@ class Interpolator:
         """
         for name, min_len in sorted(self._min_points.items(), key=lambda x: x[1]):
             if self.method == name and n_points < min_len:
-                for fallback, required in sorted(self._min_points.items(), key=lambda x: x[1]):
+                for fallback, required in sorted(
+                    self._min_points.items(), key=lambda x: x[1]
+                ):
                     if n_points >= required:
                         self.method = fallback
                         break
@@ -249,7 +252,9 @@ def interp_linear(
 @Interpolator.register("previous", min_points=1)
 @Interpolator.register("quadratic", min_points=3)
 @Interpolator.register("cubic", min_points=4)
-def interp_scipy(xp: Iterable, yp: Iterable, x_new: Iterable, method: str, **kwargs: dict):
+def interp_scipy(
+    xp: Iterable, yp: Iterable, x_new: Iterable, method: str, **kwargs: dict
+):
     """Scipy wrapper for interp1d method.
     Default extrapolation behaviour is propagation of first and last values
     at left and right boundaries espectively.
