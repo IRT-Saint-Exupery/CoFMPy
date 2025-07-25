@@ -33,8 +33,75 @@ from typing import Iterable
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.interpolate import make_interp_spline
+from sortedcontainers import SortedDict
 
 logger = logging.getLogger(__name__)
+
+
+def lookup_with_window(sorted_dic: SortedDict, ts: float, n_previous: int = 1):
+    """
+    Look up a value at time `ts` in a SortedDict `sorted_dic`.
+    Structure: SortedDict(ts[float]:item[any])
+
+    If `ts` exists in the dictionary, returns the exact match.
+
+    If `ts` is not present:
+        - If n_previous == 0, and there is a value before `ts`, returns the immediate
+            previous value.
+        - Otherwise, tries to return up to `n_previous` values before `ts`, and the
+            next value after `ts`.
+        - If there are not enough values on both sides, returns (False, [], []).
+
+    Args:
+        sorted_dic (SortedDict): A time-indexed SortedDict of values.
+        t (float): The time to look up.
+        n_previous (int): Number of past values required before `ts`.
+
+    Returns:
+        tuple: (status: bool, times: list[float], values: list[any])
+    """
+    # Early stop conditions
+    if ts is None or ts < 0 or len(sorted_dic) == 0:
+        return False, [], []
+
+    # Exact match: return lists with one value: True [t] [val]
+    if ts in sorted_dic:
+        exact_val = sorted_dic[ts]
+        return True, [ts], [exact_val]
+
+    times = list(sorted_dic.keys())
+    idx = sorted_dic.bisect(ts)  # Fast lookup: O(ln n)
+
+    # Interpolate requirements
+    has_before = idx >= n_previous
+    has_after = idx < len(times)
+
+    # Mode "previous", return the one value in sorted_dic
+    if has_before and n_previous == 0:
+        # Get idx - 1 because .bisect gives the following index to insert ts
+        prev_idx = idx - 1
+        values = [sorted_dic[k] for k in times][prev_idx]
+        return True, [times[prev_idx]], [values]
+
+    # Other modes + not enough surrounding values: can't interpolate or use neighbors
+    if not (has_before and has_after):
+        return False, [], []
+
+    # Get up to n_previous items before ts
+    past_items = [
+        (times[i], list(sorted_dic[times[i]].values())[0])
+        for i in range(max(0, idx - n_previous), idx)
+    ]
+
+    # Get the next item after ts
+    next_item = [(times[idx], sorted_dic[times[idx]])]
+
+    # Combine the results: keys and values lists
+    all_items = past_items + next_item
+    all_keys = [key for key, _ in all_items]
+    all_values = [val for _, val in all_items]
+
+    return True, all_keys, all_values
 
 
 class Interpolator:

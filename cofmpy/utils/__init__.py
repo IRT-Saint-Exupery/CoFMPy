@@ -25,7 +25,8 @@
 """
 Utility functions for the Co-simulation FMU Python toolbox.
 """
-from .fixed_point_init import FixedPointInitializer
-from .interpolate import Interpolator
 
-__all__ = ["Interpolator", "FixedPointInitializer"]
+from .interpolate import Interpolator, lookup_with_window
+from .fixed_point_init import FixedPointInitializer
+
+__all__ = ["Interpolator", "lookup_with_window", "FixedPointInitializer"]
