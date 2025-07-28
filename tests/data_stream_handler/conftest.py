@@ -42,14 +42,12 @@ logging.getLogger("cofmpy.data_stream_handler.kafka_data_stream_handler").setLev
 
 DATA_1R = pd.DataFrame({"t": [0, 1.3, 2.9], "R": [1, 2.5, 1.2]})
 DATA_2R = pd.DataFrame({"t": [0, 1.3, 2.9], "R1": [0.5, 10.0, 1.2], "R2": [0.5, 0, 5]})
-RESISTOR_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "resistor_fmu.py")
-RESISTOR_PATH = os.path.join(os.path.dirname(__file__), "Resistor.fmu")
 
 
 FMUS = [
     {"id": "source", "path": "tests/data/source.fmu"},
-    {"id": "resistor_1", "path": RESISTOR_PATH},
-    {"id": "resistor_2", "path": RESISTOR_PATH},
+    {"id": "resistor_1", "path": "tests/data/resistor3.fmu"},
+    {"id": "resistor_2", "path": "tests/data/resistor3.fmu"},
 ]
 
 TWO_RESISTORS_RESULTS = {
@@ -403,7 +401,7 @@ def kafka_resistor_test():
 
 
 @pytest.fixture
-def kafka_two_resistors_test(generate_fmus):
+def kafka_two_resistors_test():
     topic_name = "topic_2R"
     config = {
         "fmus": FMUS,
@@ -430,7 +428,7 @@ def kafka_two_resistors_test(generate_fmus):
 
 
 @pytest.fixture
-def literal_two_resistors_test(generate_fmus):
+def literal_two_resistors_test():
     config = {
         "fmus": FMUS,
         "connections": SOURCE_CONNECTIONS
@@ -491,26 +489,8 @@ def generate_csv(tmp_path_factory):
     yield paths
 
 
-@pytest.fixture(scope="module")
-def generate_fmus():
-    """
-    Generate FMUs into a temp dir.
-    """
-
-    build_dir = os.path.dirname(__file__)
-
-    result = os.system(
-        f"pythonfmu build -f {RESISTOR_SCRIPT_PATH} --no-external-tool -d {build_dir}"
-    )
-
-    yield 
-
-    if os.path.exists(RESISTOR_PATH):
-        os.remove(RESISTOR_PATH)
-
-
 @pytest.fixture
-def csv_two_resistors_test(generate_csv, generate_fmus):
+def csv_two_resistors_test(generate_csv):
     r1_path, r2_path = generate_csv
 
     def make_csv_source(path):
