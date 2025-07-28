@@ -42,8 +42,9 @@ logging.getLogger("cofmpy.data_stream_handler.kafka_data_stream_handler").setLev
 
 DATA_1R = pd.DataFrame({"t": [0, 1.3, 2.9], "R": [1, 2.5, 1.2]})
 DATA_2R = pd.DataFrame({"t": [0, 1.3, 2.9], "R1": [0.5, 10.0, 1.2], "R2": [0.5, 0, 5]})
-RESISTOR_PATH = "Resistor.fmu"
-RESISTOR_SCRIPT_PATH = "resistor_fmu.py"
+RESISTOR_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "resistor_fmu.py")
+RESISTOR_PATH = os.path.join(os.path.dirname(__file__), "Resistor.fmu")
+
 
 FMUS = [
     {"id": "source", "path": "tests/data/source.fmu"},
@@ -496,21 +497,19 @@ def generate_fmus():
     Generate FMUs into a temp dir.
     """
 
-    fmu_script_path = os.path.join(os.path.dirname(__file__), RESISTOR_SCRIPT_PATH)
-    fmu_output_path = os.path.abspath(RESISTOR_PATH)
+    build_dir = os.path.dirname(__file__)
 
-    if os.path.exists(fmu_output_path):
-        raise RuntimeError("FMU output not found.")
-
-    result = os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
+    result = os.system(
+        f"pythonfmu build -f {RESISTOR_SCRIPT_PATH} --no-external-tool -d {build_dir}"
+    )
     
-    if result != 0 :
-        raise RuntimeError("FMU build failed.")
+    if result != 0 or not os.path.exists(RESISTOR_PATH):
+        raise RuntimeError("FMU build failed or output not found.")
 
     yield 
 
-    if os.path.exists(fmu_output_path):
-        os.remove(fmu_output_path)
+    if os.path.exists(RESISTOR_PATH):
+        os.remove(RESISTOR_PATH)
 
 
 @pytest.fixture
