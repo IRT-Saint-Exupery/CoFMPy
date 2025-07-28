@@ -43,6 +43,7 @@ logging.getLogger("cofmpy.data_stream_handler.kafka_data_stream_handler").setLev
 DATA_1R = pd.DataFrame({"t": [0, 1.3, 2.9], "R": [1, 2.5, 1.2]})
 DATA_2R = pd.DataFrame({"t": [0, 1.3, 2.9], "R1": [0.5, 10.0, 1.2], "R2": [0.5, 0, 5]})
 RESISTOR_PATH = "Resistor.fmu"
+RESISTOR_SCRIPT_PATH = "resistor_fmu.py"
 
 FMUS = [
     {"id": "source", "path": "tests/data/source.fmu"},
@@ -495,14 +496,14 @@ def generate_fmus(tmp_path_factory):
     Generate FMUs into a temp dir.
     """
     base_dir = tmp_path_factory.mktemp("fmu_test_data")
-    script_fnames = ("resistor_fmu.py",)
-    fmu_fnames = ("Resistor.fmu",)
+    script_fnames = (RESISTOR_SCRIPT_PATH,)
+    fmu_fnames = (RESISTOR_PATH,)
 
     for fmu_script in script_fnames:
         fmu_script_path = os.path.join(os.path.dirname(__file__), fmu_script)
         os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
 
-    yield [base_dir / fmu_name for fmu_name in fmu_fnames]
+    yield 
 
     # optional: cleanup
     for fmu_file in fmu_fnames:
