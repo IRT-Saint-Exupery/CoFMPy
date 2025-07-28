@@ -429,7 +429,7 @@ def kafka_two_resistors_test(generate_fmus):
 
 
 @pytest.fixture
-def literal_two_resistors_test():
+def literal_two_resistors_test(generate_fmus):
     config = {
         "fmus": FMUS,
         "connections": SOURCE_CONNECTIONS
@@ -491,25 +491,26 @@ def generate_csv(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
-def generate_fmus(tmp_path_factory):
+def generate_fmus():
     """
     Generate FMUs into a temp dir.
     """
-    base_dir = tmp_path_factory.mktemp("fmu_test_data")
-    script_fnames = (RESISTOR_SCRIPT_PATH,)
-    fmu_fnames = (RESISTOR_PATH,)
 
-    for fmu_script in script_fnames:
-        fmu_script_path = os.path.join(os.path.dirname(__file__), fmu_script)
-        os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
+    fmu_script_path = os.path.join(os.path.dirname(__file__), RESISTOR_SCRIPT_PATH)
+    fmu_output_path = os.path.abspath(RESISTOR_PATH)
+
+    if os.path.exists(fmu_output_path):
+        raise RuntimeError("FMU output not found.")
+
+    result = os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
+    
+    if result != 0 :
+        raise RuntimeError("FMU build failed.")
 
     yield 
 
-    # optional: cleanup
-    for fmu_file in fmu_fnames:
-        f = base_dir / fmu_file
-        if f.exists():
-            f.unlink()
+    if os.path.exists(fmu_output_path):
+        os.remove(fmu_output_path)
 
 
 @pytest.fixture
