@@ -136,9 +136,7 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             self.data[message["t"]] = message
             if self._first_msg is None:
                 self._first_msg = message
-                logger.info(
-                    "First Kafka message stored at timestamp: %s", message["t"]
-                )
+                logger.info("First Kafka message stored at timestamp: %s", message["t"])
                 logger.info("self.data: %s", self.data)
 
     def _build_out_dict(self, ts_list, val_list, ts):
@@ -232,9 +230,7 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
                     logger.debug(
                         "Lookup returned: %s,%s, %s", status, ts_list, val_list
                     )
-                    logger.debug(
-                        "Found interpolation window for ts %f: %s", t, ts_list
-                    )
+                    logger.debug("Found interpolation window for ts %f: %s", t, ts_list)
                     time.sleep(self.config.first_delay)
                     out_dict = self._build_out_dict(ts_list, val_list, t)
                     logger.debug(

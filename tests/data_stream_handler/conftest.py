@@ -23,6 +23,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
 # WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGE.
+import os
 import json
 import logging
 import pytest
@@ -488,27 +489,26 @@ def generate_csv(tmp_path_factory):
     yield paths
 
 
-import os
-
-
 @pytest.fixture(scope="module")
-def generate_fmus():
+def generate_fmus(tmp_path_factory):
     """
-    Fixture to generate the FMU files before running tests (using pythonfmu).
-    The FMUs are then deleted after the tests.
+    Generate FMUs into a temp dir.
     """
+    base_dir = tmp_path_factory.mktemp("fmu_test_data")
     script_fnames = ("resistor_fmu.py",)
     fmu_fnames = ("Resistor.fmu",)
 
-    current_test_filepath = os.path.dirname(os.path.abspath(__file__))
     for fmu_script in script_fnames:
-        fmu_script_path = os.path.join(current_test_filepath, fmu_script)
+        fmu_script_path = os.path.join(os.path.dirname(__file__), fmu_script)
         os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
 
-    yield
+    yield [base_dir / fmu_name for fmu_name in fmu_fnames]
 
+    # optional: cleanup
     for fmu_file in fmu_fnames:
-        os.remove(fmu_file)
+        f = base_dir / fmu_file
+        if f.exists():
+            f.unlink()
 
 
 @pytest.fixture
