@@ -13,12 +13,12 @@
         <img src="https://img.shields.io/badge/python-3.9%2B-blue"></a>
      <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/LICENSE">
         <img alt="License BSD" src="https://img.shields.io/badge/License-BSD%202--Clause-blue.svg"></a>
-    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-linters.yml">
-        <img alt="Pylint" src="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-linters.yml/badge.svg"></a>
-    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-tests.yml">
-        <img alt="Tests" src="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-tests.yml/badge.svg"></a>
-    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-tests-coverage.yml">
-        <img alt="Coverage" src="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-tests-coverage.yml/coverage.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-linters.yml">
+        <img alt="Pylint" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-linters.yml/badge.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml">
+        <img alt="Tests" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml/badge.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests-coverage.yml">
+        <img alt="Coverage" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests-coverage.yml/coverage.svg"></a>
    
 </div>
 <br>

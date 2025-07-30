@@ -1,8 +1,10 @@
-name: Python tests coverage
+name: coverage
 
 on:
   push:
-    branches: [main]
+    branches: 
+      - main
+      - chore/coverage
   pull_request:
     branches: [main]
 

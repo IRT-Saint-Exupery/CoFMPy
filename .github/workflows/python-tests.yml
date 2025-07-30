@@ -1,4 +1,4 @@
-name: CoFMPy pytests
+name: tests
 
 on:
   push:
