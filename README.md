@@ -18,7 +18,7 @@
     <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml">
         <img alt="Tests" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml/badge.svg"></a>
     <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests-coverage.yml">
-        <img alt="Coverage" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests-coverage.yml/coverage.svg"></a>
+        <img alt="Coverage" src="https://raw.githubusercontent.com/IRT-Saint-Exupery/CoFMPy/chore/coverage/.github/badges/coverage.svg""></a>
    
 </div>
 <br>
