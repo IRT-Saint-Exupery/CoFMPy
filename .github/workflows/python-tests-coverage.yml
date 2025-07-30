@@ -1,5 +1,8 @@
 name: coverage
 
+permissions:
+  contents: write # Required to commit the coverage badge
+
 on:
   push:
     branches: 
