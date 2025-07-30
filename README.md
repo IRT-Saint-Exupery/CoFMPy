@@ -7,6 +7,22 @@
 </div>
 <br>
 
+<!-- Badge section -->
+<div align="center">
+    <a href="#">
+        <img src="https://img.shields.io/badge/python-3.9%2B-blue"></a>
+     <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/LICENSE">
+        <img alt="License BSD" src="https://img.shields.io/badge/License-BSD%202--Clause-blue.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-linters.yml">
+        <img alt="Pylint" src="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-linters.yml/badge.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-tests.yml">
+        <img alt="Tests" src="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-tests.yml/badge.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-tests-coverage.yml">
+        <img alt="Coverage" src="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/.github/workflows/python-tests-coverage.yml/coverage.svg"></a>
+   
+</div>
+<br>
+
 ## 👋 About CoFMPy
 
 CoFMPy is a Python library designed for co-simulating Functional Mock-up Units (FMUs).
@@ -61,7 +77,6 @@ entry point of CoFMPy and it manages all the other components:
 - the data stream handlers that control the input data required by the co-simulation
   system.
 - the data storages that allow to store or send the outputs of the simulation.
-- the GUI as the frontend of CoFMPy.
 
 ## 📜 JSON configuration file
 
