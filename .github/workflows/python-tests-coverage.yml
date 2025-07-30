@@ -34,7 +34,7 @@ jobs:
         run: coverage-badge -o .github/badges/coverage.svg
 
       - name: Commit coverage badge
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/chore/coverage'
         uses: EndBug/add-and-commit@v9
         with:
           add: '.github/badges/coverage.svg'
