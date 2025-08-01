@@ -22,12 +22,42 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+<<<<<<< HEAD
+=======
+
+# Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+# The 2-Clause BSD License
+#
+# Redistribution and use in source and binary forms, with or without modification, are
+# permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this list of
+#    conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this list
+#    of conditions and the following disclaimer in the documentation and/or other
+#    materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+>>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
 """
 Helper classes handling Kafka configuration, Threads, messages, etc
 """
 import logging
+<<<<<<< HEAD
 import threading
 import time
+=======
+>>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
 from dataclasses import dataclass
 from typing import Any
 from typing import Dict
@@ -116,6 +146,7 @@ class KafkaHandlerConfig:  # pylint: disable=too-many-instance-attributes
             auto_offset_reset=config.get("auto_offset_reset", cls.auto_offset_reset),
             enable_auto_commit=config.get("enable_auto_commit", cls.enable_auto_commit),
         )
+<<<<<<< HEAD
 
 
 class KafkaThreadManager:
@@ -180,3 +211,5 @@ class KafkaThreadManager:
             self.running = False
             self.thread.join()
             logger.info("Kafka consumer thread stopped.")
+=======
+>>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
