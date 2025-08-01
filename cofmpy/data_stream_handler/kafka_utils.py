@@ -1,0 +1,140 @@
+# -*- coding: utf-8 -*-
+# Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+# The 2-Clause BSD License
+#
+# Redistribution and use in source and binary forms, with or without modification, are
+# permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this list of
+#    conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this list
+#    of conditions and the following disclaimer in the documentation and/or other
+#    materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
+#
+# The 2-Clause BSD License
+#
+# Redistribution and use in source and binary forms, with or without modification, are
+# permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this list of
+#    conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this list
+#    of conditions and the following disclaimer in the documentation and/or other
+#    materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+Helper classes handling Kafka configuration, Threads, messages, etc
+"""
+import logging
+from dataclasses import dataclass
+from typing import Any
+from typing import Dict
+
+from ..utils import Interpolator
+
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class KafkaHandlerConfig:  # pylint: disable=too-many-instance-attributes
+    """
+    Handler to configure Kafka connections, providing default values.
+    """
+
+    # Positional arguments
+    topic: str
+    server_url: str
+    port: str
+    group_id: str
+    variable: str
+
+    # Optional arguments from config.json
+    timeout: float = 0.1
+    interpolation: str = "previous"
+    auto_offset_reset: str = "earliest"
+    enable_auto_commit: bool = True
+
+    def __post_init__(self):
+
+        if not self.port.isdigit():
+            raise ValueError(f"Port must be numeric, got '{self.port}'")
+
+        if self.timeout < 0:
+            raise ValueError(f"Timeout must be non-negative, got {self.timeout}")
+
+        valid_offsets = {"earliest", "latest", "none"}
+        if self.auto_offset_reset not in valid_offsets:
+            raise ValueError(
+                f"Invalid auto_offset_reset: '{self.auto_offset_reset}'. "
+                f"Must be one of {valid_offsets}"
+            )
+
+        interpolator = Interpolator()
+        valid_interpolation = set(interpolator._registry.keys())
+        if self.interpolation not in valid_interpolation:
+            raise ValueError(
+                f"Invalid interpolation method: '{self.interpolation}'. "
+                f"Must be one of {valid_interpolation}"
+            )
+
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]) -> "KafkaHandlerConfig":
+        """Builds up the configuration Dataclass
+
+        Args:
+            config (dict): kwargs-like dictionary
+
+        Returns:
+            dataclass: class storing config data
+        """
+
+        required = {"uri", "topic", "variable", "group_id"}
+        missing = required - set(config.keys())
+        if missing:
+            for key in missing:
+                logger.error(f"Missing kafka config field: {key}")
+            raise KeyError("Configuration for KafkaDataStreamHandler is incomplete")
+
+        try:
+            server_url, port = config["uri"].split(":")
+        except ValueError as exc:
+            raise ValueError(
+                f"Malformed URI in Kafka config: {config['uri']!r}"
+            ) from exc
+
+        return cls(
+            topic=config["topic"],
+            variable=config["variable"],
+            server_url=server_url,
+            port=port,
+            group_id=config["group_id"],
+            timeout=config.get("timeout", cls.timeout),
+            interpolation=config.get("interpolation", cls.interpolation),
+            auto_offset_reset=config.get("auto_offset_reset", cls.auto_offset_reset),
+            enable_auto_commit=config.get("enable_auto_commit", cls.enable_auto_commit),
+        )

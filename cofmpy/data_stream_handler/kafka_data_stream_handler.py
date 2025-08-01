@@ -37,8 +37,8 @@ from confluent_kafka import KafkaException
 
 from ..utils import Interpolator
 from .base_data_stream_handler import BaseDataStreamHandler
+from .kafka_utils import KafkaHandlerConfig
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -57,64 +57,43 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         """
 
         # Configuration handling
-        interp_method, self.timeout = self._validate_config(kwargs)
-        self.topic = topic
-        server_url, port = uri.split(":")
-        self.group_id = group_id
-        self.var_name = variable
+        positional = {
+            "topic": topic,
+            "uri": uri,
+            "group_id": group_id,
+            "variable": variable,
+        }
+        kwargs.update(positional)
+        self.config = KafkaHandlerConfig.from_dict(kwargs)
+        logger.debug(f"Parsed config for {self}: {vars(self.config)}")
 
-        # Consumer isntantiation
-        self._start_consumer(server_url, port, group_id)
+        # Data-related instances
+        self.interpolator = Interpolator(self.config.interpolation)
+        self.data = pd.DataFrame(columns=["t", self.config.variable])
+
         self._subscribed = False
-
-        # Other variables
-        self.interpolator = Interpolator(interp_method)
-        self.data = pd.DataFrame(columns=["t", self.var_name])
         self.consumer_thread = None
         self.running = False
         self.first_received = None
 
+        self._start_consumer()
         self.start_consuming()
 
-    def _start_consumer(self, server_url, port, group_id):
+    def _start_consumer(self):
         """Creates and configures a Kafka consumer"""
         kafka_config = {
-            "bootstrap.servers": f"{server_url}:{port}",
-            "group.id": f"{group_id}_{self.var_name}",
-            "enable.auto.commit": True,  # usage ?
-            "auto.offset.reset": "earliest",  # usage ?
+            "bootstrap.servers": f"{self.config.server_url}:{self.config.port}",
+            "group.id": f"{self.config.group_id}_{self.config.variable}",
+            "enable.auto.commit": self.config.enable_auto_commit,
+            "auto.offset.reset": self.config.auto_offset_reset,
         }
         self.consumer = Consumer(kafka_config)
 
     def _lazy_subscribe(self):
         """One-time subscription"""
         if not self._subscribed:
-            self.consumer.subscribe([self.topic])
+            self.consumer.subscribe([self.config.topic])
             self._subscribed = True
-
-    def _validate_config(self, config):
-        """Parses configuration kwargs giving default values for optional arguments.
-
-        Args:
-            config (dict): keyword arguments dictionary.
-
-        Returns:
-            tuple: optional arguments as tuple.
-        """
-
-        # Optional arguments
-        optional_args = (
-            config.get("interpolation", "previous"),
-            config.get("timeout", 2),
-        )
-        if "interpolation" not in config:
-            logger.info(
-                "Interpolation method not provided, using default 'previous' method."
-            )
-        if "timeout" not in config:
-            logger.info("Timeout not provided, using default 2 seconds.")
-
-        return optional_args
 
     def get_data(self, t: float):
         """
@@ -139,22 +118,22 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
 
                 # Data has started arriving
                 # Apply timeout only once (data should arrive at once)
-                if self.timeout >= 0:
+                if self.config.timeout >= 0:
                     logging.debug(
                         "First data recovered ('get_data')'. "
                         f"Shape: {data.shape}. "
-                        f"Will wait {self.timeout} sec before proceeding."
+                        f"Will wait {self.config.timeout} sec before proceeding."
                     )
 
                     # Wait and update data after timeout
-                    time.sleep(self.timeout)
+                    time.sleep(self.config.timeout)
                     data = self.data.copy()
 
-                    self.timeout = -1
+                    self.config.timeout = -1
 
                 xp = data["t"]
                 # xp = data.index
-                yp = data[self.var_name]
+                yp = data[self.config.variable]
 
                 return self.interpolator(xp, yp, [t])
 
@@ -170,10 +149,10 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         Args:
             data (str): data to send.
         """
-        self.consumer.produce(self.topic, value=data)
+        self.consumer.produce(self.config.topic, value=data)
         self.consumer.poll(0)
         self.consumer.flush()
-        logger.info(f"Data sent to Kafka topic {self.topic}.")
+        logger.info(f"Data sent to Kafka topic {self.config.topic}.")
 
     @staticmethod
     def parse_kafka_message(msg: str):
