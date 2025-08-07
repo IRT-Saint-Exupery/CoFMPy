@@ -7,7 +7,6 @@ on:
   push:
     branches: 
       - main
-      - chore/coverage
   pull_request:
     branches: [main]
 
