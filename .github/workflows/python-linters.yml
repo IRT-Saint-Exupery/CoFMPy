@@ -1,4 +1,4 @@
-name: CoFMPy formatting/linting
+name: pylint
 
 on:
   push:
