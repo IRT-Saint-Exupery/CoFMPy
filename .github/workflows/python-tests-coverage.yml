@@ -36,12 +36,10 @@ jobs:
       - name: Generate coverage badge
         run: coverage-badge -f -o .github/badges/coverage.svg
 
-      - name: Commit coverage badge
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/chore/coverage'
-        uses: EndBug/add-and-commit@v9
+      - name: Commit badge to `badges` branch
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          add: '.github/badges/coverage.svg'
-          message: 'Update coverage badge'
-          push: true
-          # Only commit if changes exist:
-          condition: true
+          commit_message: "Update coverage badge"
+          branch: badges
+          create_branch: true
+          file_pattern: .github/badges/coverage.svg
