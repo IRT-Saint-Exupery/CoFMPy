@@ -240,19 +240,23 @@ def test_set_inputs(master_instance, expected_results):
         master_instance.set_inputs({fmu_id: {"dummy_var": [12.0]}})
 
 
-def test_solve_loop_jacobi(master_instance, expected_results):
+def test_solve_loop_wrong_algo_name(master_instance, expected_results):
+    """Asserts that the solve_loop method fails when an invalid algorithm name is given."""
+
+    with pytest.raises(NotImplementedError):
+        master_instance.solve_loop([], 0.1, algo="invalid_algo")
+
+
+@pytest.mark.parametrize("algo_name", ["jacobi", "gauss_seidel"])
+def test_solve_loop(master_instance, expected_results, algo_name):
     """Asserts that the solve_loop method works. The solve_loop method only runs the
     step method of the FMUs. The results are not checked here.
     """
     loop_fmu_ids = expected_results["loop_fmu_ids"]
 
-    step_size = 0.01
     master_instance.init_simulation()
+    output = master_instance.solve_loop(loop_fmu_ids, 0.01, algo=algo_name)
 
-    with pytest.raises(NotImplementedError):
-        master_instance.solve_loop(loop_fmu_ids, step_size, algo="invalid_algo")
-
-    output = master_instance.solve_loop(loop_fmu_ids, step_size, algo="jacobi")
     assert isinstance(output, dict)
     assert list(output.keys()) == loop_fmu_ids
 
