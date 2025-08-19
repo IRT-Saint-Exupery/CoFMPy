@@ -21,7 +21,7 @@ repo](https://github.com/OpenModelica/OMSimulator/tree/master/testsuite/resource
 # %%
 # # Description of the system
 #
-# ![Duall Mass Oscillator](https://github.com/IRT-Saint-Exupery/CoFMPy/tree/main/docs/examples/academic_examples/assets/dual_mass_oscillator.png)
+# ![Duall Mass Oscillator](https://raw.githubusercontent.com/IRT-Saint-Exupery/CoFMPy/refs/heads/main/docs/examples/academic_examples/assets/dual_mass_oscillator.png)
 #
 # The Dual Mass Oscillator is a mechanical system composed of two masses, each connected
 # to a wall by a spring and a damper. The first mass is connected to the second mass by
