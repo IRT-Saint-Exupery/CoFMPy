@@ -344,6 +344,15 @@ class ConfigParser:
             logger.info(f"Success: found {path}")
             return path
 
+        if ".py" in path and "::" in path:
+            module_name = path.split("::")[0]
+            class_name = path.split("::")[1]
+            if os.path.exists(module_name):
+                logger.info(
+                    f"Success: {path} resolved to module: {module_name}, class: {class_name}"
+                )
+                return path
+
         # Determine the base directory
         if isinstance(self.file_path, dict):
             base_dir = os.getcwd()

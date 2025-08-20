@@ -29,13 +29,22 @@ This module contains the FMU handler classes for FMI 2.0 and FMI 3.0. These clas
 used to load FMU files and interact with loaded FMUs.
 """
 import os
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+
+from typing import Any, Dict, List
 
 from fmpy import extract
 from fmpy import read_model_description
 from fmpy.fmi2 import FMU2Slave
 from fmpy.fmi3 import FMU3Slave
+from cofmpy.utils.proxy import (
+    ProxyVarAttr,
+    ProxyModelDescription,
+    ProxyCoSimulation,
+    FmiCausality,
+    ProxyDefaultExperiment,
+    load_proxy_class_from_file,
+)
 
 
 class FmuHandlerFactory:
@@ -67,13 +76,20 @@ class FmuHandlerFactory:
             ValueError: If the FMI version is not recognized.
         """
         self.path = path
-        self.description = read_model_description(path)
+
+        # case of .py file or .py::<class_name>
+        if self.path.endswith(".py") or "::" in self.path:
+            self.description = ProxyModelDescription()
+        else:
+            self.description = read_model_description(path)
 
     def __call__(self):
         if self.description.fmiVersion == "2.0":
             return Fmu2Handler(self.path, FMU2Slave)
         if self.description.fmiVersion == "3.0":
             return Fmu3Handler(self.path, FMU3Slave)
+        if self.description.fmiVersion == "proxy":
+            return FmuProxyHandler(self.path)  # Proxy handler uses native Python
         raise ValueError("FMI version not recognized")
 
 
@@ -156,7 +172,10 @@ class FmuXHandler(ABC):
                 corresponding values.
         """
         for name, value in input_dict.items():
-            self._set_variable(name, value)
+            if isinstance(value, list):
+                self._set_variable(name, value[-1])
+            else:
+                self._set_variable(name, value)
 
     def get_variables(self, names: list[str]) -> dict:
         """Gets the values of the FMU variables matching the given names.
@@ -287,6 +306,127 @@ class FmuXHandler(ABC):
         values.
         """
         raise NotImplementedError
+
+
+class FmuProxyHandler(FmuXHandler):
+    """
+    Wraps a Python FmuProxy, exposes FMU-like description and timestepping.
+    """
+
+    def __init__(self, path: str):
+        # extract proxy from path
+        self._proxy = load_proxy_class_from_file(path)()
+        self.fmu = self._proxy  # compatibility with FmuXHandler
+        self._time: float = 0.0
+
+        # Build a proxy model description compatible with FmuXHandler helpers
+        pv: List[ProxyVarAttr] = []
+        for vr, v in enumerate(self._proxy.variables()):
+            pv.append(
+                ProxyVarAttr(
+                    name=v.name,
+                    type=v.type,
+                    causality=v.causality,
+                    variability=v.variability,
+                    valueReference=vr,
+                    start=v.start,
+                )
+            )
+
+        self.description = ProxyModelDescription(
+            fmiVersion="proxy",
+            guid=f"proxy-{self._proxy.model_identifier}",
+            coSimulation=ProxyCoSimulation(
+                modelIdentifier=self._proxy.model_identifier
+            ),
+            defaultExperiment=ProxyDefaultExperiment(
+                stepSize=self._proxy.default_step_size
+            ),
+            modelVariables=pv,
+        )
+
+        self.default_step_size = (
+            self.description.defaultExperiment.stepSize
+            if self.description.defaultExperiment
+            else None
+        )
+
+        self.var_name2attr: Dict[str, ProxyVarAttr] = {
+            v.name: v for v in self.description.modelVariables
+        }
+        self.output_var_names = self.get_output_names()
+
+    # --- FMI-like behaviors ---
+
+    def reset(self):
+        self._time = 0.0
+        # self._proxy.reset()
+
+    # Override get_variable inherited from FmuXHandler.
+    # Allows to not specify variable type in method call
+    def get_variable(self, name: str) -> list:
+        # Return the value as a single-element list to match the API
+        return [getattr(self._proxy, name)]
+
+    def _set_variable(self, name, value):
+        # Optional: coerce types based on declared type
+        # declared = self.var_name2attr[name]
+        # t = declared.type
+        # if t == "Real":
+        #     value = float(value)
+        # elif t == "Integer":
+        #     value = int(value)
+        # elif t == "Boolean":
+        #     value = bool(value)
+        # elif t == "String":
+        #     value = str(value)
+        if isinstance(value, list):
+            setattr(self._proxy, name, value[-1])
+        else:
+            setattr(self._proxy, name, value)
+
+    def set_variables(self, input_dict: Dict[str, Any]):
+        for k, v in (input_dict or {}).items():
+            if k in self.var_name2attr:
+                self._set_variable(k, v)
+
+    def step(self, current_time: float, step_size: float, input_dict: Dict[str, Any]):
+        # 1) Apply inputs/parameters before stepping
+        if input_dict:
+            for k, v_list in input_dict.items():
+                if k in self.var_name2attr:
+                    caus = self.var_name2attr[k].causality
+                    if caus in (FmiCausality.input, FmiCausality.parameter):
+                        self._set_variable(k, v_list[-1])
+
+        # 2) Delegate to proxy logic
+        if not self._proxy.do_step(current_time, step_size):
+            # mimic FMU doStep returning False in case of failure
+            raise RuntimeError("FmiProxyHandler: proxy do_step() returned False")
+
+        # 3) Advance internal time (FMU-like)
+        self._time = current_time + step_size
+
+        result = {name: self.get_variable(name) for name in self.output_var_names}
+        return result
+
+    # State snapshot (FMU-like, but JSON-serializable)
+    def get_state(self):
+        vals = {
+            v.name: getattr(self._proxy, v.name, None)
+            for v in self.description.modelVariables
+        }
+        return {"time": self._time, "values": vals}
+
+    def set_state(self, state: Dict[str, Any]):
+        self._time = float(state.get("time", 0.0))
+        for k, v in (state.get("values", {}) or {}).items():
+            if k in self.var_name2attr:
+                self._set_variable(k, v)
+
+    # No-op to keep compatibility with abstract root class
+    def cancel_step(self):
+        pass
 
 
 class Fmu2Handler(FmuXHandler):
