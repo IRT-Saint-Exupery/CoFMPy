@@ -423,6 +423,20 @@ class Master:
                 output[fmu_id] = fmu.step(
                     self.current_time, step_size, self._input_dict[fmu_id]
                 )
+        elif algo == "gauss_seidel":
+            inputs = self._input_dict.copy()
+            for fmu_id in fmu_ids:
+                # Compute outputs for the current FMU
+                fmu = self.fmu_handlers[fmu_id]
+                output[fmu_id] = fmu.step(self.current_time, step_size, inputs[fmu_id])
+
+                # Update inputs based on connections with the current FMU
+                for output_name, value in output[fmu_id].items():
+                    if (fmu_id, output_name) in self.connections:
+                        for target_fmu, target_variable in self.connections[
+                            (fmu_id, output_name)
+                        ]:
+                            inputs[target_fmu][target_variable] = value
         else:
             raise NotImplementedError(
                 f"Algorithm {algo} not implemented for loop solving."
