@@ -51,7 +51,7 @@ class Master:
             source and target FMUs and variables.
         sequence_order (list):
             The order in which FMUs should be executed.
-        loop_solver (str):
+        cosim_method (str):
             The method used to solve algebraic loops in the simulation.
         current_time (float):
             The current simulation time.
@@ -61,7 +61,7 @@ class Master:
             Keyword arguments for the fixed-point initialization method.
 
     Methods:
-        __init__(fmu_config_list, connections, sequence_order, loop_solver="jacobi",
+        __init__(fmu_config_list, connections, sequence_order, cosim_method="jacobi",
             fixed_point=False, fixed_point_kwargs=None):
             Initializes the Master class with the given FMU list, connection list,
             sequence order, and algebraic loop solver.
@@ -113,7 +113,8 @@ class Master:
         fmu_config_list: list,
         connections: dict,
         sequence_order: list,
-        loop_solver: str = "jacobi",
+        cosim_method: str = "jacobi",
+        iterative: bool = False,
         fixed_point=False,
         fixed_point_kwargs=None,
     ):
@@ -125,8 +126,10 @@ class Master:
             fmu_config_list (list): List of dictionaries with FMU configurations.
             connections (dict): Dictionary mapping connections between FMUs.
             sequence_order (list): Execution order of FMUs.
-            loop_solver (str, optional): Method for solving algebraic loops. Defaults to
+            cosim_method (str, optional): Method for solving algebraic loops. Defaults to
                 "jacobi".
+            iterative (str, optional): Method for solving algebraic loops. Defaults to
+                non-iterative method.
             fixed_point (bool): whether to use the fixed-point initialization method.
             fixed_point_kwargs (dict): keyword arguments for the fixed point initialization
                 method if fixed_point is set to True. Defaults to None, in which
@@ -163,8 +166,10 @@ class Master:
         if self.sequence_order is None:
             self.sequence_order = [d[self.__keys["id"]] for d in self.fmu_config_list]
 
-        # Loop solver method (default: Jacobi)
-        self.loop_solver = loop_solver
+        # Cosimulation method (default: Jacobi)
+        self.cosim_method = cosim_method
+        # Whether iterative method requested (default: False)
+        self.iterative = iterative
         # init current_time to None to check if init_simulation() has been called
         self.current_time = None
         # Init output and input dictionaries for FMUs to maintain state between steps
@@ -393,7 +398,7 @@ class Master:
         """
         return self._results
 
-    def solve_loop(self, fmu_ids, step_size: float, algo="jacobi") -> dict:
+    def solve_loop(self, fmu_ids, step_size: float, algo="jacobi", iterative=False) -> dict:
         """
         Performs a single simulation step on the given FMUs, using the defined algorithm
         to solve algebraic loops in the simulation.
@@ -407,6 +412,9 @@ class Master:
             step_size (float): The step size for **data exchange** (in cosimulation
                 mode, FMU integration step is fixed).
             algo (str): The algorithm to use to solve the loop (default: "jacobi").
+            iterative (bool): Whether iterative method requested to solve the loop.
+                Not used for the moment, Work In Progress
+
 
         Returns:
             dict: A dictionary containing the output values for this step of the FMUs
@@ -430,13 +438,7 @@ class Master:
                 fmu = self.fmu_handlers[fmu_id]
                 output[fmu_id] = fmu.step(self.current_time, step_size, inputs[fmu_id])
 
-                # Update inputs based on connections with the current FMU
-                for output_name, value in output[fmu_id].items():
-                    if (fmu_id, output_name) in self.connections:
-                        for target_fmu, target_variable in self.connections[
-                            (fmu_id, output_name)
-                        ]:
-                            inputs[target_fmu][target_variable] = value
+                self.apply_fmu_outputs_to_inputs(output[fmu_id], fmu_id)
         else:
             raise NotImplementedError(
                 f"Algorithm {algo} not implemented for loop solving."
@@ -466,24 +468,61 @@ class Master:
         """
         self.set_inputs(input_dict=input_dict)
         for fmu_ids in self.sequence_order:
-            # out = {"fmu_id" : {"output_name" : value}}
-            out = self.solve_loop(fmu_ids, step_size, self.loop_solver)
-            for fmu_id, fmu_output_dict in out.items():
-                for output_name, value in fmu_output_dict.items():
-                    # If output is connected, transfer the value to the connected FMU(s)
-                    if (fmu_id, output_name) in self.connections:
-                        for target_fmu, target_variable in self.connections[
-                            (fmu_id, output_name)
-                        ]:
-                            self._input_dict[target_fmu][target_variable] = value
+            # out is fill with key: fmu_id, value: output_dict (var_name, value)
+            out = self.solve_loop(fmu_ids, step_size, algo=self.cosim_method, iterative=self.iterative)
 
-                    # add each output to the result dict, (FMU_ID + Var) as key
-                    if record_outputs:
+            if record_outputs:
+                for fmu_id, fmu_output_dict in out.items():
+                    for output_name, value in fmu_output_dict.items():
+
+                        # add each output to the result dict, (FMU_ID + Var) as key
                         self._results[(fmu_id, output_name)].extend(value)
-                    # add each output to the output dict, [FMU_ID][Var] as key
-                    self._output_dict[fmu_id][output_name] = value
+                        # add each output to the output dict, [FMU_ID][Var] as key
+                        self._output_dict[fmu_id][output_name] = value
+            self.apply_outputs_to_inputs(out)
+
         if record_outputs:
             self._results["time"].append(self.current_time)
         self.current_time += step_size
         # Return the output value for this step
         return self._output_dict
+
+    def apply_outputs_to_inputs(self, out: dict):
+        """
+        Performs a copy of output values into input dict.
+        The copy is based on connections between given outputs and inpout dict for
+        each FMU.
+
+        Args:
+            out: A dictionary containing the output values for the current step on all
+                concerned FMUs
+
+        Returns:
+            No return, at the end of the method, self._input_dict is fill with updated
+                values.
+        """
+        for fmu_id, fmu_output_dict in out.items():
+            self.apply_fmu_outputs_to_inputs(fmu_output_dict, fmu_id)
+
+    def apply_fmu_outputs_to_inputs(self, out_fmu: dict, fmu_id: str):
+        """
+        Performs a copy of output values into input dict.
+        The copy is based on connections between given fmu/outputs and inpout dict for
+        each FMU.
+
+        Args:
+            out_fmu: A dictionary containing the output values for the current step
+                on a given fmu, identified by fmu_id
+            fmu_id: A String identifying FMU into system. Used to find connections with
+                outputs
+
+        Returns:
+            No return, at the end of the method, self._input_dict is fill with updated
+                values.
+        """
+        for output_name, value in out_fmu.items():
+            # If output is connected, transfer the value to the connected FMU(s)
+            if (fmu_id, output_name) in self.connections:
+                for target_fmu, target_variable in self.connections[(fmu_id, output_name)]:
+                    self._input_dict[target_fmu][target_variable] = value
+
