@@ -479,8 +479,9 @@ class Master:
 
             for fmu_id, fmu_output_dict in out.items():
                 for output_name, value in fmu_output_dict.items():
-                    # Update inputs connected to FMU outputs
-                    self.update_connected_inputs(fmu_id, output_name, value)
+                    if self.cosim_method == "gauss_seidel":
+                        # Update inputs connected to FMU outputs
+                        self.update_connected_inputs(fmu_id, output_name, value)
 
                     if record_outputs:
                         # add each output to the result dict, (FMU_ID + Var) as key
@@ -489,6 +490,10 @@ class Master:
                     # add each output to the output dict, [FMU_ID][Var] as key
                     self._output_dict[fmu_id][output_name] = value
 
+        # If jacobi, update 1 for all inputs with outputs
+        if self.cosim_method == "jacobi":
+            for fmu_id, fmu_output_dict in self._output_dict.items():
+                self.apply_fmu_outputs_to_inputs(fmu_id, fmu_output_dict)
         if record_outputs:
             self._results["time"].append(self.current_time)
         self.current_time += step_size
