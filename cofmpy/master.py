@@ -407,9 +407,7 @@ class Master:
         """
         return self._results
 
-    def solve_loop(
-        self, fmu_ids, step_size: float, algo="jacobi"
-    ) -> dict:
+    def solve_loop(self, fmu_ids, step_size: float, algo="jacobi") -> dict:
         """
         Performs a single simulation step on the given FMUs, using the defined algorithm
         to solve algebraic loops in the simulation.
@@ -477,9 +475,7 @@ class Master:
         self.set_inputs(input_dict=input_dict)
         for fmu_ids in self.sequence_order:
             # out is fill with key: fmu_id, value: output_dict (var_name, value)
-            out = self.solve_loop(
-                fmu_ids, step_size, algo=self.cosim_method
-            )
+            out = self.solve_loop(fmu_ids, step_size, algo=self.cosim_method)
 
             for fmu_id, fmu_output_dict in out.items():
                 for output_name, value in fmu_output_dict.items():
