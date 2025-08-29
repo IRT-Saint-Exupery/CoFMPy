@@ -405,7 +405,7 @@ def literal_two_resistors_test():
             },
         ],
         "root": "",
-        "loop_solver": "jacobi",
+        "cosim_method": "jacobi",
         "edge_sep": " -> ",
     }
     return config, expected_results
@@ -476,7 +476,7 @@ def kakfa_two_resistors_test():
             },
         ],
         "root": "",
-        "loop_solver": "jacobi",
+        "cosim_method": "jacobi",
         "edge_sep": " -> ",
     }
 

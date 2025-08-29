@@ -57,14 +57,15 @@ def test_load_config_from_file(tmp_path):
             }
         ],
         "edge_sep": "test_sep",
-        "loop_solver": "test_solver",
+        "cosim_method": "test_solver",
+        "iterative": True,
         "root": "",
     }
     config_file = tmp_path / "config.json"
     config_file.write_text(json.dumps(config_data))
 
     parser = ConfigParser(
-        str(config_file), loop_solver="test_solver", edge_sep="test_sep"
+        str(config_file), cosim_method="test_solver_default", edge_sep="test_sep_default"
     )
     assert parser.config_dict == config_data
 
@@ -82,8 +83,15 @@ def test_invalid_config_format():
 def test_apply_defaults():
     config_data = {"fmus": [], "connections": []}
     parser = ConfigParser(config_data)
-    assert parser.config_dict["loop_solver"] == "jacobi"
+    assert parser.config_dict["cosim_method"] == "jacobi"
     assert parser.config_dict["edge_sep"] == " -> "
+    assert parser.config_dict["iterative"] == False
+
+    config_data = {"fmus": [], "connections": []}
+    parser2 = ConfigParser(config_data, cosim_method="test_solver_default", edge_sep="test_sep_default", iterative=True)
+    assert parser2.config_dict["cosim_method"] == "test_solver_default"
+    assert parser2.config_dict["edge_sep"] == "test_sep_default"
+    assert parser2.config_dict["iterative"] == True
 
 
 def test_missing_keys():
@@ -121,7 +129,8 @@ def test_update_paths_in_dict(tmp_path):
     assert parser.config_dict["fmus"][0]["path"] == "model.fmu"
 
 
-def test_build_master_config():
+@pytest.mark.parametrize("algo_name", ["jacobi", "gauss_seidel"])
+def test_build_master_config(algo_name):
     config_data = {
         "fmus": [
             {"id": "FMU1", "path": "fmu1.fmu"},
@@ -133,12 +142,13 @@ def test_build_master_config():
                 "target": {"id": "FMU2", "variable": "y", "type": "fmu", "unit": ""},
             }
         ],
+        "cosim_method": algo_name
     }
     parser = ConfigParser(config_data)
     assert "fmus" in parser.master_config
     assert "connections" in parser.master_config
     assert len(parser.master_config["connections"]) == 1
-    assert parser.master_config["loop_solver"] == "jacobi"
+    assert parser.master_config["cosim_method"] == algo_name
 
 
 def test_build_handlers_config():
