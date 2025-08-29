@@ -14,13 +14,17 @@
 #    materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT
 # OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+# THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 This module is designed to parse, validate, and structure a JSON
@@ -111,7 +115,10 @@ class ConfigParser:
 
         raise TypeError(f"Invalid configuration format: {type(self.file_path)}")
 
-    def _apply_defaults(self, edge_sep: str, cosim_method: str, iterative: bool) -> None:
+    def _apply_defaults(
+        self, edge_sep: str, cosim_method: str, iterative: bool
+    ) -> None:
+
         """Apply default values to missing configuration fields."""
         self.config_dict.setdefault("root", "")
         self.config_dict.setdefault("edge_sep", edge_sep)
@@ -322,7 +329,8 @@ class ConfigParser:
           the base directory is set to the current working directory (`os.getcwd()`).
         - Otherwise, the base directory is derived from `self.file_path`.
 
-        If `path` is not found within the expected directory structure, a warning is logged,
+        If `path` is not found within the expected directory structure, a warning is
+        logged,
         and the function returns `path` unchanged.
 
         Args:
