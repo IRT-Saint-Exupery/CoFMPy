@@ -118,7 +118,6 @@ class ConfigParser:
     def _apply_defaults(
         self, edge_sep: str, cosim_method: str, iterative: bool
     ) -> None:
-
         """Apply default values to missing configuration fields."""
         self.config_dict.setdefault("root", "")
         self.config_dict.setdefault("edge_sep", edge_sep)

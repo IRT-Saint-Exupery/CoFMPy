@@ -316,9 +316,9 @@ class Master:
                     )
                 for variable in input_dict[fmu]:
                     if (
-                            variable
-                            not in self.fmu_handlers[fmu].get_input_names()
-                            + self.fmu_handlers[fmu].get_parameter_names()
+                        variable
+                        not in self.fmu_handlers[fmu].get_input_names()
+                        + self.fmu_handlers[fmu].get_parameter_names()
                     ):
                         raise ValueError(
                             f"Variable '{variable}' not found in inputs of FMU '{fmu}':"
@@ -481,10 +481,7 @@ class Master:
         for fmu_ids in self.sequence_order:
             # out is fill with key: fmu_id, value: output_dict (var_name, value)
             out = self.solve_loop(
-                fmu_ids,
-                step_size,
-                algo=self.cosim_method,
-                iterative=self.iterative
+                fmu_ids, step_size, algo=self.cosim_method, iterative=self.iterative
             )
 
             for fmu_id, fmu_output_dict in out.items():
