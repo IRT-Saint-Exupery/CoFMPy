@@ -408,7 +408,7 @@ class Master:
         return self._results
 
     def solve_loop(
-        self, fmu_ids, step_size: float, algo="jacobi", iterative=False
+        self, fmu_ids, step_size: float, algo="jacobi"
     ) -> dict:
         """
         Performs a single simulation step on the given FMUs, using the defined algorithm
@@ -423,9 +423,6 @@ class Master:
             step_size (float): The step size for **data exchange** (in cosimulation
                 mode, FMU integration step is fixed).
             algo (str): The algorithm to use to solve the loop (default: "jacobi").
-            iterative (bool): Whether iterative method requested to solve the loop.
-                Not used for the moment, Work In Progress
-
 
         Returns:
             dict: A dictionary containing the output values for this step of the FMUs
@@ -481,7 +478,7 @@ class Master:
         for fmu_ids in self.sequence_order:
             # out is fill with key: fmu_id, value: output_dict (var_name, value)
             out = self.solve_loop(
-                fmu_ids, step_size, algo=self.cosim_method, iterative=self.iterative
+                fmu_ids, step_size, algo=self.cosim_method
             )
 
             for fmu_id, fmu_output_dict in out.items():
@@ -522,6 +519,22 @@ class Master:
             self.update_connected_inputs(fmu_id, output_name, value)
 
     def update_connected_inputs(self, fmu_id: str, output_name: str, value):
+        """
+        Performs a copy of output value into input dict.
+        The copy is based on connections between given fmu/output name and inpout dict
+        for each connected FMU.
+
+        Args:
+            fmu_id: A String identifying FMU into system. Used to find connections
+                between inputs and output
+            output_name: A string that identifies name of the output. Used to find
+                connections with inputs
+            value: the value to copy to inputs
+
+        Returns:
+            No return, at the end of the method, self._input_dict is fill with updated
+                value.
+        """
         # If output is connected, transfer the value to the connected FMU(s)
         if (fmu_id, output_name) in self.connections:
             for target_fmu, target_variable in self.connections[(fmu_id, output_name)]:
