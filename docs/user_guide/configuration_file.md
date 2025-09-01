@@ -262,7 +262,7 @@ A JSON example for Kafka data stream:
 Besides the description of the FMUs and the connections, the JSON configuration file
 also specifies global settings used by CoFMPy.
 
-- `loop_method`: specifies the algorithm for solving system loops (e.g., `jacobi`,
+- `cosim_method`: specifies the algorithm for solving system loops (e.g., `jacobi`,
   `gauss-seidel`).
 - `edge_sep`: defines the separator for connection naming. Default is ` -> `.
 - `root`: specifies the root directory for relative paths.
