@@ -64,6 +64,7 @@ use_cases = [
         },
     },
     {  # Use case 2: two FMUs with a single connection (source -> resistor)
+       # jacobi algo
         "use_case_name": "source_resistor",
         "master_config": {
             "fmu_config_list": [
@@ -80,6 +81,7 @@ use_cases = [
             ],
             "connections": {("source", "V"): [("resistor", "V")]},
             "sequence_order": [["source"], ["resistor"]],
+            "cosim_method": "jacobi",
         },
         "expected_results": {
             "fmu_ids": ["source", "resistor"],
@@ -87,6 +89,37 @@ use_cases = [
             "input_dict": {"source": {}, "resistor": {"V": [0]}},
             "output_vars": {"source": ["V"], "resistor": ["I"]},
             "do_step": {"source": {"V": [15.666538]}, "resistor": {"I": [0.0]}},
+            "results_keys": [("source", "V"), ("resistor", "I")],
+            "new_var_value": ("resistor", "V", 3.0),
+            "loop_fmu_ids": ["source", "resistor"],
+        },
+    },
+    {  # Use case 3: two FMUs with a single connection (source -> resistor),
+       # gauss-seidel algo
+        "use_case_name": "source_resistor_2",
+        "master_config": {
+            "fmu_config_list": [
+                {
+                    "id": "source",
+                    "path": "tests/data/source.fmu",
+                    "initialization": {"phase": 0.9},
+                },
+                {
+                    "id": "resistor",
+                    "path": "tests/data/resistor.fmu",
+                    "initialization": {"R": 5.0},
+                },
+            ],
+            "connections": {("source", "V"): [("resistor", "V")]},
+            "sequence_order": [["source"], ["resistor"]],
+            "cosim_method": "gauss_seidel",
+        },
+        "expected_results": {
+            "fmu_ids": ["source", "resistor"],
+            "input_dict_first_fmu": np.array(0),
+            "input_dict": {"source": {}, "resistor": {"V": [0]}},
+            "output_vars": {"source": ["V"], "resistor": ["I"]},
+            "do_step": {"source": {"V": [15.666538]}, "resistor": {"I": [3.1333076385099337]}},
             "results_keys": [("source", "V"), ("resistor", "I")],
             "new_var_value": ("resistor", "V", 3.0),
             "loop_fmu_ids": ["source", "resistor"],
@@ -247,15 +280,14 @@ def test_solve_loop_wrong_algo_name(master_instance, expected_results):
         master_instance.solve_loop([], 0.1, algo="invalid_algo")
 
 
-@pytest.mark.parametrize("algo_name", ["jacobi", "gauss_seidel"])
-def test_solve_loop(master_instance, expected_results, algo_name):
+def test_solve_loop(master_instance, expected_results):
     """Asserts that the solve_loop method works. The solve_loop method only runs the
     step method of the FMUs. The results are not checked here.
     """
     loop_fmu_ids = expected_results["loop_fmu_ids"]
 
     master_instance.init_simulation()
-    output = master_instance.solve_loop(loop_fmu_ids, 0.01, algo=algo_name)
+    output = master_instance.solve_loop(loop_fmu_ids, 0.01)
 
     assert isinstance(output, dict)
     assert list(output.keys()) == loop_fmu_ids
