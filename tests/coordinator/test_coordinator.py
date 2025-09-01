@@ -47,6 +47,7 @@ class CoordinatorCheck(unittest.TestCase):
             ],
             ("resistor", "I"): [
                 0.0,
+                0.0,
                 -9.797174393178826e-14,
                 -1.9594348786357651e-13,
                 -8.623494204034449e-13,
@@ -55,7 +56,6 @@ class CoordinatorCheck(unittest.TestCase):
                 -1.7246988408068898e-12,
                 -1.254236396130598e-12,
                 -7.837739514543061e-13,
-                -3.1331150677801413e-13,
             ],
             "time": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90],
         }
@@ -199,4 +199,4 @@ class CoordinatorCheck(unittest.TestCase):
         assert len(content) == 11
         assert content[0] == "time,resistor.I,source.V\n"
         assert content[1] == "0.0,0.0,0.0\n"
-        assert content[-1] == "90.0,-3.1331150677801413e-13,-1.5665575338900706e-13\n"
+        assert content[-1] == "90.0,-7.837739514543061e-13,-1.5665575338900706e-13\n"
