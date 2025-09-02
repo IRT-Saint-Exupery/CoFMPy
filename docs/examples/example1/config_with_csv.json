@@ -28,6 +28,6 @@
       "target": {"id": "resistor", "variable": "R", "unit": "Ohm"}
     }
   ],
-  "loop_method": "jacobi",
+  "cosim_method": "jacobi",
   "edge_sep": " -> "
 }

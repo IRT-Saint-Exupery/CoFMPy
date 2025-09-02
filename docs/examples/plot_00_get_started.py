@@ -111,11 +111,11 @@ coordinator.start(config_path)
 # %%
 # You can access the attributes of the components of the Coordinator object. For
 # example, you can access the loop solver of the co-simulation via the
-# `master.loop_solver` attribute.
+# `master.cosim_method` attribute.
 
 # We can check the list of FMUs in the Master or the loop solver used
 print("FMUs in Master:", list(coordinator.master.fmu_handlers.keys()))
-print(f"Loop solver: {coordinator.master.loop_solver}")
+print(f"Loop solver: {coordinator.master.cosim_method}")
 
 # ... and the stream handlers (here, the CSV source). Keys are (fmu_name, var_name)
 print("\nCSV data stream handler key:", list(coordinator.stream_handlers.keys())[0])
