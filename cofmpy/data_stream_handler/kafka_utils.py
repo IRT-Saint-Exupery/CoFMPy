@@ -22,34 +22,12 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-# Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
-#
-# The 2-Clause BSD License
-#
-# Redistribution and use in source and binary forms, with or without modification, are
-# permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this list of
-#    conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice, this list
-#    of conditions and the following disclaimer in the documentation and/or other
-#    materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
-# OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 Helper classes handling Kafka configuration, Threads, messages, etc
 """
 import logging
+import threading
+import time
 from dataclasses import dataclass
 from typing import Any
 from typing import Dict
@@ -138,3 +116,66 @@ class KafkaHandlerConfig:  # pylint: disable=too-many-instance-attributes
             auto_offset_reset=config.get("auto_offset_reset", cls.auto_offset_reset),
             enable_auto_commit=config.get("enable_auto_commit", cls.enable_auto_commit),
         )
+
+
+class KafkaThreadManager:
+    """Class managing the thread for the kafka consumer"""
+
+    def __init__(self, consumer, callback, thread_lifetime=40):
+        """Constructor requires the confluent_kafka consumer object
+        and on_consume callback
+
+        Args:
+            consumer (_type_): _description_
+            callback (function): _description_
+        """
+        self.consumer = consumer
+        self.callback = callback
+        self.thread_lifetime = thread_lifetime
+        self.running = False
+        self.thread = None
+        self.start_time = None
+
+    def start(self):
+        """Start consuming thread"""
+        if self.thread_lifetime:
+            self.start_time = time.time()
+        if not self.running:
+            self.running = True
+            self.thread = threading.Thread(target=self._consume_loop)
+            self.thread.daemon = True
+            self.thread.start()
+            logger.info(
+                f"Kafka consumer started consuming in thread '{self.thread.name}'"
+            )
+
+    def _consume_loop(self):
+        """Consuming loop."""
+        full_counter = 0
+        msg = None
+        while self.running:
+            elapsed = time.time() - self.start_time
+            if elapsed > self.thread_lifetime:
+                logger.info("Thread lifetime reached. Stopping thread.")
+                self.running = False
+                break
+
+            try:
+                msg = self.consumer.poll(timeout=1)
+                if not msg:
+                    continue
+
+                self.callback(msg)
+                full_counter += 1
+
+            except Exception as e:
+                logger.error(f"Error consuming messages: {e}")
+        logger.info("'running' set to False, closing consumer.")
+        self.consumer.close()
+
+    def stop(self):
+        """Gracefully stop the consuming thread"""
+        if self.running:
+            self.running = False
+            self.thread.join()
+            logger.info("Kafka consumer thread stopped.")
