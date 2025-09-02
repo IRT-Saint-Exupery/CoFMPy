@@ -23,6 +23,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 # Copyright 2025 IRT Saint Exupéry and HECATE European project - All rights reserved
@@ -49,15 +50,22 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 >>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
+=======
+>>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
 """
 Helper classes handling Kafka configuration, Threads, messages, etc
 """
 import logging
 <<<<<<< HEAD
+<<<<<<< HEAD
 import threading
 import time
 =======
 >>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
+=======
+import threading
+import time
+>>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
 from dataclasses import dataclass
 from typing import Any
 from typing import Dict
@@ -147,6 +155,9 @@ class KafkaHandlerConfig:  # pylint: disable=too-many-instance-attributes
             enable_auto_commit=config.get("enable_auto_commit", cls.enable_auto_commit),
         )
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
 
 
 class KafkaThreadManager:
@@ -182,6 +193,10 @@ class KafkaThreadManager:
 
     def _consume_loop(self):
         """Consuming loop."""
+<<<<<<< HEAD
+=======
+        full_counter = 0
+>>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
         msg = None
         while self.running:
             elapsed = time.time() - self.start_time
@@ -193,6 +208,7 @@ class KafkaThreadManager:
             try:
                 msg = self.consumer.poll(timeout=1)
                 if not msg:
+<<<<<<< HEAD
                     continue  # Skip processing for empty messages
 
             except Exception as e:
@@ -202,6 +218,15 @@ class KafkaThreadManager:
                 # Callback should implement error handling
                 self.callback(msg)
 
+=======
+                    continue
+
+                self.callback(msg)
+                full_counter += 1
+
+            except Exception as e:
+                logger.error(f"Error consuming messages: {e}")
+>>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
         logger.info("'running' set to False, closing consumer.")
         self.consumer.close()
 
@@ -211,5 +236,8 @@ class KafkaThreadManager:
             self.running = False
             self.thread.join()
             logger.info("Kafka consumer thread stopped.")
+<<<<<<< HEAD
 =======
 >>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
+=======
+>>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
