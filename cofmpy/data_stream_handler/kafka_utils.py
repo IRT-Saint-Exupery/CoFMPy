@@ -162,7 +162,7 @@ class KafkaThreadManager:
             try:
                 msg = self.consumer.poll(timeout=1)
                 if not msg:
-                    continue # Skip processing for empty messages
+                    continue  # Skip processing for empty messages
 
             except Exception as e:
                 logger.error(f"Consumer error when polling message: {e}")
