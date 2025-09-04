@@ -37,14 +37,7 @@ from confluent_kafka import KafkaException
 from ..utils import Interpolator
 from .base_data_stream_handler import BaseDataStreamHandler
 from .kafka_utils import KafkaHandlerConfig
-<<<<<<< HEAD
-<<<<<<< HEAD
 from .kafka_utils import KafkaThreadManager
-=======
->>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
-=======
-from .kafka_utils import KafkaThreadManager
->>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +62,6 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             "uri": uri,
             "group_id": group_id,
             "variable": variable,
-<<<<<<< HEAD
-=======
         }
         kwargs.update(positional)
         self.config = KafkaHandlerConfig.from_dict(kwargs)
@@ -98,38 +89,7 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             "group.id": f"{self.config.group_id}_{self.config.variable}",
             "enable.auto.commit": self.config.enable_auto_commit,
             "auto.offset.reset": self.config.auto_offset_reset,
->>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
         }
-<<<<<<< HEAD
-        kwargs.update(positional)
-        self.config = KafkaHandlerConfig.from_dict(kwargs)
-        logger.debug(f"Parsed config for {self}: {vars(self.config)}")
-
-        # Data-related instances
-        self.interpolator = Interpolator(self.config.interpolation)
-        self.data = pd.DataFrame(columns=["t", self.config.variable])
-
-        self._subscribed = False
-        self.first_received = None
-        self.consumer = self._create_consumer()
-
-        self.thread_manager = KafkaThreadManager(self.consumer, self._handle_message)
-        self.start_consumer_thread()
-
-    def _create_consumer(self):
-        """Creates and configures a Kafka consumer
-
-        Returns:
-            confluent_kafka.Consumer: Consumer instance
-        """
-        kafka_config = {
-            "bootstrap.servers": f"{self.config.server_url}:{self.config.port}",
-            "group.id": f"{self.config.group_id}_{self.config.variable}",
-            "enable.auto.commit": self.config.enable_auto_commit,
-            "auto.offset.reset": self.config.auto_offset_reset,
-        }
-=======
->>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
         logger.debug(f"Creating Kafka consumer with config: {kafka_config}")
         consumer = Consumer(kafka_config)
         logger.debug("Kafka consumer created successfully.")
@@ -177,21 +137,9 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
 
                     self.config.timeout = -1
 
-<<<<<<< HEAD
-<<<<<<< HEAD
                 x_p = data["t"]
                 # x_p = data.index
                 y_p = data[self.config.variable]
-=======
-                xp = data["t"]
-                # xp = data.index
-                yp = data[self.config.variable]
->>>>>>> 14204c1 (refactor(kafka-handler): extract config logic to KafkaHandlerConfig in kafka_utils with tests)
-=======
-                x_p = data["t"]
-                # x_p = data.index
-                y_p = data[self.config.variable]
->>>>>>> fcc166c (refactor(kafka): move thread-related logic to kafka_utils)
 
                 return self.interpolator(x_p, y_p, [t])
 
