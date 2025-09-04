@@ -165,11 +165,15 @@ class KafkaThreadManager:
                 if not msg:
                     continue
 
-                self.callback(msg)
-                full_counter += 1
-
             except Exception as e:
-                logger.error(f"Error consuming messages: {e}")
+                logger.error(f"Consumer error when polling message: {e}")
+                
+            # Callback should implement error handling
+            self.callback(msg)
+            
+            full_counter += 1
+
+
         logger.info("'running' set to False, closing consumer.")
         self.consumer.close()
 

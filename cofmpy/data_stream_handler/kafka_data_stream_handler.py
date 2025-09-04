@@ -185,7 +185,29 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         return row
 
     def _handle_message(self, message):
-        """Process an individual Kafka message."""
+        """
+        Process a single Kafka message (typically used as callback 
+        for KafkaThreadManager).
+
+        * If the message has an error, log an end-of-partition warning or raise
+        `kafka.KafkaException` for other errors.
+        * Otherwise parse the payload, merge it into `self.data`
+        (dropping duplicates), and mark the first successful message.
+        * All `AttributeError`, `KeyError`, or
+        `ValueError` raised during processing are logged and ignored.
+
+        Parameters
+        ----------
+        message : confluent_kafka.Message
+            A message returned by the consumer.
+
+        Notes
+        -----
+        * `self.first_received` is set only once, after the first
+        successfully parsed message.
+        * `self.data` is updated with new rows and reset-indexed; empty
+        frames are ignored.
+        """
         try:
             if message.error():
                 if message.error().code() == KafkaError._PARTITION_EOF:
