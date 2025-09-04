@@ -151,7 +151,6 @@ class KafkaThreadManager:
 
     def _consume_loop(self):
         """Consuming loop."""
-        full_counter = 0
         msg = None
         while self.running:
             elapsed = time.time() - self.start_time
@@ -163,16 +162,14 @@ class KafkaThreadManager:
             try:
                 msg = self.consumer.poll(timeout=1)
                 if not msg:
-                    continue
+                    continue # Skip processing for empty messages
 
             except Exception as e:
                 logger.error(f"Consumer error when polling message: {e}")
-                
-            # Callback should implement error handling
-            self.callback(msg)
-            
-            full_counter += 1
 
+            else:
+                # Callback should implement error handling
+                self.callback(msg)
 
         logger.info("'running' set to False, closing consumer.")
         self.consumer.close()

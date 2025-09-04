@@ -96,7 +96,7 @@ def test_consume_loop_processes_messages(mock_consumer, mock_callback):
         manager._consume_loop()
 
         mock_callback.assert_called_once_with(msg)
-        mock_logger.error.assert_called_with("Error consuming messages: fail")
+        mock_logger.error.assert_called_with("Consumer error when polling message: fail")
         mock_consumer.close.assert_called_once()
 
 

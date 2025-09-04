@@ -186,7 +186,7 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
 
     def _handle_message(self, message):
         """
-        Process a single Kafka message (typically used as callback 
+        Process a single Kafka message (typically used as callback
         for KafkaThreadManager).
 
         * If the message has an error, log an end-of-partition warning or raise
