@@ -30,3 +30,4 @@ os.system("python -m pythonfmu build -f scripts_fmus/heater.py --no-external-too
 os.system(
     "python -m pythonfmu build -f scripts_fmus/heater_with_loop.py --no-external-tool"
 )
+os.system("pythonfmu build -f scripts_fmus/programmer.py --no-external-tool")
