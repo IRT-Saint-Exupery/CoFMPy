@@ -93,7 +93,7 @@ class CoordinatorCheck(unittest.TestCase):
         my_coordinator.start(conf_path=os.path.join("tests", "data", "config.json"))
         self.assertEqual(
             my_coordinator.graph_engine.sequence_order,
-            [{"source"}, {"resistor"}],
+            [["source"], ["resistor"]],
         )
 
     def test_start_csv_stream(self):
@@ -103,7 +103,7 @@ class CoordinatorCheck(unittest.TestCase):
         )
         self.assertEqual(
             my_coordinator.graph_engine.sequence_order,
-            [{"source"}, {"resistor"}],
+            [["source"], ["resistor"]],
         )
 
     def test_do_step(self):

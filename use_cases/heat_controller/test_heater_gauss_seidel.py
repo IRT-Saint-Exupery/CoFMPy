@@ -1,9 +1,7 @@
 
-from matplotlib import pyplot as plt
 from cofmpy.coordinator import Coordinator
 import pprint
-from tqdm import tqdm
-import os
+import matplotlib.pyplot as plt
 
 coordinator = Coordinator()
 config_path = "config_gauss_seidel.json"
@@ -17,17 +15,17 @@ pprint.pp(coordinator.master._output_dict)
 print(coordinator.master.sequence_order)
 
 # Force sequence order
-coordinator.master.sequence_order = [{'programmer'}, ['controller', 'heater']]
+#coordinator.master.sequence_order = [{'programmer'}, ['controller', 'heater']]
 print(coordinator.master.sequence_order)
+raise RuntimeError()
 
 communication_time_step = 0.01
 coordinator.run_simulation(communication_time_step, 24)
 
 results = coordinator.get_results()
-coordinator.save_results("./results/results_cosim_heater_gauss.csv")
+coordinator.save_results("./results_cosim_heater_gauss.csv")
 
 # plot the results
-import matplotlib.pyplot as plt
 
 fig, axs = plt.subplots(5, 1, figsize=(10, 10), sharex=False)
 fig.suptitle("Gauss Simulation Results")
