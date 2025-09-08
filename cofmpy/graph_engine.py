@@ -224,7 +224,7 @@ class GraphEngine:
                 "Inconsistent units in '%s': %s -> %s.", *(label, src_unit, tgt_unit)
             )
 
-    def _get_order(self) -> List[Set]:
+    def _get_order(self) -> List[List]:
         """
         Computes the execution order of nodes in the directed graph by:
         1. Identifying strongly connected components (SCCs).
@@ -232,7 +232,7 @@ class GraphEngine:
         3. Performing a topological sort on the condensed graph.
 
         Returns:
-            List[Set[str]]: A list of sets, each containing nodes in execution order.
+            List[List[str]]: A list of list, each containing nodes in execution order.
         """
 
         # Strongly connected components
@@ -244,13 +244,13 @@ class GraphEngine:
         # Get the topological order of the condensed graph
         topo_order: List[int] = list(nx.topological_sort(condensed_graph))
 
-        # Order nodes in sets
+        # Order nodes in lists
         order = [
-            sccs[scc] if isinstance(sccs[scc], set) else {sccs[scc]}
+            list(sccs[scc]) if isinstance(sccs[scc], set) else [sccs[scc]]
             for scc in topo_order
         ]
 
-        # Filter out sets containing symbolic nodes
+        # Filter out lists containing symbolic nodes
         node_types = nx.get_node_attributes(self.graph, "type")
         order = [s for s in order if all(node_types[node] == "fmu" for node in s)]
 
