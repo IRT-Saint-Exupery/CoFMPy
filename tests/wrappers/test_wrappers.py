@@ -132,9 +132,8 @@ def test_get_state(wrapper_params):
         assert state is not None
 
     if version == "3.0":
-        with pytest.raises(AttributeError) as exc_info:
-            fmu.get_state()
-        assert err_msg in str(exc_info.value)
+        state = fmu.get_state()
+        assert state is not None
 
 
 @pytest.mark.parametrize("wrapper_params", [fmu_2_path, fmu_3_path], indirect=True)
@@ -150,9 +149,9 @@ def test_set_state(wrapper_params):
         ret = fmu.set_state(state)
         assert ret is None
     if version == "3.0":
-        with pytest.raises(AttributeError) as exc_info:
-            fmu.set_state(None)
-        assert err_msg in str(exc_info.value)
+        state = fmu.get_state()
+        ret = fmu.set_state(state)
+        assert ret is None
 
 
 @pytest.mark.parametrize("wrapper_params", [fmu_2_path, fmu_3_path], indirect=True)

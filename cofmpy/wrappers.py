@@ -246,7 +246,7 @@ class FmuXHandler(ABC):
             (fmiXFMUState): The current of state of the FMU, X is the version of FMI used
                 (ie. fmi3FMUState for FMI3.0)
         """
-        return self.fmu.getFMUstate()
+        return self.fmu.getFMUState()
 
     def set_state(self, state):
         """Sets the state of the FMU to the given state.
@@ -255,7 +255,7 @@ class FmuXHandler(ABC):
             state (fmiXFMUState): The state of the FMU to set, X is the version of FMI
                 used (ie. fmi3FMUState for FMI3.0)
         """
-        self.fmu.setFMUstate(state)
+        self.fmu.setFMUState(state)
 
     @abstractmethod
     def _set_variable(self, name, value):
@@ -368,6 +368,7 @@ class Fmu3Handler(FmuXHandler):
         """Resets the FMU to its initial state"""
         self.fmu.enterInitializationMode()
         self.fmu.exitInitializationMode()
+        self.fmu.setDebugLogging(True, ("logStatusError", "logStatusFatal"))
 
     def step(self, current_time: float, step_size: float, input_dict: dict) -> dict:
         """
@@ -393,7 +394,7 @@ class Fmu3Handler(FmuXHandler):
             # print(f"{name} : {value}")
 
         self.fmu.doStep(
-            currentCommunicationPoint=current_time, communicationStepSize=step_size
+            currentCommunicationPoint=current_time, communicationStepSize=step_size, noSetFMUStatePriorToCurrentPoint=False
         )
         result = {
             name: self.fmu.getFloat64([self.var_name2attr[name].valueReference])

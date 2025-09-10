@@ -39,6 +39,7 @@ import numpy as np
 
 from .utils import FixedPointInitializer
 from .wrappers import FmuHandlerFactory
+import copy
 
 
 class Master:
@@ -407,7 +408,9 @@ class Master:
         """
         return self._results
 
-    def solve_loop(self, fmu_ids, step_size: float, algo="jacobi") -> dict:
+    def solve_loop(
+        self, fmu_ids, step_size: float, algo="jacobi", iterative=False
+    ) -> dict:
         """
         Performs a single simulation step on the given FMUs, using the defined algorithm
         to solve algebraic loops in the simulation.
@@ -421,6 +424,7 @@ class Master:
             step_size (float): The step size for **data exchange** (in cosimulation
                 mode, FMU integration step is fixed).
             algo (str): The algorithm to use to solve the loop (default: "jacobi").
+            iterative (bool): Whether iterative method requested to solve the loop.
 
         Returns:
             dict: A dictionary containing the output values for this step of the FMUs
@@ -430,26 +434,68 @@ class Master:
 
         # TODO check FMU cosimulation mode and raise exception if it is model exchange
 
-        output = {}  # key: fmu_id, value: output_dict (var_name, value)
-        if algo == "jacobi":
-            for fmu_id in fmu_ids:
-                fmu = self.fmu_handlers[fmu_id]
-                output[fmu_id] = fmu.step(
-                    self.current_time, step_size, self._input_dict[fmu_id]
-                )
-        elif algo == "gauss_seidel":
-            inputs = self._input_dict.copy()
-            for fmu_id in fmu_ids:
-                # Compute outputs for the current FMU
-                fmu = self.fmu_handlers[fmu_id]
-                output[fmu_id] = fmu.step(self.current_time, step_size, inputs[fmu_id])
-
-                self.apply_fmu_outputs_to_inputs(fmu_id, output[fmu_id])
-        else:
+        # Verify algo is a known algo name
+        if algo != "jacobi" and algo != "gauss_seidel":
             raise NotImplementedError(
                 f"Algorithm {algo} not implemented for loop solving."
             )
 
+        output = {}  # key: fmu_id, value: output_dict (var_name, value)
+        inputs = {}
+        iter = 0
+        tol = 1e-3
+        max_iter = 10
+        converged = False
+        first_iteration = True
+        fmu_states = defaultdict(list)  # variable for state storage for each FMU
+
+        while not converged and iter < max_iter:
+            for fmu_id in fmu_ids:
+                fmu = self.fmu_handlers[fmu_id]
+
+                if iterative:
+                    if first_iteration:     # If first time => save state
+                        fmu_states[fmu_id] = fmu.get_state()
+                    else:                   # If not first time => retrieve state
+                        fmu.set_state(fmu_states[fmu_id])   # TODO : is exists state ?
+
+                # Save inputs for check coherence
+                inputs[fmu_id] = copy.deepcopy(self._input_dict[fmu_id])
+                output[fmu_id] = fmu.step(
+                    self.current_time, step_size, self._input_dict[fmu_id]
+                )
+
+                # Update inputs, only for gauss-seidel algo
+                if algo == "gauss_seidel":
+                    self.apply_fmu_outputs_to_inputs(fmu_id, output[fmu_id])
+
+            # Exit loop if not iterative or only 1 FMU inside loop
+            if not iterative or len(fmu_ids) == 1:
+                break
+
+            conv_val = True
+            for fmu_id in fmu_ids:
+                conv_val = conv_val and self.check_convergence(
+                    fmu_id, inputs, output[fmu_id], tol
+                )
+            converged = conv_val
+            first_iteration = False
+            iter += 1
+
+        if iterative and len(fmu_ids) != 1:
+            if iter == max_iter:
+                print(
+                    str(self.current_time) +
+                    " - Max iteration reached with following solution " +
+                    str(output)
+                )
+            else:
+                print(
+                    str(self.current_time) +
+                    " - Convergence found " +
+                    str(iter) +
+                    " iterations"
+                )
         return output
 
     def do_step(self, step_size: float, input_dict=None, record_outputs=True) -> dict:
@@ -475,7 +521,9 @@ class Master:
         self.set_inputs(input_dict=input_dict)
         for fmu_ids in self.sequence_order:
             # out is fill with key: fmu_id, value: output_dict (var_name, value)
-            out = self.solve_loop(fmu_ids, step_size, algo=self.cosim_method)
+            out = self.solve_loop(
+                fmu_ids, step_size, algo=self.cosim_method, iterative=self.iterative
+            )
 
             for fmu_id, fmu_output_dict in out.items():
                 for output_name, value in fmu_output_dict.items():
@@ -499,6 +547,37 @@ class Master:
         self.current_time += step_size
         # Return the output value for this step
         return self._output_dict
+
+    def check_convergence(
+        self, fmu_id: str, input_dict:dict, out_fmu: dict, tolerance: float
+    ):
+        """
+        Performs check between outputs and connected inputs to verify if
+        there is convergence
+        The check is based on connections between given fmu/outputs and inpout dict for
+        each FMU.
+
+        Args:
+            out_fmu: A dictionary containing the output values for the current step
+                on a given fmu, identified by fmu_id
+            fmu_id: A String identifying FMU into system. Used to find connections with
+                outputs
+            tolerance: maximum value to find between output and input to return true
+
+        Returns:
+            No return, at the end of the method, self._input_dict is fill with updated
+                values.
+        """
+        conv_val = True
+        for output_name, value in out_fmu.items():
+            if (fmu_id, output_name) in self.connections:
+                for target_fmu, target_variable in self.connections[
+                    (fmu_id, output_name)
+                ]:
+                    conv_val = conv_val and (np.abs(
+                        input_dict[target_fmu][target_variable][0] - value[0]
+                    ) < tolerance)
+        return conv_val
 
     def apply_fmu_outputs_to_inputs(self, fmu_id: str, out_fmu: dict):
         """

@@ -34,5 +34,6 @@
     }
   ],
   "edge_sep": "->",
-  "cosim_method": "jacobi"
+  "cosim_method": "jacobi",
+  "iterative": true
 }
