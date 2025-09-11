@@ -368,7 +368,6 @@ class Fmu3Handler(FmuXHandler):
         """Resets the FMU to its initial state"""
         self.fmu.enterInitializationMode()
         self.fmu.exitInitializationMode()
-        self.fmu.setDebugLogging(True, ("logStatusError", "logStatusFatal"))
 
     def step(self, current_time: float, step_size: float, input_dict: dict) -> dict:
         """
