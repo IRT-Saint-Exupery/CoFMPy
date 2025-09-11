@@ -26,7 +26,9 @@ import plotly.io as pio
 
 pio.renderers.default = "sphinx_gallery"
 
-conf = {}
+conf = {
+    "within_subsection_order": "FileNameSortKey",
+}
 # conf = {
 #     "examples_dirs": ["docs/examples"],
 #     "gallery_dirs": ["docs/generated/gallery"],

@@ -121,37 +121,17 @@ def test_cancel_step(wrapper_params):
 
 @pytest.mark.parametrize("wrapper_params", [fmu_2_path, fmu_3_path], indirect=True)
 def test_get_state(wrapper_params):
-    fmu, version, err_msg = (
-        wrapper_params["fmu"],
-        wrapper_params["version"],
-        wrapper_params["err_msg_get"],
-    )
-
-    if version == "2.0":
-        state = fmu.get_state()
-        assert state is not None
-
-    if version == "3.0":
-        state = fmu.get_state()
-        assert state is not None
+    fmu = wrapper_params["fmu"]
+    state = fmu.get_state()
+    assert state is not None
 
 
 @pytest.mark.parametrize("wrapper_params", [fmu_2_path, fmu_3_path], indirect=True)
 def test_set_state(wrapper_params):
-    fmu, version, err_msg = (
-        wrapper_params["fmu"],
-        wrapper_params["version"],
-        wrapper_params["err_msg_set_state"],
-    )
-
-    if version == "2.0":
-        state = fmu.get_state()
-        ret = fmu.set_state(state)
-        assert ret is None
-    if version == "3.0":
-        state = fmu.get_state()
-        ret = fmu.set_state(state)
-        assert ret is None
+    fmu = wrapper_params["fmu"]
+    state = fmu.get_state()
+    ret = fmu.set_state(state)
+    assert ret is None
 
 
 @pytest.mark.parametrize("wrapper_params", [fmu_2_path, fmu_3_path], indirect=True)
