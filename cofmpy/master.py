@@ -454,10 +454,10 @@ class Master:
                 fmu = self.fmu_handlers[fmu_id]
 
                 if iterative:
-                    if first_iteration:     # If first time => save state
+                    if first_iteration:  # If first time => save state
                         fmu_states[fmu_id] = fmu.get_state()
-                    else:                   # If not first time => retrieve state
-                        fmu.set_state(fmu_states[fmu_id])   # TODO : is exists state ?
+                    else:  # If not first time => retrieve state
+                        fmu.set_state(fmu_states[fmu_id])  # TODO : is exists state ?
 
                 # Save inputs for check coherence
                 inputs[fmu_id] = copy.deepcopy(self._input_dict[fmu_id])
@@ -485,16 +485,16 @@ class Master:
         if iterative and len(fmu_ids) != 1:
             if iter == max_iter:
                 print(
-                    str(self.current_time) +
-                    " - Max iteration reached with following solution " +
-                    str(output)
+                    str(self.current_time)
+                    + " - Max iteration reached with following solution "
+                    + str(output)
                 )
             else:
                 print(
-                    str(self.current_time) +
-                    " - Convergence found " +
-                    str(iter) +
-                    " iterations"
+                    str(self.current_time)
+                    + " - Convergence found "
+                    + str(iter)
+                    + " iterations"
                 )
         return output
 
@@ -549,7 +549,7 @@ class Master:
         return self._output_dict
 
     def check_convergence(
-        self, fmu_id: str, input_dict:dict, out_fmu: dict, tolerance: float
+        self, fmu_id: str, input_dict: dict, out_fmu: dict, tolerance: float
     ):
         """
         Performs check between outputs and connected inputs to verify if
@@ -574,9 +574,10 @@ class Master:
                 for target_fmu, target_variable in self.connections[
                     (fmu_id, output_name)
                 ]:
-                    conv_val = conv_val and (np.abs(
-                        input_dict[target_fmu][target_variable][0] - value[0]
-                    ) < tolerance)
+                    conv_val = conv_val and (
+                        np.abs(input_dict[target_fmu][target_variable][0] - value[0])
+                        < tolerance
+                    )
         return conv_val
 
     def apply_fmu_outputs_to_inputs(self, fmu_id: str, out_fmu: dict):

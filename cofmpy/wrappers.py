@@ -394,7 +394,7 @@ class Fmu3Handler(FmuXHandler):
             # print(f"{name} : {value}")
 
         self.fmu.doStep(
-            currentCommunicationPoint=current_time, communicationStepSize=step_size, noSetFMUStatePriorToCurrentPoint=False
+            currentCommunicationPoint=current_time, communicationStepSize=step_size
         )
         result = {
             name: self.fmu.getFloat64([self.var_name2attr[name].valueReference])
