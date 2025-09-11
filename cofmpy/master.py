@@ -435,7 +435,7 @@ class Master:
         # TODO check FMU cosimulation mode and raise exception if it is model exchange
 
         # Verify algo is a known algo name
-        if algo != "jacobi" and algo != "gauss_seidel":
+        if algo not in ("jacobi", "gauss_seidel"):
             raise NotImplementedError(
                 f"Algorithm {algo} not implemented for loop solving."
             )
