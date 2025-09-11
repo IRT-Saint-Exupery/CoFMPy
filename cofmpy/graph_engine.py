@@ -39,7 +39,6 @@ from dataclasses import dataclass
 from typing import Any
 from typing import Dict
 from typing import List
-from typing import Set
 
 import networkx as nx
 import plotly.graph_objects as go
