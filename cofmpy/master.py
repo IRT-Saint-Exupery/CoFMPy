@@ -442,14 +442,14 @@ class Master:
 
         output = {}  # key: fmu_id, value: output_dict (var_name, value)
         inputs = {}
-        iter = 0
+        current_iteration = 0
         tol = 1e-3
-        max_iter = 10
+        max_iteration = 10
         converged = False
         first_iteration = True
         fmu_states = defaultdict(list)  # variable for state storage for each FMU
 
-        while not converged and iter < max_iter:
+        while not converged and current_iteration < max_iteration:
             for fmu_id in fmu_ids:
                 fmu = self.fmu_handlers[fmu_id]
 
@@ -480,10 +480,10 @@ class Master:
                 )
             converged = conv_val
             first_iteration = False
-            iter += 1
+            current_iteration += 1
 
         if iterative and len(fmu_ids) != 1:
-            if iter == max_iter:
+            if current_iteration == max_iteration:
                 print(
                     str(self.current_time)
                     + " - Max iteration reached with following solution "
@@ -493,7 +493,7 @@ class Master:
                 print(
                     str(self.current_time)
                     + " - Convergence found "
-                    + str(iter)
+                    + str(current_iteration)
                     + " iterations"
                 )
         return output
