@@ -474,14 +474,15 @@ class Master:
                 break
 
             conv_val = True
-            for fmu_id in fmu_ids:
-                conv_val = conv_val and self.check_convergence(
-                    fmu_id, inputs, output[fmu_id], tol
-                )
+            residuals = self.get_residual(inputs, output)
+            for fmu_id, residual in residuals.items():
+                conv_val = conv_val and residual < tol
+
             converged = conv_val
             first_iteration = False
             current_iteration += 1
 
+        """
         if iterative and len(fmu_ids) != 1:
             if current_iteration == max_iteration:
                 print(
@@ -496,7 +497,46 @@ class Master:
                     + str(current_iteration)
                     + " iterations"
                 )
+        """
         return output
+
+    def do_fixed_point_step(self, step_size: float, input_dict=None):
+        """
+        This method updates the input dictionary with the values from the provided input
+        dictionary, performs a single step of the simulation on each FMU, using the
+        default jacobi method, propagates the output values to the corresponding
+        variables for the next step, and updates the current simulation time accordingly. It also
+        stores the output values in the results dictionary.
+
+        Args:
+            step_size (float): The size of the simulation step.
+            input_dict (dict, optional): A dictionary containing input values for the
+                simulation. Defaults to None.
+            record_outputs (bool, optional): Whether to store the output values in the
+                results dictionary. Defaults to True.
+
+        Returns:
+            dict: A dictionary containing the output values for this step, structured as
+                `[FMU_ID][Var]`.
+
+        """
+        self.set_inputs(input_dict=input_dict)
+        for fmu_ids in self.sequence_order:
+            # out is fill with key: fmu_id, value: output_dict (var_name, value)
+            out = self.solve_loop(fmu_ids, step_size)
+
+            for fmu_id, fmu_output_dict in out.items():
+                for output_name, value in fmu_output_dict.items():
+
+                    # add each output to the output dict, [FMU_ID][Var] as key
+                    self._output_dict[fmu_id][output_name] = value
+
+        # update 1 for all inputs with outputs
+        for fmu_id, fmu_output_dict in self._output_dict.items():
+            self.apply_fmu_outputs_to_inputs(fmu_id, fmu_output_dict)
+        self.current_time += step_size
+        # Return the output value for this step
+        return self._output_dict
 
     def do_step(self, step_size: float, input_dict=None, record_outputs=True) -> dict:
         """
@@ -548,37 +588,34 @@ class Master:
         # Return the output value for this step
         return self._output_dict
 
-    def check_convergence(
-        self, fmu_id: str, input_dict: dict, out_fmu: dict, tolerance: float
-    ):
+    def get_residual(self, input_dict: dict, output_dict: dict):
         """
-        Performs check between outputs and connected inputs to verify if
-        there is convergence
+        Performs check between outputs and connected inputs and return a list of
+        residuals
         The check is based on connections between given fmu/outputs and inpout dict for
         each FMU.
 
         Args:
-            out_fmu: A dictionary containing the output values for the current step
-                on a given fmu, identified by fmu_id
-            fmu_id: A String identifying FMU into system. Used to find connections with
-                outputs
-            tolerance: maximum value to find between output and input to return true
+            output_dict: A dictionary containing the output values for the current step
+            input_dict: Input dict concerned by the check, transient dict with current
+                calculated values
 
         Returns:
-            No return, at the end of the method, self._input_dict is fill with updated
-                values.
+            residuals: A list of residuals between inputs and outputs
+                (1 for each connection)
         """
-        conv_val = True
-        for output_name, value in out_fmu.items():
-            if (fmu_id, output_name) in self.connections:
-                for target_fmu, target_variable in self.connections[
-                    (fmu_id, output_name)
-                ]:
-                    conv_val = conv_val and (
-                        np.abs(input_dict[target_fmu][target_variable][0] - value[0])
-                        < tolerance
-                    )
-        return conv_val
+        residuals = {}
+        for fmu_id, out_fmu in output_dict.items():
+            for output_name, value in out_fmu.items():
+                if (fmu_id, output_name) in self.connections:
+                    for target_fmu, target_variable in self.connections[
+                        (fmu_id, output_name)
+                    ]:
+                        residuals[target_fmu + "_" + target_variable] = np.abs(
+                            input_dict[target_fmu][target_variable][0] - value[0]
+                        )
+
+        return residuals
 
     def apply_fmu_outputs_to_inputs(self, fmu_id: str, out_fmu: dict):
         """
