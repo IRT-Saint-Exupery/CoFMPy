@@ -39,6 +39,8 @@ def generate_fmu():
     os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
 
     fmu_script_path = os.path.join(current_test_filepath, "../data/math_fmu_v3.py")
+    os.mkdir("./bad")
+    os.mkdir("./correct")
     os.system(
         f"pythonfmu3 build -f {fmu_script_path} -d ./bad --no-external-tool"
     )
@@ -162,5 +164,5 @@ def test_bad_fmu_for_cosimulation():
         "sequence_order": []
     }
 
-    with pytest.raises(Exception, match="fmus are not well configured for cosimulation !!"):
+    with pytest.raises(Exception, match="fmus are not well configured for co-simulation !!"):
         master = Master(**bad_config)
