@@ -41,6 +41,8 @@ from .utils import FixedPointInitializer
 from .wrappers import FmuHandlerFactory
 import copy
 
+from fmpy.model_description import read_model_description
+
 
 class Master:
     """
@@ -246,7 +248,10 @@ class Master:
                     )
 
     def _load_fmus(self, id_key="id", path_key="path"):
-        """Loads FMU Handlers and stores them in a dictionary.
+        """Loads FMU Handlers and stores them in a dictionary. This method also check
+            if fmus are ready to make cosimulation :
+            - Cosimulation mode (not ModelExchange)
+            - Can Get and Set States (for loop solver iterations)
 
         Args:
             id_key (str): Key for FMU IDs (default: "id").
@@ -256,12 +261,28 @@ class Master:
             Dictionary of FMU Handlers.
         """
         fmu_handlers = {}
+        has_error = False
         for fmu_info_dict in self.fmu_config_list:
             # Load FMU (custom handler from wrappers)
             fmu_path = fmu_info_dict[path_key]
             # fmu_handler = FmuHandlerFactory(fmu_path)
+
+            # Check fmu parameters are correct for cosimulation
+            model_description = read_model_description(fmu_path)
+            if model_description.coSimulation is None:
+                print(f"Fmu {fmu_path} is not in co-simulation mode")
+                has_error = True
+            elif (
+                not model_description.coSimulation.canGetAndSetFMUstate
+                and model_description.fmiVersion == "3.0"
+            ):
+                print(f"Can get or set States on fmu {fmu_path} {model_description.fmiVersion}")
+                has_error = True
+
             # Store it into fmus dictionary
             fmu_handlers[fmu_info_dict[id_key]] = FmuHandlerFactory(fmu_path)()
+        if has_error:
+            raise Exception("fmus are not well configured for co-simulation !!")
         return fmu_handlers
 
     def initialize_values_from_config(self):
@@ -431,8 +452,6 @@ class Master:
                 given, structured as `[FMU_ID][Var]`
 
         """
-
-        # TODO check FMU cosimulation mode and raise exception if it is model exchange
 
         # Verify algo is a known algo name
         if algo not in ("jacobi", "gauss_seidel"):
