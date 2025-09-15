@@ -38,9 +38,9 @@ def generate_fmu():
     fmu_script_path = os.path.join(current_test_filepath, "../data/math_fmu.py")
     os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
 
-    fmu_script_path = os.path.join(current_test_filepath, "../data/math_fmu_v3.py")
+    fmu_script_path = os.path.join(current_test_filepath, "../data/math_fmu_v3_bad.py")
     os.system(f"pythonfmu3 build -f {fmu_script_path} --no-external-tool")
-    os.rename("./MathFMUV3.fmu", "./MathFMUV3_bad.fmu")
+    fmu_script_path = os.path.join(current_test_filepath, "../data/math_fmu_v3.py")
     os.system(
         f"pythonfmu3 build -f {fmu_script_path} --no-external-tool --handle-state"
     )
@@ -48,7 +48,7 @@ def generate_fmu():
     yield
 
     os.remove("MathFMU.fmu")
-    os.remove("./MathFMUV3_bad.fmu")
+    os.remove("./MathFMUV3Bad.fmu")
     os.remove("./MathFMUV3.fmu")
 
 
@@ -152,7 +152,7 @@ def test_bad_fmu_for_cosimulation():
     bad_config = {
         "fmu_config_list": [{
             "id": "math2",
-            "path": "./MathFMUV3_bad.fmu",
+            "path": "./MathFMUV3Bad.fmu",
             "initialization": {"x": -1, "u": -2},
         }],
         "connections": {},
