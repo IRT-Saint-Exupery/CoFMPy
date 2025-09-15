@@ -39,20 +39,17 @@ def generate_fmu():
     os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
 
     fmu_script_path = os.path.join(current_test_filepath, "../data/math_fmu_v3.py")
+    os.system(f"pythonfmu3 build -f {fmu_script_path} --no-external-tool")
+    os.rename("./MathFMUV3.fmu", "./MathFMUV3_bad.fmu")
     os.system(
-        f"pythonfmu3 build -f {fmu_script_path} -d ./tests/bad --no-external-tool"
-    )
-    os.system(
-        f"pythonfmu3 build -f {fmu_script_path} -d ./tests/correct --no-external-tool --handle-state"
+        f"pythonfmu3 build -f {fmu_script_path} --no-external-tool --handle-state"
     )
 
     yield
 
     os.remove("MathFMU.fmu")
-    os.remove("./tests/bad/MathFMUV3.fmu")
-    os.removedirs("./tests/bad")
-    os.remove("./tests/correct/MathFMUV3.fmu")
-    os.removedirs("./tests/correct")
+    os.remove("./MathFMUV3_bad.fmu")
+    os.remove("./MathFMUV3.fmu")
 
 
 def test_fmu_for_cosimulation():
@@ -114,12 +111,12 @@ def test_rollback_v3():
         "fmu_config_list": [
             {
                 "id": "math1",
-                "path": "./tests/correct/MathFMUV3.fmu",
+                "path": "./MathFMUV3.fmu",
                 "initialization": {"x": -1, "u": -2},
             },
             {
                 "id": "math2",
-                "path": "./tests/correct/MathFMUV3.fmu",
+                "path": "./MathFMUV3.fmu",
                 "initialization": {"x": 20, "u": 1},
             }
         ],
@@ -155,7 +152,7 @@ def test_bad_fmu_for_cosimulation():
     bad_config = {
         "fmu_config_list": [{
             "id": "math2",
-            "path": "./tests/bad/MathFMUV3.fmu",
+            "path": "./MathFMUV3_bad.fmu",
             "initialization": {"x": -1, "u": -2},
         }],
         "connections": {},
