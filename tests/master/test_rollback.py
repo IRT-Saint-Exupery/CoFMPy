@@ -42,10 +42,10 @@ def generate_fmu():
     os.mkdir("./bad")
     os.mkdir("./correct")
     os.system(
-        f"pythonfmu3 build -f {fmu_script_path} -d ./bad --no-external-tool"
+        f"pythonfmu3 build -f {fmu_script_path} -d bad --no-external-tool"
     )
     os.system(
-        f"pythonfmu3 build -f {fmu_script_path} -d ./correct --no-external-tool --handle-state"
+        f"pythonfmu3 build -f {fmu_script_path} -d correct --no-external-tool --handle-state"
     )
 
     yield
