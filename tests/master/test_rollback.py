@@ -48,8 +48,8 @@ def generate_fmu():
     yield
 
     os.remove("MathFMU.fmu")
-    os.remove("./MathFMUV3Bad.fmu")
-    os.remove("./MathFMUV3.fmu")
+    os.remove("MathFMUV3Bad.fmu")
+    os.remove("MathFMUV3.fmu")
 
 
 def test_fmu_for_cosimulation():
@@ -111,12 +111,12 @@ def test_rollback_v3():
         "fmu_config_list": [
             {
                 "id": "math1",
-                "path": "./MathFMUV3.fmu",
+                "path": "MathFMUV3.fmu",
                 "initialization": {"x": -1, "u": -2},
             },
             {
                 "id": "math2",
-                "path": "./MathFMUV3.fmu",
+                "path": "MathFMUV3.fmu",
                 "initialization": {"x": 20, "u": 1},
             }
         ],
@@ -152,7 +152,7 @@ def test_bad_fmu_for_cosimulation():
     bad_config = {
         "fmu_config_list": [{
             "id": "math2",
-            "path": "./MathFMUV3Bad.fmu",
+            "path": "MathFMUV3Bad.fmu",
             "initialization": {"x": -1, "u": -2},
         }],
         "connections": {},
