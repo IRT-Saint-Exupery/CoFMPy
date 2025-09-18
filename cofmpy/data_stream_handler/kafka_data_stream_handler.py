@@ -27,6 +27,7 @@ This module contains the child class for Kafka data stream handler.
 """
 import json
 import logging
+import threading
 import time
 
 import pandas as pd
@@ -48,29 +49,26 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
     # Type name of the handler (used in the configuration file and handler registration)
     type_name = "kafka"
 
-    def __init__(self, topic, uri, group_id, variable, **kwargs):
+    def __init__(self, topic, uri, group_id, **kwargs):
         """
         Constructor for Kafka data stream handler.
 
         Args:
             kwargs: kafka service configuration.
         """
+        super().__init__()
 
         # Configuration handling
-        positional = {
-            "topic": topic,
-            "uri": uri,
-            "group_id": group_id,
-            "variable": variable,
-        }
+        positional = {"topic": topic, "uri": uri, "group_id": group_id}
         kwargs.update(positional)
         self.config = KafkaHandlerConfig(**kwargs)
         logger.debug(f"Parsed config for {self}: {vars(self.config)}")
 
         # Data-related instances
         self.interpolator = Interpolator(self.config.interpolation)
-        self.data = pd.DataFrame(columns=["t", self.config.variable])
+        self.data = pd.DataFrame(columns=["t"])
 
+        self._data_lock = threading.Lock()
         self._subscribed = False
         self.first_received = None
         self.consumer = self._create_consumer()
@@ -86,7 +84,7 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         """
         kafka_config = {
             "bootstrap.servers": f"{self.config.server_url}:{self.config.port}",
-            "group.id": f"{self.config.group_id}_{self.config.variable}",
+            "group.id": self.config.group_id,
             "enable.auto.commit": self.config.enable_auto_commit,
             "auto.offset.reset": self.config.auto_offset_reset,
         }
@@ -101,52 +99,90 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             self.consumer.subscribe([self.config.topic])
             self._subscribed = True
 
-    def get_data(self, t: float):
-        """
-        Get the data at a specific time.
+    def _build_out_dict(self, t_s):
+        """Builds the requested dictionary (output of get_data). Iterates over alias_mapping
+        to get variable names or alias. Uses interpolator to retrieve data at requested time
+        from self.data (pd.DataFrame).
 
         Args:
-            t (float): timestamp to get the data.
+            ts (float): requested timestamp
 
         Returns:
-            dict: data at the requested time: {'var1': val1 , ...}.
+            dict[tuple:float]: requested float values per variable (tuple key)
         """
+        out_dict = {}
+        for (node, endpoint), var_name in self.alias_mapping.items():
+            out_dict[(node, endpoint)] = self.interpolator(
+                self.data["t"], self.data[var_name], [t_s]
+            )[0]
+
+        return out_dict
+
+    def get_data(self, t: float):
+        """
+        Retrieve data corresponding to a specific timestamp, with optional interpolation.
+
+        This method waits for the required data to become available in a thread-safe way.
+        It distinguishes between the first data retrieval (allowing a longer timeout to
+        handle sparse data sources) and subsequent retrievals with a shorter retry window.
+
+        Args:
+            t (float): The target timestamp for which data is requested.
+
+        Returns:
+            dict or None:
+                - A list containing the interpolated or exact data. Format: [float]
+                - Returns None if data could not be retrieved within the configured timeouts.
+
+        Notes:
+            - If the consumer thread is not running, an error is logged and None is returned.
+            - The first message is awaited with a longer timeout to better handle sparse
+                data sources.
+        """
+        logger.debug(f"Getting data for timestamp: {t}")
+
+        if not self.thread_manager.running:
+            logger.error("Consumer thread is not running. Cannot get data.")
+            return None
+
         self._lazy_subscribe()
 
-        while True:
+        with self._data_lock:
+            data_len = len(self.data)
+            logger.debug(f"Current data buffer size: {data_len}")
 
-            try:
-                data = self.data.copy()
+        # First-time handling with extended timeout
+        if data_len == 0:
+            logger.info(
+                "Waiting for first Kafka message "
+                f"(timeout = {self.config.first_msg_timeout})"
+            )
+            start_time = time.time()
+            while time.time() - start_time < self.config.first_msg_timeout:
+                try:
+                    with self._data_lock:
+                        logger.debug(
+                            "1st msg attempt: trying to fetch data. "
+                            f"Available t_series: {self.data['t']}. "
+                            f"Requested ts: {t}"
+                        )
+                        return self._build_out_dict(t)
+                except KeyError as error:
+                    logger.error(f"Missing key: {error}")
+                except (ValueError, RuntimeError) as error:
+                    logger.error(f"{type(error).__name__}: {error}")
+                time.sleep(self.config.retry_delay)
 
-                if data.shape[0] == 0:
-                    time.sleep(0.01)
-                    continue
+        # Regular retry loop for existing streams
+        for _ in range(self.config.max_retries):
+            start_time = time.time()
+            while time.time() - start_time < self.config.timeout:
+                with self._data_lock:
+                    logger.debug(f"Fetching data for ts = {t}")
+                    return self._build_out_dict(t)
+            logger.error(f"No valid data for ts = {t} after retries.")
 
-                # Data has started arriving
-                # Apply timeout only once (data should arrive at once)
-                if self.config.timeout >= 0:
-                    logging.debug(
-                        "First data recovered ('get_data')'. "
-                        f"Shape: {data.shape}. "
-                        f"Will wait {self.config.timeout} sec before proceeding."
-                    )
-
-                    # Wait and update data after timeout
-                    time.sleep(self.config.timeout)
-                    data = self.data.copy()
-
-                    self.config.timeout = -1
-
-                x_p = data["t"]
-                # x_p = data.index
-                y_p = data[self.config.variable]
-
-                return self.interpolator(x_p, y_p, [t])
-
-            except (AttributeError, KeyError, ValueError) as error:
-                logger.error(f"Error: {error}")
-
-            time.sleep(0.05)
+        return None
 
     def send_data(self, data):
         """
@@ -246,3 +282,33 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         """Stop the consumer gracefully."""
         logger.debug("Stopping Kafka consumer thread.")
         self.thread_manager.stop()
+
+    # pylint: disable=W0237,W0221
+    def is_equivalent_stream(self, topic, uri, group_id, **alt_config) -> bool:
+        """
+        Check if the current data stream handler instance is equivalent to
+        another that would be created with the given config.
+        This kafka data handler groups all variables sent in the same
+        {uri, topic, group} data stream into one handler instance.
+
+        Args:
+            The constructor is exacly the same than in __init__.
+
+        Returns:
+            bool: True if the handlers are equivalent, False otherwise.
+        """
+        # equivalent items: {uri, topic, group_id}
+        self_uri = f"{self.config.server_url}:{self.config.port}"
+        self_topic = self.config.topic
+        self_group_id = self.config.group_id
+
+        positional = {"topic": topic, "uri": uri, "group_id": group_id}
+        alt_config.update(positional)
+
+        same = (
+            alt_config["uri"] == self_uri
+            and alt_config["topic"] == self_topic
+            and alt_config["group_id"] == self_group_id
+        )
+        logger.debug("Stream equivalence check: %s", same)
+        return same

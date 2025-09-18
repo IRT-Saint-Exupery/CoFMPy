@@ -79,6 +79,11 @@ class KafkaHandlerConfig:
     interpolation: str = "previous"
     auto_offset_reset: str = "earliest"
     enable_auto_commit: bool = True
+    first_msg_timeout: float = 35
+    max_retries: int = 3
+    retry_delay: float = 0.02
+    first_delay: float = 4
+    thread_lifetime: float = 3600
 
     def __post_init__(self):
 

@@ -32,6 +32,8 @@ import pandas as pd
 from ..utils import Interpolator
 from .base_data_stream_handler import BaseDataStreamHandler
 
+logger = logging.getLogger(__name__)
+
 
 class LocalDataStreamHandler(BaseDataStreamHandler):
     """
@@ -49,8 +51,8 @@ class LocalDataStreamHandler(BaseDataStreamHandler):
 
     def __init__(self, values, interpolation="previous"):
         if not values:
-            logging.warning("Given dict is empty, no value will be used")
-
+            logger.warning("Given dict is empty, no value will be used")
+        super().__init__()
         self.values = values
         self.interpolator = Interpolator(interpolation)
 
@@ -66,11 +68,45 @@ class LocalDataStreamHandler(BaseDataStreamHandler):
             t (float): timestamp to get the data.
 
         Returns:
-            float: data at the requested time.
+            dict: for the requested time, returns dict of values associated to endpoints
+                under the data handler scope (see BaseDataStreamHandler.is_equivalent_stream).
+                Format : {(fmu_i, var_j): value_1, (fmu_k, var_l): value_2}, ...}
         """
-        if t < self.data["t"].values[0]:
-            logging.warning(
-                f"Timestamp {t} is before available data range. "
-                "Extrapolated variable value will be used instead"
-            )
-        return self.interpolator(self.data["t"], self.data["values"], [t])[0]
+        out_dict = {}
+        for (node, endpoint), _ in self.alias_mapping.items():
+            out_dict[(node, endpoint)] = self.interpolator(
+                self.data["t"], self.data["values"], [t]
+            )[0]
+
+        return out_dict
+
+    # pylint: disable=W0237
+    def is_equivalent_stream(self, values, interpolation="previous") -> bool:
+        """
+        Check if the current data stream handler instance is equivalent to
+        another that would be created with the given config.
+        This local data handler is always considered as unique.
+
+        Args:
+            The constructor is exacly the same than in __init__.
+
+        Returns:
+            bool: True if the handlers are equivalent, False otherwise.
+        """
+        _ = values, interpolation
+        logger.debug("Each handler is unique. Returning False.")
+
+        return False
+
+    def add_variable(self, endpoint: tuple, stream_alias: str):
+        """
+        Add a new variable values to the current instance.
+
+        Args:
+            endpoint (tuple): key of the variable to add in the format:
+                (node_name, endpoint_name).
+            stream_alias (str): not used since values are passed direcly
+                in config under 'values' key.
+        """
+        logger.debug(f"Argument not used: {stream_alias}")
+        self.alias_mapping.update({endpoint: "values"})
