@@ -69,13 +69,13 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
             t (float): timestamp to get the data.
 
         Returns:
-            dict: for the requested time, returns dict of values associated to endpoints
+            dict: for the requested time, returns dict of values associated to variables
                 under the data handler scope (see BaseDataStreamHandler.is_equivalent_stream).
-                Format : {(fmu_i, var_j): value_1, (fmu_k, var_l): value_2}, ...}
+                Format : {(fmu_i, var_j): value_1, (fmu_k, var_l): value_2, ...}
         """
         out_dict = {}
-        for (node, endpoint), stream_alias in self.alias_mapping.items():
-            out_dict[(node, endpoint)] = self.interpolator(
+        for (fmu, variable), stream_alias in self.alias_mapping.items():
+            out_dict[(fmu, variable)] = self.interpolator(
                 self.data["t"], self.data[stream_alias], [t]
             )[0]
 

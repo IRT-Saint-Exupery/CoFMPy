@@ -37,13 +37,18 @@ logger = logging.getLogger(__name__)
 
 class LocalDataStreamHandler(BaseDataStreamHandler):
     """
-    Data stream handler to read values from a dictionary.
-
-    This data stream handler is the simplest one, as it just reads the values of the
+    This data stream handler receives the values of the
     variable directly from the JSON main configuration file.
+
+    Each LocalDataStreamHandler instance is associated to a single variable.
+    As a consequence:
+    * `is_equivalent_stream` method always returns False
+    * `add_variable` is overriden so `alias_mapping` use is replaced
+        by using its single key.
 
     Args:
         values (dict): dictionary with the values to process
+            in the format {'t1':value1, ...}
     """
 
     # Type name of the handler (used in the configuration file and handler registration)
@@ -53,6 +58,7 @@ class LocalDataStreamHandler(BaseDataStreamHandler):
         if not values:
             logger.warning("Given dict is empty, no value will be used")
         super().__init__()
+        self.single_key = None
         self.values = values
         self.interpolator = Interpolator(interpolation)
 
@@ -68,15 +74,15 @@ class LocalDataStreamHandler(BaseDataStreamHandler):
             t (float): timestamp to get the data.
 
         Returns:
-            dict: for the requested time, returns dict of values associated to endpoints
+            dict: for the requested time, returns dict of values associated to variables
                 under the data handler scope (see BaseDataStreamHandler.is_equivalent_stream).
                 Format : {(fmu_i, var_j): value_1, (fmu_k, var_l): value_2}, ...}
         """
-        out_dict = {}
-        for (node, endpoint), _ in self.alias_mapping.items():
-            out_dict[(node, endpoint)] = self.interpolator(
+        out_dict = {
+            self.single_key: self.interpolator(
                 self.data["t"], self.data["values"], [t]
             )[0]
+        }
 
         return out_dict
 
@@ -98,15 +104,20 @@ class LocalDataStreamHandler(BaseDataStreamHandler):
 
         return False
 
-    def add_variable(self, endpoint: tuple, stream_alias: str):
-        """
-        Add a new variable values to the current instance.
-
-        Args:
-            endpoint (tuple): key of the variable to add in the format:
-                (node_name, endpoint_name).
-            stream_alias (str): not used since values are passed direcly
-                in config under 'values' key.
-        """
+    def add_variable(self, variable: tuple, stream_alias: str):
+        """Extracts the single key in alias_mapping"""
+        if len(self.alias_mapping) == 1:
+            err_msg = (
+                "Error: 'add_variable' called while alias_mappping "
+                "already contains one variable. "
+                "This is not allowed for the current LocalDataStreamHandler."
+            )
+            logger.error(err_msg)
+            raise ValueError(err_msg)
         logger.debug(f"Argument not used: {stream_alias}")
-        self.alias_mapping.update({endpoint: "values"})
+        self.alias_mapping.update({variable: stream_alias})
+        logger.debug(
+            f"single_key ({self.single_key}) will be used "
+            f"instead of alias_mapping ({self.alias_mapping})"
+        )
+        self.single_key = variable

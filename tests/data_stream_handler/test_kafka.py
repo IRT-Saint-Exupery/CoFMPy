@@ -24,167 +24,288 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # test_kafka_data_stream_handler.py
 import pytest
-
-pytest.skip("Skipping this test file", allow_module_level=True)
-import unittest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock, PropertyMock
 import pandas as pd
-import json
-import threading
+import time
+
+from confluent_kafka import Consumer
+from cofmpy.utils import Interpolator
+from cofmpy.data_stream_handler import kafka_data_stream_handler
 from cofmpy.data_stream_handler import KafkaDataStreamHandler
+from cofmpy.data_stream_handler.kafka_utils import KafkaHandlerConfig
+from cofmpy.data_stream_handler.kafka_utils import KafkaThreadManager
 
 
-class TestKafkaDataStreamHandler(unittest.TestCase):
-    def setUp(self):
-        self.var_name = "MySignal"
-        self.topic = "test_topic"
-        self.t_out = 1
-        self.config = {
-            "topic": self.topic,
-            "variable": self.var_name,
-            "uri": "localhost:9092",
-            "group_id": "test_group",
-            "interpolation": "previous",
-            "timeout": self.t_out,
-        }
+# -----------------------------
+# Fixtures
+# -----------------------------
+@pytest.fixture
+def not_equiv_case():
+    return [
+        ("uri", "wrong_uri:1234"),
+        ("topic", "wrong_topic"),
+        ("group_id", "wrong_group"),
+    ]
 
-    @patch(
-        "cofmpy.data_stream_handler.kafka_data_stream_handler.KafkaDataStreamHandler.start_consuming"
-    )
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Interpolator")
-    def test_init_and_config_validation(self, mock_interp, mock_consumer, mock_start):
-        handler = KafkaDataStreamHandler(**self.config)
 
-        self.assertEqual(handler.topic, self.topic)
-        self.assertEqual(handler.var_name, self.var_name)
-        self.assertEqual(handler.timeout, self.t_out)
-        self.assertTrue(isinstance(handler.data, pd.DataFrame))
-        self.assertTrue(mock_consumer.called)
-        self.assertTrue(mock_interp.called)
+@pytest.fixture
+def mock_consumer_and_thread_mgr():
+    """
+    Patches are needed to mock the kafka Consumer (no real Kafka message sending).
+    Also thread manager is Mocked up.
+    """
+    with patch(
+        "cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer"
+    ) as mock_consumer, patch(
+        "cofmpy.data_stream_handler.kafka_data_stream_handler.KafkaThreadManager"
+    ) as mock_thread_mgr:
 
-        handler.stop_consuming()
+        consumer_instance = MagicMock(spec=Consumer)
+        mock_consumer.return_value = consumer_instance
 
-    def test_validate_config_defaults(self):
-        config = {"topic": "t", "variable": "v", "uri": "server:1234", "group_id": "g"}
-        handler_args = KafkaDataStreamHandler._validate_config(
-            KafkaDataStreamHandler, config
-        )
-        positional, optional = handler_args
+        thread_manager_instance = MagicMock(spec=KafkaThreadManager)
+        mock_thread_mgr.return_value = thread_manager_instance
 
-        self.assertEqual(optional[0], "previous")
-        self.assertEqual(optional[1], 2)
+        yield mock_consumer, consumer_instance, mock_thread_mgr, thread_manager_instance
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    def test_lazy_subscribe(self, mock_consumer):
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.consumer = MagicMock()
-        handler._subscribed = False
 
-        handler._lazy_subscribe()
-        handler.consumer.subscribe.assert_called_once_with([self.topic])
-        self.assertTrue(handler._subscribed)
+@pytest.fixture
+def fresh_handler_with_var(mock_consumer_and_thread_mgr, kafka_resistor_test):
+    raw_config, _, _ = kafka_resistor_test
+    _, consumer_instance, _, thread_manager_instance = mock_consumer_and_thread_mgr
 
-    def test_parse_kafka_message(self):
-        class MockMsg:
-            def value(self):
-                return b"{'t': 1, 'temperature': 22}"
+    print("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    print("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n")
 
-        result = KafkaDataStreamHandler.parse_kafka_message(MockMsg())
-        self.assertEqual(result["t"].iloc[0], 1.0)
-        self.assertEqual(result["temperature"].iloc[0], 22.0)
+    print(raw_config)
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Interpolator")
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    def test_handle_message_updates_data(self, mock_consumer_class, mock_interp_class):
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.data = pd.DataFrame(columns=["t", "value"])
+    print("\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    print("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n")
 
-        # Mock Kafka message
-        mock_msg = MagicMock()
-        mock_msg.error.return_value = None
-        mock_msg.value.return_value = b'{"t": 1, "value": 22.5}'
+    # raw_config is suited for Coordinator which uses ConfigParser. 
+    # We manually parse raw config to adapt it to KafkaDataStreamHandler
+    for arg in ("type", "id", "unit"):
+        _ = raw_config.pop(arg)
+    # topic, uri, gp_id = [raw_config.pop(arg) for arg in ("topic", "uri", "group_id")]
+    var_name = raw_config.pop("variable")
 
-        handler._handle_message(mock_msg)
+    print(raw_config)
 
-        self.assertEqual(handler.data.shape[0], 1)
-        self.assertIn("value", handler.data.columns)
+    print("\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+    print("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Interpolator")
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    def test_get_data_interpolates(self, mock_consumer_class, mock_interp_class):
-        handler = KafkaDataStreamHandler(**self.config)
 
-        handler.data = pd.DataFrame({"t": [1.0, 2.0, 3.0], "value": [20.0, 21.0, 22.0]})
+    handler = KafkaDataStreamHandler(**raw_config)
+    handler.thread_manager.running = PropertyMock(return_value=True)
+    handler.add_variable(("any", "name"), var_name)
 
-        handler.timeout = -1  # Skip sleep logic
+    return handler, var_name, raw_config
 
-        mock_interp = MagicMock()
-        mock_interp.return_value = [21.5]
-        handler.interpolator = mock_interp
 
-        result = handler.get_data(2.5)
-        mock_interp.assert_called_once()
-        self.assertEqual(result, [21.5])
+# -----------------------------
+# Helper functions
+# -----------------------------
+def fake_time_controller(start: float, increment: float):
+    current = {"t": start}
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.logger")
-    def test_handle_message_with_error(self, mock_logger):
-        mock_message = MagicMock()
-        mock_message.error.return_value = MagicMock(code=lambda: 1)
+    def fake_time():
+        current["t"] += increment
+        return current["t"]
 
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.consumer = MagicMock()
+    return current, fake_time
 
-        handler._handle_message(mock_message)
 
-        mock_logger.error.assert_called()
+def delayed_data_injection(handler, var_name, t_val=1.0, val=123):
+    original = handler._build_out_dict
 
-    def test_handle_message_valid(self):
-        mock_message = MagicMock()
-        mock_message.error.return_value = None
-        mock_message.value.return_value = b"{'t': 1, 'temperature': 22}"
-        mock_message.offset.return_value = 5
+    def wrapper(t):
+        if handler.data.empty:
+            handler.data = pd.DataFrame({"t": [t_val], var_name: [val]})
+        return original(t)
 
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.data = pd.DataFrame(columns=["t", "temperature"])
-        handler.first_received = None
+    handler._build_out_dict = wrapper
 
-        handler._handle_message(mock_message)
-        self.assertIsNotNone(handler.first_received)
-        self.assertIn("temperature", handler.data.columns)
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    def test_start_stop_consuming(self, mock_consumer_class):
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.consumer = MagicMock()
+# -----------------------------
+# Initialization & config tests
+# -----------------------------
+def test_init_and_config_validation(fresh_handler_with_var):
+    h, _, _ = fresh_handler_with_var
+    cfg = h.config
 
-        handler.start_consuming()
-        self.assertTrue(handler.running)
-        self.assertTrue(handler.consumer_thread.is_alive())
+    assert isinstance(h.interpolator, Interpolator)
+    assert h.interpolator.method == cfg.interpolation
+    assert isinstance(h.config, KafkaHandlerConfig)
+    assert isinstance(h.data, pd.DataFrame)
+    assert isinstance(h.consumer, Consumer)
+    assert isinstance(h.thread_manager, KafkaThreadManager)
 
-        handler.stop_consuming()
-        self.assertFalse(handler.running)
 
-    @patch("cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer")
-    def test_consume_loop(self, mock_consumer_class):
-        handler = KafkaDataStreamHandler(**self.config)
-        handler.consumer = MagicMock()
-        handler.running = True
+def test_create_consumer_called_with_expected_config(fresh_handler_with_var):
+    h, _, _ = fresh_handler_with_var
+    expected_config = {
+        "bootstrap.servers": f"{h.config.server_url}:{h.config.port}",
+        "group.id": h.config.group_id,
+        "enable.auto.commit": h.config.enable_auto_commit,
+        "auto.offset.reset": h.config.auto_offset_reset,
+    }
+    kafka_data_stream_handler.Consumer.assert_called_once_with(expected_config)
 
-        # Simulate poll returning one mock message
-        mock_msg = MagicMock()
-        mock_msg.error.return_value = None
-        mock_msg.value.return_value = b"{'t': 1, 'temperature': 22}"
-        mock_msg.offset.return_value = 3
-        handler.consumer.poll = MagicMock(side_effect=[mock_msg, None, None])
-        handler._handle_message = MagicMock()
-        handler.consumer.close = MagicMock()
 
-        # Run _consume for a short time
-        def stop_soon():
-            handler.running = False
+# -----------------------------
+# Lazy subscription
+# -----------------------------
+def test_lazy_subscribe_calls_consumer_once(fresh_handler_with_var):
+    h, _, _ = fresh_handler_with_var
+    c = h.consumer
 
-        threading.Timer(0.1, stop_soon).start()
-        handler._consume()
+    h._lazy_subscribe()
+    c.subscribe.assert_called_once_with([h.config.topic])
 
-        handler._handle_message.assert_called_with(mock_msg)
+    c.subscribe.reset_mock()
+    h._lazy_subscribe()
+    c.subscribe.assert_not_called()
+
+
+# -----------------------------
+# get_data tests
+# -----------------------------
+def test_get_data_waits_until_data_arrives(fresh_handler_with_var):
+    h, var_name, _ = fresh_handler_with_var
+    h.interpolator.__call__ = MagicMock(return_value=[123])
+
+    delayed_data_injection(h, var_name)
+
+    result = h.get_data(1.0)
+    assert result == {("any", "name"): 123.0}
+
+
+def test_get_data_respects_timeout_once(fresh_handler_with_var, monkeypatch):
+    h, _, _ = fresh_handler_with_var
+    h._build_out_dict = MagicMock(side_effect=lambda t: None)
+
+    h.config.retry_delay = 0.01
+    h.config.first_msg_timeout = 0.05
+
+    start, fake_time = fake_time_controller(1000.0, 0.03)
+    monkeypatch.setattr(time, "time", fake_time)
+
+    result = h.get_data(1.0)
+
+    assert result is None
+    assert start["t"] >= 1000.0 + h.config.first_msg_timeout
+
+
+# -----------------------------
+# parse_kafka_message tests
+# -----------------------------
+@pytest.mark.parametrize(
+    "msg_bytes,expected",
+    [
+        (
+            b"{'t': 1.0, 'var1': 123, 'var2': 456}",
+            {"t": [1.0], "var1": [123], "var2": [456]},
+        ),
+        (b"{}", {}),
+    ],
+)
+def test_parse_kafka_message_valid_and_empty(
+    fresh_handler_with_var, msg_bytes, expected
+):
+    h, _, _ = fresh_handler_with_var
+    msg = MagicMock()
+    msg.value.return_value = msg_bytes
+
+    df = h.parse_kafka_message(msg)
+    if expected:
+        assert list(df.columns) == list(expected.keys())
+        for k, v in expected.items():
+            assert list(df[k]) == v
+    else:
+        assert df.empty
+
+
+# -----------------------------
+# Consumer thread control
+# -----------------------------
+def test_consumer_thread_start_stop(fresh_handler_with_var):
+    h, _, _ = fresh_handler_with_var
+    tm = h.thread_manager
+
+    tm.start.assert_called_once()
+    h.stop_consumer_thread()
+    tm.stop.assert_called_once()
+
+
+def test_thread_manager_received_correct_callback(fresh_handler_with_var):
+    _, _, raw_config = fresh_handler_with_var
+    with patch(
+        "cofmpy.data_stream_handler.kafka_data_stream_handler.KafkaThreadManager"
+    ) as mock_tm:
+        h = KafkaDataStreamHandler(**raw_config)
+        callback = mock_tm.call_args[0][1]
+        assert callback == h._handle_message
+
+
+# -----------------------------
+# _handle_message tests
+# -----------------------------
+@pytest.mark.parametrize(
+    "messages,expected_t,expected_val",
+    [
+        ([{"t": 1.0, "var1": 42}], [1.0], [42]),
+        ([{"t": 1.0, "var1": 10}, {"t": 2.0, "var1": 20}], [1.0, 2.0], [10, 20]),
+    ],
+)
+def test_handle_message_appends_multiple(
+    fresh_handler_with_var, messages, expected_t, expected_val
+):
+    h, _, _ = fresh_handler_with_var
+
+    for msg_dict in messages:
+        # Ensure all keys exist as columns
+        for k in msg_dict.keys():
+            if k not in h.data.columns:
+                h.data[k] = []
+
+        msg = MagicMock()
+        msg.value.return_value = str(msg_dict).encode()
+        msg.error.return_value = None
+        h._handle_message(msg)
+
+    assert list(h.data["t"]) == expected_t
+    var_name = [k for k in h.data.columns if k != "t"][0]
+    assert list(h.data[var_name]) == expected_val
+
+
+def test_handle_message_with_single_quotes(fresh_handler_with_var):
+    h, var_name, _ = fresh_handler_with_var
+    h.data = pd.DataFrame(columns=["t", var_name])
+
+    msg = MagicMock()
+    msg.value.return_value = f"{{'t': 1.0, '{var_name}': 99}}".encode()
+    msg.error.return_value = None
+
+    h._handle_message(msg)
+    assert h.data[var_name].iloc[0] == 99
+
+
+# -----------------------------
+# is_equivalent_stream tests
+# -----------------------------
+def test_is_equivalent_stream_true(fresh_handler_with_var, kafka_resistor_test):
+    h, _, _ = fresh_handler_with_var
+    raw_config, _, _ = kafka_resistor_test
+    assert h.is_equivalent_stream(**raw_config) is True
+
+
+def test_is_equivalent_stream_false(
+    fresh_handler_with_var, kafka_resistor_test, not_equiv_case
+):
+    h, _, _ = fresh_handler_with_var
+    raw_config, _, _ = kafka_resistor_test
+
+    for field, wrong_value in not_equiv_case:
+        raw_config_copy = raw_config.copy()
+        raw_config_copy[field] = wrong_value
+        assert h.is_equivalent_stream(**raw_config_copy) is False

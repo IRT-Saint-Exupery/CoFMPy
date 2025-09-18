@@ -194,7 +194,7 @@ class Coordinator:
         )
         self.master.init_simulation(input_dict={})
 
-    def load_stream_handlers(self, stream_handlers_config: dict):
+    def load_stream_handlers(self, stream_handlers: dict):
         """
         Load the stream handlers from the given dictionary of configurations.
 
@@ -205,7 +205,7 @@ class Coordinator:
 
         self.stream_handlers = []
 
-        for key, config in stream_handlers_config.items():
+        for key, config in stream_handlers.items():
             var_name = config["config"].pop("variable", "")
             # Check if the stream handler already exists
             for dh in self.stream_handlers:
@@ -234,7 +234,7 @@ class Coordinator:
 
     def do_step(self, step_size: float, save_data=False):
         """
-        Performs a simulation step.
+        Perform a simulation step.
 
         Args:
             step_size (float): simulation step size

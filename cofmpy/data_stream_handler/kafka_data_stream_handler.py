@@ -111,8 +111,8 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             dict[tuple:float]: requested float values per variable (tuple key)
         """
         out_dict = {}
-        for (node, endpoint), var_name in self.alias_mapping.items():
-            out_dict[(node, endpoint)] = self.interpolator(
+        for (fmu, variable), var_name in self.alias_mapping.items():
+            out_dict[(fmu, variable)] = self.interpolator(
                 self.data["t"], self.data[var_name], [t_s]
             )[0]
 

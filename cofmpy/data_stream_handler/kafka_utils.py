@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class KafkaHandlerConfig:
+class KafkaHandlerConfig:  # pylint: disable=too-many-instance-attributes
     """
     Configuration handler for Kafka connections.
 
@@ -67,7 +67,6 @@ class KafkaHandlerConfig:
     # Required fields
     topic: str
     uri: str
-    variable: str
     group_id: str
 
     # Split fields, initialized in __post_init__
@@ -84,6 +83,9 @@ class KafkaHandlerConfig:
     retry_delay: float = 0.02
     first_delay: float = 4
     thread_lifetime: float = 3600
+    backend_conf_path: str = ""
+    offset_reset: str = "earliest"
+    max_buffer_len: int = 10
 
     def __post_init__(self):
 

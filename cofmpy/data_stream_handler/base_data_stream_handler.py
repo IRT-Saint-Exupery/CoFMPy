@@ -41,7 +41,7 @@ class BaseDataStreamHandler:
 
     @abstractmethod
     def __init__(self):
-        # dict[tuple[str, str]:[str]]: {(node, endpoint): name_in_stream}
+        # dict[tuple[str, str]:[str]]: {(fmu, variable): name_in_stream}
         self.alias_mapping = {}
 
     @classmethod
@@ -96,29 +96,30 @@ class BaseDataStreamHandler:
         """
 
     @abstractmethod
-    def is_equivalent_stream(self, config: dict) -> bool:
+    def is_equivalent_stream(self, args) -> bool:
         """
         Check if the current data stream handler instance is equivalent to
         another that would be created with the given config.
         Useful to detect multiple similar child instances.
-        Eeach child class should implement criteria to decide wether two instances
+        Each child class should implement criteria to decide wether two instances
         are equivalent or not.
 
         Args:
-            config (dict): config for the data stream handler to compare.
+            args: config arguments for each data stream handler to compare.
+                Must be overriden in  child class.
 
         Returns:
             bool: True if the handlers are equivalent, False otherwise.
         """
 
-    def add_variable(self, endpoint: tuple, stream_alias: str):
+    def add_variable(self, variable: tuple, stream_alias: str):
         """
         Add a new variable to the data stream handler.
 
         Args:
-            endpoint (tuple): key of the variable to add in the format:
-                (node_name, endpoint_name).
+            variable (tuple): key of the variable to add in the format:
+                (fmu_name, variable_name).
             stream_alias (str): alias, relative to the data stream,
                 of the variable to add.
         """
-        self.alias_mapping.update({endpoint: stream_alias})
+        self.alias_mapping.update({variable: stream_alias})
