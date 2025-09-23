@@ -276,7 +276,7 @@ class Master:
                 not model_description.coSimulation.canGetAndSetFMUstate
                 and model_description.fmiVersion == "3.0"
             ):
-                print(f"Can get or set States on fmu {fmu_path}")
+                print(f"Can't get or set States on fmu {fmu_path}")
                 has_error = True
 
             # Store it into fmus dictionary

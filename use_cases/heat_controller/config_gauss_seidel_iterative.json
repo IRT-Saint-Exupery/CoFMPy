@@ -34,5 +34,6 @@
     }
   ],
   "edge_sep": "->",
-  "cosim_method": "gauss_seidel"
+  "cosim_method": "gauss_seidel",
+  "iterative": true
 }

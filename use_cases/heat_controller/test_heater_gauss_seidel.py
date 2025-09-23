@@ -4,7 +4,7 @@ import pprint
 import matplotlib.pyplot as plt
 
 coordinator = Coordinator()
-config_path = "config_gauss_seidel.json"
+config_path = "./config_gauss_seidel.json"
 coordinator.start(config_path)
 
 print("Input dict is :")
