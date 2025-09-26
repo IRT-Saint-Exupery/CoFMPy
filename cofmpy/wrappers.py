@@ -402,7 +402,7 @@ class FmuProxyHandler(FmuXHandler):
         # 2) Delegate to proxy logic
         if not self._proxy.do_step(current_time, step_size):
             # mimic FMU doStep returning False in case of failure
-            raise RuntimeError("FmiProxyHandler: proxy do_step() returned False")
+            raise RuntimeError("FmuProxyHandler: proxy do_step() returned False")
 
         # 3) Advance internal time (FMU-like)
         self._time = current_time + step_size

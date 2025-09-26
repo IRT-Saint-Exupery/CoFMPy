@@ -56,55 +56,22 @@ class FmiVariability:
 
 @dataclass
 class Variable:
+    """
+    Represents a variable with associated metadata.
+
+    Attributes:
+        name (str): The name of the variable.
+        causality (str): The causality of the variable (e.g., input, output, parameter).
+        variability (str): The variability of the variable, defaulting to FmiVariability.continuous.
+        start (Optional[Any]): The initial value of the variable, if any.
+        type (Optional[str]): The data type of the variable, defaulting to "Float16".
+    """
+
     name: str
     causality: str
     variability: str = FmiVariability.continuous
     start: Optional[Any] = None
-    type: str = "Real"  # "Real" | "Integer" | "Boolean" | "String"
-
-
-class Real(Variable):
-    def __init__(
-        self,
-        name,
-        causality,
-        variability=FmiVariability.continuous,
-        start: Optional[float] = None,
-    ):
-        super().__init__(name, causality, variability, start, type="Real")
-
-
-class Integer(Variable):
-    def __init__(
-        self,
-        name,
-        causality,
-        variability=FmiVariability.discrete,
-        start: Optional[int] = None,
-    ):
-        super().__init__(name, causality, variability, start, type="Integer")
-
-
-class Boolean(Variable):
-    def __init__(
-        self,
-        name,
-        causality,
-        variability=FmiVariability.discrete,
-        start: Optional[bool] = None,
-    ):
-        super().__init__(name, causality, variability, start, type="Boolean")
-
-
-class String(Variable):
-    def __init__(
-        self,
-        name,
-        causality,
-        variability=FmiVariability.discrete,
-        start: Optional[str] = None,
-    ):
-        super().__init__(name, causality, variability, start, type="String")
+    type: Optional[str] = "Float16"
 
 
 # ---------------- Proxy "modelDescription" structs ----------------
@@ -145,11 +112,34 @@ class ProxyModelDescription:
 
 
 class FmuProxy:
-    """Python object that mimics an FMI's API."""
+    """
+    FmuProxy is a Python class that mimics the API of an FMU.
+    It provides a framework for registering and managing variables, as well as implementing
+    a simulation step mechanism. This class is intended to be subclassed, with the `do_step`
+    method implemented by concrete proxies.
+    Attributes:
+        author (str): The author of the proxy. Defaults to an empty string.
+        description (str): A description of the proxy. Defaults to an empty string.
+        model_identifier (str): The identifier for the model. Defaults to "FmuProxy".
+        default_step_size (Optional[float]): The default step size for the simulation. Defaults to None.
+    Methods:
+        __init__():
+            Initializes the FmuProxy instance, setting up the variables and their initial states.
+        register_variable(v: Variable):
+            Registers a variable with the proxy. If the variable has a start value, it is added
+            as an attribute and stored for reset purposes.
+        variables() -> List[Variable]:
+            Returns a list of all registered variables.
+        reset():
+            Restores the initial start values of all registered variables, if they were declared.
+        do_step(current_time: float, step_size: float) -> bool:
+            Abstract method that must be implemented by subclasses. Represents a simulation step
+            and should return a boolean indicating success or failure.
+    """
 
     author: str = ""
     description: str = ""
-    model_identifier: str = "FmiProxy"
+    model_identifier: str = "FmuProxy"
     default_step_size: Optional[float] = None
 
     def __init__(self):
@@ -168,6 +158,35 @@ class FmuProxy:
 
     def variables(self) -> List[Variable]:
         return list(self._variables)
+
+    def getFMUstate(self):
+        """Get the current state of the FMU as a dictionary."""
+        state = {}
+        for v in self._variables:
+            state[v.name] = getattr(self, v.name, None)
+        return state
+
+    def setFMUstate(self, state: Dict[str, Any]):
+        """
+        Set the state of the FMU from a dictionary.
+
+        This method updates the attributes of the FMU object based on the key-value
+        pairs provided in the `state` dictionary. If a key in the dictionary does not
+        correspond to an existing attribute of the FMU, an AttributeError is raised.
+
+        Args:
+            state (Dict[str, Any]): A dictionary where keys are attribute names and
+                values are the corresponding values to set.
+
+        Raises:
+            AttributeError: If a key in the `state` dictionary does not match any
+                existing attribute of the FMU object.
+        """
+        for name, value in state.items():
+            if hasattr(self, name):
+                setattr(self, name, value)
+            else:
+                raise AttributeError(f"Variable '{name}' not found in the FMU.")
 
     def reset(self):
         """Default reset: restore declared starts, if any."""
@@ -252,7 +271,7 @@ def load_proxy_class_from_file(
 
     module = import_module_from_path(path)
 
-    # If your code sometimes names the base as ProxyFmu, support both:
+    # If the code sometimes names the base as ProxyFmu, support both:
     base_cls = FmuProxy
     # Optional: attempt to alias ProxyFmu -> FmuProxy if present in file
     if hasattr(module, "ProxyFmu"):
