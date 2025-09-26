@@ -1,4 +1,4 @@
-from cofmpy.utils.proxy import FmuProxy, Real, FmiCausality
+from cofmpy.utils.proxy import FmuProxy, Variable, FmiCausality
 
 
 class Resistor(FmuProxy):
@@ -26,21 +26,21 @@ class Resistor(FmuProxy):
 
         # Register variables (FMI-like descriptors)
         self.register_variable(
-            Real(
+            Variable(
                 "V",
                 causality=FmiCausality.input,
                 start=self.V,
             )
         )
         self.register_variable(
-            Real(
+            Variable(
                 "I",
                 causality=FmiCausality.output,
                 start=self.I,
             )
         )
         self.register_variable(
-            Real(
+            Variable(
                 "R",
                 causality=FmiCausality.parameter,
                 start=self.R,
