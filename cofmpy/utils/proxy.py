@@ -90,6 +90,7 @@ class ProxyVarAttr:
 @dataclass
 class ProxyCoSimulation:
     modelIdentifier: str = "proxy"
+    canGetAndSetFMUstate: bool = True
 
 
 @dataclass
