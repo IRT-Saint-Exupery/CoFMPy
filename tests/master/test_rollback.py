@@ -156,7 +156,8 @@ def test_bad_fmu_for_cosimulation():
             "initialization": {"x": -1, "u": -2},
         }],
         "connections": {},
-        "sequence_order": []
+        "sequence_order": [],
+        "iterative": True
     }
 
     with pytest.raises(Exception, match="fmus are not well configured for co-simulation !!"):

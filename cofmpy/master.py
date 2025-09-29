@@ -152,6 +152,11 @@ class Master:
         )
         self.connections = connections  # Dict of connections between FMUs
 
+        # Cosimulation method (default: Jacobi)
+        self.cosim_method = cosim_method
+        # Whether iterative method requested (default: False)
+        self.iterative = iterative
+
         # Load FMUs into dict of FMU Handlers
         self.fmu_handlers = self._load_fmus()
 
@@ -178,10 +183,6 @@ class Master:
         if self.sequence_order is None:
             self.sequence_order = [d[self.__keys["id"]] for d in self.fmu_config_list]
 
-        # Cosimulation method (default: Jacobi)
-        self.cosim_method = cosim_method
-        # Whether iterative method requested (default: False)
-        self.iterative = iterative
         # init current_time to None to check if init_simulation() has been called
         self.current_time = None
         # Init output and input dictionaries for FMUs to maintain state between steps
@@ -274,9 +275,8 @@ class Master:
                 print(f"Fmu {fmu_path} is not in co-simulation mode")
                 has_error = True
             # if iterative algorithm requested, check fmus are able to set/get states
-            elif (
-                self.iterative
-                and (not model_description.coSimulation.canGetAndSetFMUstate)
+            elif self.iterative and (
+                not model_description.coSimulation.canGetAndSetFMUstate
             ):
                 print(f"Can't get or set States on fmu {fmu_path}")
                 has_error = True
