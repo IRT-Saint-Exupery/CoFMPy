@@ -134,11 +134,11 @@ class Master:
             fmu_config_list (list): List of dictionaries with FMU configurations.
             connections (dict): Dictionary mapping connections between FMUs.
             sequence_order (list): Execution order of FMUs.
-            cosim_method (str, optional): Method for solving algebraic loops.
-            Defaults to
-                "jacobi".
-            iterative (str, optional): Method for solving algebraic loops. Defaults to
-                non-iterative method.
+            cosim_method (str, optional): Strategy for coordinating FMUs in
+                co-simulation. Options are "jacobi" and "gauss-seidel".
+                Defaults to "jacobi".
+            iterative (str, optional): Whether to solve algebraic loops iteratively.
+                Defaults to False.
             fixed_point (bool): whether to use the fixed-point initialization method.
             fixed_point_kwargs (dict): keyword arguments for the fixed point
             initialization
@@ -268,13 +268,15 @@ class Master:
             # fmu_handler = FmuHandlerFactory(fmu_path)
 
             # Check fmu parameters are correct for cosimulation
+            # Check Cosimulation mode
             model_description = read_model_description(fmu_path)
             if model_description.coSimulation is None:
                 print(f"Fmu {fmu_path} is not in co-simulation mode")
                 has_error = True
+            # if iterative algorithm requested, check fmus are able to set/get states
             elif (
-                not model_description.coSimulation.canGetAndSetFMUstate
-                and model_description.fmiVersion == "3.0"
+                self.iterative
+                and (not model_description.coSimulation.canGetAndSetFMUstate)
             ):
                 print(f"Can't get or set States on fmu {fmu_path}")
                 has_error = True
