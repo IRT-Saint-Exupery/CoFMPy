@@ -10,6 +10,7 @@
 *~
 .vscode
 *.bat
+*.idea/
 
 storage
 

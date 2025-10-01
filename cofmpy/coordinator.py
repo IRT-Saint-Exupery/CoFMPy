@@ -185,7 +185,8 @@ class Coordinator:
             fmu_config_list=config["fmus"],
             connections=config["connections"],
             sequence_order=config["sequence_order"],
-            loop_solver=config["loop_solver"],
+            cosim_method=config["cosim_method"],
+            iterative=config["iterative"],
             fixed_point=fixed_point_init,
             fixed_point_kwargs=fixed_point_kwargs,
         )

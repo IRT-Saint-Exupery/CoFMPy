@@ -138,7 +138,7 @@ def generate_fmus():
     The FMUs are then deleted after the tests.
     """
     current_test_filepath = os.path.dirname(os.path.abspath(__file__))
-    for fmu_script in ("math_fmu.py", "internal_state_fmu.py", "double_fmu.py"):
+    for fmu_script in ("../data/math_fmu.py", "../data/internal_state_fmu.py", "../data/double_fmu.py"):
         fmu_script_path = os.path.join(current_test_filepath, fmu_script)
         os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
 
