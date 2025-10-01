@@ -262,29 +262,27 @@ class Master:
             Dictionary of FMU Handlers.
         """
         fmu_handlers = {}
-        has_error = False
         for fmu_info_dict in self.fmu_config_list:
             # Load FMU (custom handler from wrappers)
             fmu_path = fmu_info_dict[path_key]
-            # fmu_handler = FmuHandlerFactory(fmu_path)
+
+            # Store it into fmus dictionary
+            fmu_handlers[fmu_info_dict[id_key]] = FmuHandlerFactory(fmu_path)()
 
             # Check fmu parameters are correct for cosimulation
             # Check Cosimulation mode
-            model_description = read_model_description(fmu_path)
+            model_description = fmu_handlers[fmu_info_dict[id_key]].description
             if model_description.coSimulation is None:
-                print(f"Fmu {fmu_path} is not in co-simulation mode")
-                has_error = True
+                raise Exception(f"Fmu {fmu_path} is not in co-simulation mode.")
             # if iterative algorithm requested, check fmus are able to set/get states
             elif self.iterative and (
                 not model_description.coSimulation.canGetAndSetFMUstate
             ):
-                print(f"Can't get or set States on fmu {fmu_path}")
-                has_error = True
+                raise Exception(
+                    f"Can't get or set States on fmu {fmu_path} but it is "
+                    f"required for iterative solvers."
+                )
 
-            # Store it into fmus dictionary
-            fmu_handlers[fmu_info_dict[id_key]] = FmuHandlerFactory(fmu_path)()
-        if has_error:
-            raise Exception("fmus are not well configured for co-simulation !!")
         return fmu_handlers
 
     def initialize_values_from_config(self):

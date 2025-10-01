@@ -13,7 +13,7 @@ class Resistor(FmuProxy):
 
     # Optional metadata (useful in modelDescription and logs)
     description = "Native Python resistor (FMI-compatible interface)"
-    model_identifier = "ResistorProxy"
+    model_identifier = "Resistor"
     default_step_size = 0.01
 
     def __init__(self, V0: float = 0, R0: float = 1, **kwargs):
