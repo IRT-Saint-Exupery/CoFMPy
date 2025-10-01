@@ -290,8 +290,8 @@ def test_get_order(sample_data):
 
     order = engine.sequence_order
     assert len(order) == 2  # Two FMUs
-    assert order[0] == {"fmu1"}
-    assert order[1] == {"fmu2"}
+    assert order[0] == ["fmu1"]
+    assert order[1] == ["fmu2"]
 
 
 def test_name_connections(sample_data):

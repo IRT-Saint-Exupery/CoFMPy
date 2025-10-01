@@ -265,7 +265,7 @@ class FmuXHandler(ABC):
             (fmiXFMUState): The current of state of the FMU, X is the version of FMI used
                 (ie. fmi3FMUState for FMI3.0)
         """
-        return self.fmu.getFMUstate()
+        return self.fmu.getFMUState()
 
     def set_state(self, state):
         """Sets the state of the FMU to the given state.
@@ -274,7 +274,7 @@ class FmuXHandler(ABC):
             state (fmiXFMUState): The state of the FMU to set, X is the version of FMI
                 used (ie. fmi3FMUState for FMI3.0)
         """
-        self.fmu.setFMUstate(state)
+        self.fmu.setFMUState(state)
 
     @abstractmethod
     def _set_variable(self, name, value):

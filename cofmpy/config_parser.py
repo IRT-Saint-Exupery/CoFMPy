@@ -14,13 +14,17 @@
 #    materials provided with the distribution.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT
 # OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+# THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 This module is designed to parse, validate, and structure a JSON
@@ -54,7 +58,7 @@ class ConfigParser:
             a dictionary if the user prefers to provide the configuration directly
             without using a JSON file.
         edge_sep (str): Edge separator for connections. Defaults to " -> ".
-        loop_solver (str): Method used to solve algebrauc loops. Defaults to "jacobi".
+        cosim_method (str): Method used to solve algebrauc loops. Defaults to "jacobi".
         config_dict (Dict): The parsed configuration dictionary.
         graph_config (Dict): Configuration for the graph engine.
         master_config (Dict): Configuration for the master solver.
@@ -67,12 +71,11 @@ class ConfigParser:
         self,
         file_path: Union[str, Dict],
         edge_sep: str = " -> ",
-        loop_solver: str = "jacobi",
+        cosim_method: str = "jacobi",
+        iterative: bool = False,
     ) -> None:
         # Arguments
         self.file_path = file_path
-        self.loop_solver = loop_solver
-        self.edge_sep = edge_sep
 
         self.config_dict: Dict = {}
         self.graph_config: Dict = {}
@@ -85,7 +88,7 @@ class ConfigParser:
         self.config_dict = self._load_config(file_check=True)
 
         # ------------ 2. Apply defaults and perform validation ------------
-        self._apply_defaults(edge_sep, loop_solver)
+        self._apply_defaults(edge_sep, cosim_method, iterative)
         self._validate_configuration()
 
         # ------------ 3. Prepend 'root' dir to present paths ------------
@@ -112,11 +115,14 @@ class ConfigParser:
 
         raise TypeError(f"Invalid configuration format: {type(self.file_path)}")
 
-    def _apply_defaults(self, edge_sep: str, loop_solver: str) -> None:
+    def _apply_defaults(
+        self, edge_sep: str, cosim_method: str, iterative: bool
+    ) -> None:
         """Apply default values to missing configuration fields."""
         self.config_dict.setdefault("root", "")
-        self.config_dict.setdefault("loop_solver", loop_solver)
         self.config_dict.setdefault("edge_sep", edge_sep)
+        self.config_dict.setdefault("cosim_method", cosim_method)
+        self.config_dict.setdefault("iterative", iterative)
 
         # Add connections if not present
         self.config_dict["connections"] = self.config_dict.get("connections", [])
@@ -177,7 +183,8 @@ class ConfigParser:
         self.master_config["fmus"] = self.config_dict["fmus"]
         self.master_config["connections"] = {}
         self.master_config["sequence_order"] = None
-        self.master_config["loop_solver"] = self.config_dict["loop_solver"]
+        self.master_config["cosim_method"] = self.config_dict["cosim_method"]
+        self.master_config["iterative"] = self.config_dict["iterative"]
 
         for connection in self.config_dict["connections"]:
             source = connection["source"]
@@ -321,7 +328,8 @@ class ConfigParser:
           the base directory is set to the current working directory (`os.getcwd()`).
         - Otherwise, the base directory is derived from `self.file_path`.
 
-        If `path` is not found within the expected directory structure, a warning is logged,
+        If `path` is not found within the expected directory structure, a warning is
+        logged,
         and the function returns `path` unchanged.
 
         Args:

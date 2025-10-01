@@ -1,0 +1,38 @@
+{
+  "fmus": [
+    {
+      "id": "heater",
+      "path": "./Heater.fmu",
+      "initialization": {"T_out": 17}
+    },
+    {
+      "id": "controller",
+      "path": "./HeatController.fmu"
+    },
+    {
+      "id": "programmer",
+      "path": "./Programmer.fmu",
+      "initialization": {
+        "t1_start": 480,
+        "t1_stop": 660,
+        "t1_temp": 21
+      }
+    }
+  ],
+  "connections": [
+    {
+      "source": {"id": "programmer", "variable": "T_out"},
+      "target": {"id": "controller", "variable": "Tc"}
+    },
+    {
+      "source": {"id": "heater", "variable": "T_out"},
+      "target": {"id": "controller", "variable": "T_in"}
+    },
+    {
+      "source": {"id": "controller", "variable": "P_out", "unit": "W"},
+      "target": {"id": "heater", "variable": "P_in", "unit": "W"}
+    }
+  ],
+  "edge_sep": "->",
+  "cosim_method": "gauss_seidel"
+}

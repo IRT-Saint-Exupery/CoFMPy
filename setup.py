@@ -48,6 +48,7 @@ requirements = [
     "pandas",
     "plotly",
     "pythonfmu==0.6.3",
+    "pythonfmu3==0.3.3",
     "scikit-learn",
     "scipy",
     "streamlit==1.12.0",
