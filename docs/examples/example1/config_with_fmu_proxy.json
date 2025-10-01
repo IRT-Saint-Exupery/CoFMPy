@@ -42,6 +42,6 @@
             }
         }
     ],
-    "loop_method": "jacobi",
+    "cosim_method": "jacobi",
     "edge_sep": " -> "
 }
