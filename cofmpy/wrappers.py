@@ -310,10 +310,60 @@ class FmuXHandler(ABC):
 
 class FmuProxyHandler(FmuXHandler):
     """
-    Wraps a Python FmuProxy, exposes FMU-like description and timestepping.
+    A handler class that acts as a proxy for an FMU by delegating operations
+    to a dynamically loaded proxy object. This class provides FMI-like behaviors
+    and interfaces for interacting with the proxy.
+    Attributes:
+        _proxy: The dynamically loaded proxy object.
+        fmu: Alias for the proxy object for compatibility with FmuXHandler.
+        _time (float): Internal simulation time.
+        description (ProxyModelDescription): A proxy model description compatible
+            with FmuXHandler helpers.
+        default_step_size (float): Default step size for the simulation.
+        var_name2attr (Dict[str, ProxyVarAttr]): A mapping of variable names to
+            their attributes.
+        output_var_names (List[str]): A list of output variable names.
+    Methods:
+        reset():
+            Resets the internal simulation time to 0.0.
+        get_variable(name: str) -> list:
+            Retrieves the value of a variable by name as a single-element list.
+        set_variables(input_dict: Dict[str, Any]):
+            Sets multiple variables based on the provided dictionary of
+            variable names and values.
+        step(current_time: float, step_size: float, input_dict: Dict[str, Any]) -> Dict[str, Any]:
+            Advances the simulation by a given step size, applying inputs
+            before stepping and returning the output variables.
+        get_state() -> Dict[str, Any]:
+            Retrieves the current state of the simulation, including time
+            and variable values, in a JSON-serializable format.
+        set_state(state: Dict[str, Any]):
+            Restores the simulation state from a given dictionary.
     """
 
     def __init__(self, path: str):
+        """
+        Initialize the wrapper class with a given proxy model file path.
+        Args:
+            path (str): The file path to the proxy model. This should be in the
+                format <model_name>.py or <model_name>.py::<class_name>.
+        Attributes:
+            _proxy: The proxy instance loaded from the file.
+            fmu: Alias for the proxy instance for compatibility with FmuXHandler.
+            _time (float): The current simulation time, initialized to 0.0.
+            description (ProxyModelDescription): A model description object
+                compatible with FmuXHandler helpers, containing metadata about
+                the proxy model.
+            default_step_size (Optional[float]): The default step size for the
+                simulation, extracted from the proxy model description.
+            var_name2attr (Dict[str, ProxyVarAttr]): A mapping of variable names
+                to their attributes for quick lookup.
+            output_var_names: A list of output variable names extracted from the
+                proxy model.
+        Raises:
+            Any exceptions raised by `load_proxy_class_from_file` or other
+            operations during initialization.
+        """
         # extract proxy from path
         self._proxy = load_proxy_class_from_file(path)()
         self.fmu = self._proxy  # compatibility with FmuXHandler
@@ -369,17 +419,6 @@ class FmuProxyHandler(FmuXHandler):
         return [getattr(self._proxy, name)]
 
     def _set_variable(self, name, value):
-        # Optional: coerce types based on declared type
-        # declared = self.var_name2attr[name]
-        # t = declared.type
-        # if t == "Real":
-        #     value = float(value)
-        # elif t == "Integer":
-        #     value = int(value)
-        # elif t == "Boolean":
-        #     value = bool(value)
-        # elif t == "String":
-        #     value = str(value)
         if isinstance(value, list):
             setattr(self._proxy, name, value[-1])
         else:
