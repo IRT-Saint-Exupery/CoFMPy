@@ -172,10 +172,7 @@ class FmuXHandler(ABC):
                 corresponding values.
         """
         for name, value in input_dict.items():
-            if isinstance(value, list):
-                self._set_variable(name, value[-1])
-            else:
-                self._set_variable(name, value)
+            self._set_variable(name, value)
 
     def get_variables(self, names: list[str]) -> dict:
         """Gets the values of the FMU variables matching the given names.
@@ -341,7 +338,7 @@ class FmuProxyHandler(FmuXHandler):
             Restores the simulation state from a given dictionary.
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str):  # pylint: disable=super-init-not-called
         """
         Initialize the wrapper class with a given proxy model file path.
         Args:
