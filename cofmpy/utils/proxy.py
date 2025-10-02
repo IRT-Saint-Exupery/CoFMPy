@@ -151,6 +151,22 @@ class FmuProxy:
 
     # Registration API (mirrors pythonfmu)
     def register_variable(self, v: Variable):
+        """
+        Registers a variable by adding it to the internal list of variables and
+        optionally setting its starting value as an attribute of the instance.
+
+        Args:
+            v (Variable): The variable to register. It should have a `name` attribute
+                          and an optional `start` attribute.
+
+        Behavior:
+            - The variable is appended to the internal `_variables` list.
+            - If the variable has a `start` value and the instance does not already
+              have an attribute with the same name as the variable, the `start` value
+              is set as an attribute of the instance.
+            - If the variable has a `start` value, it is also stored in the `_starts`
+              dictionary with the variable's name as the key.
+        """
         self._variables.append(v)
         if v.start is not None and not hasattr(self, v.name):
             setattr(self, v.name, v.start)
@@ -158,9 +174,22 @@ class FmuProxy:
             self._starts[v.name] = v.start
 
     def variables(self) -> List[Variable]:
+        """
+        Retrieve the list of variables associated with the fmu proxy.
+
+        Returns:
+            List[Variable]: A list containing the variables managed by the fmu proxy.
+        """
         return list(self._variables)
 
     def getFMUstate(self):
+        """
+        Retrieve the current state of the FMU as a dictionary.
+
+        Returns:
+            dict: A dictionary representing the current state of the FMU, with
+              variable names as keys and their corresponding values or None.
+        """
         """Get the current state of the FMU as a dictionary."""
         state = {}
         for v in self._variables:
@@ -170,10 +199,6 @@ class FmuProxy:
     def setFMUstate(self, state: Dict[str, Any]):
         """
         Set the state of the FMU from a dictionary.
-
-        This method updates the attributes of the FMU object based on the key-value
-        pairs provided in the `state` dictionary. If a key in the dictionary does not
-        correspond to an existing attribute of the FMU, an AttributeError is raised.
 
         Args:
             state (Dict[str, Any]): A dictionary where keys are attribute names and
@@ -197,6 +222,20 @@ class FmuProxy:
 
     # Must be implemented by concrete proxies
     def do_step(self, current_time: float, step_size: float) -> bool:
+        """
+        Performs a single step in the simulation or process.
+
+        This method should be implemented by subclasses to define the behavior
+        of a single step given the current time and step size.
+
+        Args:
+            current_time (float): The current time in the simulation or process.
+            step_size (float): The size of the step to be performed.
+
+        Returns:
+            bool: True if the step was successful, False otherwise.
+
+        """
         raise NotImplementedError
 
 

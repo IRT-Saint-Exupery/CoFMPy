@@ -1,6 +1,6 @@
 # 🚀 Getting Started with CoFMPy
 
-CoFMPy is a framework designed to make co-simulation easy and efficient. This guide walks you through setting up and running a your first simulation with CoFMPy!
+CoFMPy is a framework designed to make co-simulation and prototyping digital twins easy and efficient. This guide walks you through setting up and running a your first simulation with CoFMPy!
 
 ## 🐾 Installation
 
