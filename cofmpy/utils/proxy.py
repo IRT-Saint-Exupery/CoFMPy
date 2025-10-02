@@ -278,9 +278,10 @@ def find_proxy_subclass(
             candidates.append(obj)
 
     if class_name:
-        for cls in candidates:
-            if cls.__name__ == class_name:
-                return cls
+        for candidate_cls in candidates:
+            print(f"============ {candidate_cls.__name__} =============")
+            if candidate_cls.__name__ == class_name:
+                return candidate_cls
         available = ", ".join(c.__name__ for c in candidates) or "<none>"
         raise LookupError(
             f"Class '{class_name}' not found as a subclass of {base_cls.__name__} "
