@@ -32,6 +32,9 @@ import inspect
 import importlib.util
 import os
 
+# pylint: disable=missing-class-docstring
+# pylint: disable=invalid-name
+
 # ---------------- Minimal FMI-like enums (subset) ----------------
 
 
@@ -115,14 +118,15 @@ class ProxyModelDescription:
 class FmuProxy:
     """
     FmuProxy is a Python class that mimics the API of an FMU.
-    It provides a framework for registering and managing variables, as well as implementing
-    a simulation step mechanism. This class is intended to be subclassed, with the `do_step`
-    method implemented by concrete proxies.
+    It provides a framework for registering and managing variables, as well as
+    implementing a simulation step mechanism. This class is intended to be
+    subclassed, with the `do_step` method implemented by concrete proxies.
     Attributes:
         author (str): The author of the proxy. Defaults to an empty string.
         description (str): A description of the proxy. Defaults to an empty string.
         model_identifier (str): The identifier for the model. Defaults to "FmuProxy".
-        default_step_size (Optional[float]): The default step size for the simulation. Defaults to None.
+        default_step_size (Optional[float]): The default step size for the simulation.
+            Defaults to None.
     Methods:
         __init__():
             Initializes the FmuProxy instance, setting up the variables and their initial states.

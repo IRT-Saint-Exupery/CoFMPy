@@ -41,8 +41,6 @@ from .utils import FixedPointInitializer
 from .wrappers import FmuHandlerFactory
 import copy
 
-from fmpy.model_description import read_model_description
-
 
 class Master:
     """
@@ -275,7 +273,7 @@ class Master:
             if model_description.coSimulation is None:
                 raise Exception(f"Fmu {fmu_path} is not in co-simulation mode.")
             # if iterative algorithm requested, check fmus are able to set/get states
-            elif self.iterative and (
+            if self.iterative and (
                 not model_description.coSimulation.canGetAndSetFMUstate
             ):
                 raise Exception(

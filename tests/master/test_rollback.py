@@ -54,13 +54,15 @@ def generate_fmu():
 
 def test_fmu_for_cosimulation():
     correct_config = {
-        "fmu_config_list": [{
-            "id": "math1",
-            "path": "MathFMU.fmu",
-            "initialization": {"x": -1, "u": -2},
-        }],
+        "fmu_config_list": [
+            {
+                "id": "math1",
+                "path": "MathFMU.fmu",
+                "initialization": {"x": -1, "u": -2},
+            }
+        ],
         "connections": {},
-        "sequence_order": []
+        "sequence_order": [],
     }
     master = Master(**correct_config)
 
@@ -77,13 +79,13 @@ def test_rollback_v2():
                 "id": "math2",
                 "path": "MathFMU.fmu",
                 "initialization": {"x": 20, "u": 1},
-            }
+            },
         ],
         "connections": {
             ("math1", "y"): [("math2", "x")],
-            ("math2", "y"): [("math1", "x")]
+            ("math2", "y"): [("math1", "x")],
         },
-        "sequence_order": [["math1", "math2"]]
+        "sequence_order": [["math1", "math2"]],
     }
     master = Master(**correct_config)
     math1_handler = master.fmu_handlers["math1"]
@@ -102,7 +104,10 @@ def test_rollback_v2():
     outputs["3"] = math1_handler.step(3, 1, {})
 
     assert outputs == {
-        '0': {'y': [17.8]}, '1': {'y': [17.8]}, '2': {'y': [17.8]}, '3': {'y': [27.0]}
+        "0": {"y": [17.8]},
+        "1": {"y": [17.8]},
+        "2": {"y": [17.8]},
+        "3": {"y": [27.0]},
     }
 
 
@@ -118,13 +123,13 @@ def test_rollback_v3():
                 "id": "math2",
                 "path": "MathFMUV3.fmu",
                 "initialization": {"x": 20, "u": 1},
-            }
+            },
         ],
         "connections": {
             ("math1", "y"): [("math2", "x")],
-            ("math2", "y"): [("math1", "x")]
+            ("math2", "y"): [("math1", "x")],
         },
-        "sequence_order": [["math1", "math2"]]
+        "sequence_order": [["math1", "math2"]],
     }
     master = Master(**correct_config)
     math1_handler = master.fmu_handlers["math1"]
@@ -143,22 +148,30 @@ def test_rollback_v3():
     outputs["3"] = math1_handler.step(3, 1, {})
 
     assert outputs == {
-        '0': {'y': [17.8]}, '1': {'y': [17.8]}, '2': {'y': [17.8]},
-        '3': {'y': [27.0]}
+        "0": {"y": [17.8]},
+        "1": {"y": [17.8]},
+        "2": {"y": [17.8]},
+        "3": {"y": [27.0]},
     }
 
 
 def test_bad_fmu_for_cosimulation():
     bad_config = {
-        "fmu_config_list": [{
-            "id": "math2",
-            "path": "MathFMUV3Bad.fmu",
-            "initialization": {"x": -1, "u": -2},
-        }],
+        "fmu_config_list": [
+            {
+                "id": "math2",
+                "path": "MathFMUV3Bad.fmu",
+                "initialization": {"x": -1, "u": -2},
+            }
+        ],
         "connections": {},
         "sequence_order": [],
-        "iterative": True
+        "iterative": True,
     }
 
-    with pytest.raises(Exception, match="fmus are not well configured for co-simulation !!"):
+    with pytest.raises(
+        Exception,
+        match="Can't get or set States on fmu MathFMUV3Bad.fmu but it "
+        + "is required for iterative solvers.",
+    ):
         master = Master(**bad_config)
