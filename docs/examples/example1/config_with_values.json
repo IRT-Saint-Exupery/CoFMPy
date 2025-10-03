@@ -6,25 +6,42 @@
       "supplier": "IRT Saint Exupéry"
     },
     {
-        "id": "resistor",
-        "path": "example1/resistor.fmu",
-        "initialization": {"R": 0.5},
-        "supplier": "IRT Saint Exupéry"
+      "id": "resistor",
+      "path": "example1/resistor.fmu",
+      "initialization": {
+        "R": 0.5
+      },
+      "supplier": "IRT Saint Exupéry"
     }
   ],
   "connections": [
     {
-      "source": {"id": "source", "variable": "V", "unit": "V"},
-      "target": {"id": "resistor", "variable": "V", "unit": "V"}
+      "source": {
+        "id": "source",
+        "variable": "V",
+        "unit": "V"
+      },
+      "target": {
+        "id": "resistor",
+        "variable": "V",
+        "unit": "V"
+      }
     },
     {
       "source": {
         "type": "literal",
-        "values": {"0": 1, "0.25": 2.0}
+        "values": {
+          "0": 1,
+          "0.25": 2.0
+        }
       },
-      "target": {"id": "resistor", "variable": "R", "unit": "Ohm"}
+      "target": {
+        "id": "resistor",
+        "variable": "R",
+        "unit": "Ohm"
+      }
     }
   ],
-  "loop_method": "jacobi",
+  "cosim_method": "jacobi",
   "edge_sep": " -> "
 }

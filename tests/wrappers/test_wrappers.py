@@ -27,7 +27,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-from conftest import description_class
+from conftest import description_class, wrapper_params
 from conftest import description_keys
 from conftest import do_step
 from conftest import factory_class
@@ -129,7 +129,6 @@ def test_get_state(wrapper_params):
 @pytest.mark.parametrize("wrapper_params", [fmu_2_path, fmu_3_path], indirect=True)
 def test_set_state(wrapper_params):
     fmu = wrapper_params["fmu"]
-
     state = fmu.get_state()
     ret = fmu.set_state(state)
     assert ret is None

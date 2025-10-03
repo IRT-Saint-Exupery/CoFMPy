@@ -25,7 +25,8 @@
 
 ## 👋 About CoFMPy
 
-CoFMPy is a Python library designed for co-simulating Functional Mock-up Units (FMUs).
+CoFMPy is a Python library designed for rapid prototyping of digital twins through 
+the co-simulation of Functional Mock-up Units (FMUs).
 It offers advanced master coordination features, such as solving algebraic loops between
 FMUs and managing the interaction between various simulation components. This library
 provides a seamless interface to orchestrate complex physics simulations and handle the
@@ -40,26 +41,6 @@ CoFMPy is available on PyPI and can be installed using `pip`:
 ```bash
 pip install cofmpy
 ```
-
-<!--
-## 🖥️ Graphical Interface
-
-The web interface allows users to interact with the cosimulation through a user-friendly
-graphical interface.
-
-You can start the web application by running the following command:
-
-```shell
-streamlit run cofmpy/webapp/main.py
-```
-
-Once the web application is running, you can access it by opening your web browser and
-navigating to the provided URL. From there, you can explore the various features and
-functionalities of CoFMPy's web interface.
-
-This web interface is still under development, and additional features and improvements
-will be added in the future.
--->
 
 ## 🐍 Python interface
 

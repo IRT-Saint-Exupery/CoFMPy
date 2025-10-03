@@ -47,6 +47,34 @@ class CoordinatorCheck(unittest.TestCase):
             ],
             ("resistor", "I"): [
                 0.0,
+                0.0,
+                -9.797174393178826e-14,
+                -1.9594348786357651e-13,
+                -8.623494204034449e-13,
+                -3.9188697572715303e-13,
+                7.857546894913887e-14,
+                -1.7246988408068898e-12,
+                -1.254236396130598e-12,
+                -7.837739514543061e-13,
+            ],
+            "time": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90],
+        }
+        self.test_get_results_results_jacobi = self.test_get_results_results
+        self.test_get_results_results_gauss_seidel = {
+            ("source", "V"): [
+                0.0,
+                -4.898587196589413e-14,
+                -9.797174393178826e-14,
+                -4.3117471020172245e-13,
+                -1.9594348786357651e-13,
+                3.928773447456944e-14,
+                -8.623494204034449e-13,
+                -6.27118198065299e-13,
+                -3.9188697572715303e-13,
+                -1.5665575338900706e-13,
+            ],
+            ("resistor", "I"): [
+                0.0,
                 -9.797174393178826e-14,
                 -1.9594348786357651e-13,
                 -8.623494204034449e-13,
@@ -65,7 +93,7 @@ class CoordinatorCheck(unittest.TestCase):
         my_coordinator.start(conf_path=os.path.join("tests", "data", "config.json"))
         self.assertEqual(
             my_coordinator.graph_engine.sequence_order,
-            [{"source"}, {"resistor"}],
+            [["source"], ["resistor"]],
         )
 
     def test_start_csv_stream(self):
@@ -75,7 +103,7 @@ class CoordinatorCheck(unittest.TestCase):
         )
         self.assertEqual(
             my_coordinator.graph_engine.sequence_order,
-            [{"source"}, {"resistor"}],
+            [["source"], ["resistor"]],
         )
 
     def test_do_step(self):
@@ -199,4 +227,20 @@ class CoordinatorCheck(unittest.TestCase):
         assert len(content) == 11
         assert content[0] == "time,resistor.I,source.V\n"
         assert content[1] == "0.0,0.0,0.0\n"
-        assert content[-1] == "90.0,-3.1331150677801413e-13,-1.5665575338900706e-13\n"
+        assert content[-1] == "90.0,-7.837739514543061e-13,-1.5665575338900706e-13\n"
+
+    def test_cosim_jacobi(self):
+        my_coordinator = Coordinator()
+        my_coordinator.start(conf_path=os.path.join("tests", "data", "config.json"))
+        my_coordinator.master.cosim_method = "jacobi"
+        my_coordinator.run_simulation(step_size=10, end_time=100)
+        results_df = my_coordinator.get_results()
+        self.assertEqual(results_df, self.test_get_results_results_jacobi)
+
+    def test_cosim_gauss_seidel(self):
+        my_coordinator = Coordinator()
+        my_coordinator.start(conf_path=os.path.join("tests", "data", "config.json"))
+        my_coordinator.master.cosim_method = "gauss_seidel"
+        my_coordinator.run_simulation(step_size=10, end_time=100)
+        results_df = my_coordinator.get_results()
+        self.assertEqual(results_df, self.test_get_results_results_gauss_seidel)

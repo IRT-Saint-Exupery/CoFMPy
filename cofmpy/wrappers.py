@@ -29,13 +29,22 @@ This module contains the FMU handler classes for FMI 2.0 and FMI 3.0. These clas
 used to load FMU files and interact with loaded FMUs.
 """
 import os
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+
+from typing import Any, Dict, List
 
 from fmpy import extract
 from fmpy import read_model_description
 from fmpy.fmi2 import FMU2Slave
 from fmpy.fmi3 import FMU3Slave
+from cofmpy.utils.proxy import (
+    ProxyVarAttr,
+    ProxyModelDescription,
+    ProxyCoSimulation,
+    FmiCausality,
+    ProxyDefaultExperiment,
+    load_proxy_class_from_file,
+)
 
 
 class FmuHandlerFactory:
@@ -67,13 +76,20 @@ class FmuHandlerFactory:
             ValueError: If the FMI version is not recognized.
         """
         self.path = path
-        self.description = read_model_description(path)
+
+        # case of .py file or .py::<class_name>
+        if self.path.endswith(".py") or "::" in self.path:
+            self.description = ProxyModelDescription()
+        else:
+            self.description = read_model_description(path)
 
     def __call__(self):
         if self.description.fmiVersion == "2.0":
             return Fmu2Handler(self.path, FMU2Slave)
         if self.description.fmiVersion == "3.0":
             return Fmu3Handler(self.path, FMU3Slave)
+        if self.description.fmiVersion == "proxy":
+            return FmuProxyHandler(self.path)  # Proxy handler uses native Python
         raise ValueError("FMI version not recognized")
 
 
@@ -287,6 +303,159 @@ class FmuXHandler(ABC):
         values.
         """
         raise NotImplementedError
+
+
+class FmuProxyHandler(FmuXHandler):
+    """
+    A handler class that acts as a proxy for an FMU by delegating operations
+    to a dynamically loaded proxy object. This class provides FMI-like behaviors
+    and interfaces for interacting with the proxy.
+    Attributes:
+        _proxy: The dynamically loaded proxy object.
+        fmu: Alias for the proxy object for compatibility with FmuXHandler.
+        _time (float): Internal simulation time.
+        description (ProxyModelDescription): A proxy model description compatible
+            with FmuXHandler helpers.
+        default_step_size (float): Default step size for the simulation.
+        var_name2attr (Dict[str, ProxyVarAttr]): A mapping of variable names to
+            their attributes.
+        output_var_names (List[str]): A list of output variable names.
+    Methods:
+        reset():
+            Resets the internal simulation time to 0.0.
+        get_variable(name: str) -> list:
+            Retrieves the value of a variable by name as a single-element list.
+        set_variables(input_dict: Dict[str, Any]):
+            Sets multiple variables based on the provided dictionary of
+            variable names and values.
+        step(current_time: float, step_size: float, input_dict: Dict[str, Any]) -> Dict[str, Any]:
+            Advances the simulation by a given step size, applying inputs
+            before stepping and returning the output variables.
+        get_state() -> Dict[str, Any]:
+            Retrieves the current state of the simulation, including time
+            and variable values, in a JSON-serializable format.
+        set_state(state: Dict[str, Any]):
+            Restores the simulation state from a given dictionary.
+    """
+
+    def __init__(self, path: str):  # pylint: disable=super-init-not-called
+        """
+        Initialize the wrapper class with a given proxy model file path.
+        Args:
+            path (str): The file path to the proxy model. This should be in the
+                format <model_name>.py or <model_name>.py::<class_name>.
+        Attributes:
+            _proxy: The proxy instance loaded from the file.
+            fmu: Alias for the proxy instance for compatibility with FmuXHandler.
+            _time (float): The current simulation time, initialized to 0.0.
+            description (ProxyModelDescription): A model description object
+                compatible with FmuXHandler helpers, containing metadata about
+                the proxy model.
+            default_step_size (Optional[float]): The default step size for the
+                simulation, extracted from the proxy model description.
+            var_name2attr (Dict[str, ProxyVarAttr]): A mapping of variable names
+                to their attributes for quick lookup.
+            output_var_names: A list of output variable names extracted from the
+                proxy model.
+        Raises:
+            Any exceptions raised by `load_proxy_class_from_file` or other
+            operations during initialization.
+        """
+        # extract proxy from path
+        self._proxy = load_proxy_class_from_file(path)()
+        self.fmu = self._proxy  # compatibility with FmuXHandler
+        self._time: float = 0.0
+
+        # Build a proxy model description compatible with FmuXHandler helpers
+        pv: List[ProxyVarAttr] = []
+        for vr, v in enumerate(self._proxy.variables()):
+            pv.append(
+                ProxyVarAttr(
+                    name=v.name,
+                    type=v.type,
+                    causality=v.causality,
+                    variability=v.variability,
+                    valueReference=vr,
+                    start=v.start,
+                )
+            )
+
+        self.description = ProxyModelDescription(
+            fmiVersion="proxy",
+            guid=f"proxy-{self._proxy.model_identifier}",
+            coSimulation=ProxyCoSimulation(
+                modelIdentifier=self._proxy.model_identifier
+            ),
+            defaultExperiment=ProxyDefaultExperiment(
+                stepSize=self._proxy.default_step_size
+            ),
+            modelVariables=pv,
+        )
+
+        self.default_step_size = (
+            self.description.defaultExperiment.stepSize
+            if self.description.defaultExperiment
+            else None
+        )
+
+        self.var_name2attr: Dict[str, ProxyVarAttr] = {
+            v.name: v for v in self.description.modelVariables
+        }
+        self.output_var_names = self.get_output_names()
+
+    # --- FMI-like behaviors ---
+
+    def reset(self):
+        self._time = 0.0
+        # self._proxy.reset()
+
+    # Override get_variable inherited from FmuXHandler.
+    # Allows to not specify variable type in method call
+    def get_variable(self, name: str) -> list:
+        # Return the value as a single-element list to match the API
+        return [getattr(self._proxy, name)]
+
+    def _set_variable(self, name, value):
+        if isinstance(value, list):
+            setattr(self._proxy, name, value[-1])
+        else:
+            setattr(self._proxy, name, value)
+
+    def set_variables(self, input_dict: Dict[str, Any]):
+        for k, v in (input_dict or {}).items():
+            if k in self.var_name2attr:
+                self._set_variable(k, v)
+
+    def step(self, current_time: float, step_size: float, input_dict: Dict[str, Any]):
+        # 1) Apply inputs/parameters before stepping
+        if input_dict:
+            for k, v_list in input_dict.items():
+                if k in self.var_name2attr:
+                    caus = self.var_name2attr[k].causality
+                    if caus in (FmiCausality.input, FmiCausality.parameter):
+                        self._set_variable(k, v_list[-1])
+
+        # 2) Delegate to proxy logic
+        if not self._proxy.do_step(current_time, step_size):
+            # mimic FMU doStep returning False in case of failure
+            raise RuntimeError("FmuProxyHandler: proxy do_step() returned False")
+
+        # 3) Advance internal time (FMU-like)
+        self._time = current_time + step_size
+
+        result = {name: self.get_variable(name) for name in self.output_var_names}
+        return result
+
+    # State snapshot (FMU-like, but JSON-serializable)
+    def get_state(self):
+        return self._proxy.getFMUstate()
+
+    def set_state(self, state: Dict[str, Any]):
+        self._proxy.setFMUstate(state)
+
+    # No-op to keep compatibility with abstract root class
+    def cancel_step(self):
+        pass
 
 
 class Fmu2Handler(FmuXHandler):

@@ -32,6 +32,7 @@ from fmpy.model_description import ModelDescription
 
 from cofmpy.wrappers import Fmu2Handler
 from cofmpy.wrappers import Fmu3Handler
+from cofmpy.wrappers import FmuProxyHandler
 from cofmpy.wrappers import FmuHandlerFactory
 
 description_keys = [
@@ -71,6 +72,7 @@ current_time = 0.0
 DIR = "tests/wrappers/assets"
 fmu_2_path = os.path.join(DIR, "TimeFMU2.fmu")
 fmu_3_path = os.path.join(DIR, "BouncingBall.fmu")
+fmu_proxy_path = os.path.join(DIR, "resistor.py")
 
 PARAMS_DICT = {
     fmu_2_path: lambda: {
@@ -139,6 +141,32 @@ PARAMS_DICT = {
             "local",
         ],
         "expected_var_types": ["Float64"] * 8,
+    },
+    fmu_proxy_path: lambda: {
+        "version": "proxy",
+        "handler": FmuProxyHandler,
+        "slave": None,
+        "factory": (factory := FmuHandlerFactory(fmu_proxy_path)),
+        "fmu": (fmu := factory()),
+        "default_step": None,
+        "variables": {
+            "in": ["V"],
+            "out": ["I"],
+            "par": ["R"],
+        },
+        "exception": AttributeError,
+        "err_msg_cancel": "'FmuProxyHandler' object has no attribute 'cancelStep'",
+        "err_msg_set_var": "'FmuProxyHandler' object has no attribute '_set_variable'",
+        "step_size": 1,
+        "input_dict": {"V": [5.0]},
+        "expected_results": [10.0, 5.0],
+        "expected_get_var": {
+            "V": [0.0],
+            "I": [0.0],
+            "R": [1.0],
+        },
+        "expected_get_causality": ["input", "output", "parameter"],
+        "expected_var_types": ["Real", "Real", "Real"],
     },
 }
 

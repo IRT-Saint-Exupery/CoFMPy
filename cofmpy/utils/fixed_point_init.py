@@ -169,9 +169,7 @@ class FixedPointInitializer:
             guess_dict = self._construct_from_flat(full_x_flat)
 
             # Perform a simulation step
-            output_dict = self.master.do_step(
-                self.time_step, guess_dict, record_outputs=False
-            )
+            output_dict = self.master.do_fixed_point_step(self.time_step, guess_dict)
 
             # Compute residuals only for free variables
             residuals = np.zeros_like(x, dtype=np.float64)

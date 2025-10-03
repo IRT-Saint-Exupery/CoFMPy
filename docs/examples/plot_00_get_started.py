@@ -96,7 +96,7 @@ with open(config_path, "r") as f:
 # - 2 connections:
 #     - the output of the source is connected to the input of the resistor
 #     - the resistance value of the resistor is set by a CSV file
-# - The simulation settings: the loop solver and the edge separator (used in the graph
+# - The simulation settings: the cosimulation method and the edge separator (used in the graph
 #   visualization).
 #
 # The next step is to load the configuration file via the Coordinator. This will start
@@ -110,12 +110,12 @@ coordinator.start(config_path)
 
 # %%
 # You can access the attributes of the components of the Coordinator object. For
-# example, you can access the loop solver of the co-simulation via the
-# `master.loop_solver` attribute.
+# example, you can access the co-simulation method via the
+# `master.cosim_method` attribute.
 
-# We can check the list of FMUs in the Master or the loop solver used
+# We can check the list of FMUs in the Master or the cosimulation method used
 print("FMUs in Master:", list(coordinator.master.fmu_handlers.keys()))
-print(f"Loop solver: {coordinator.master.loop_solver}")
+print(f"Cosimulation method: {coordinator.master.cosim_method}")
 
 # ... and the stream handlers (here, the CSV source). Keys are (fmu_name, var_name)
 print("\nCSV data stream handler key:", list(coordinator.stream_handlers.keys())[0])
