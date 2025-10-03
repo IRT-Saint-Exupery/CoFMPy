@@ -448,17 +448,10 @@ class FmuProxyHandler(FmuXHandler):
 
     # State snapshot (FMU-like, but JSON-serializable)
     def get_state(self):
-        vals = {
-            v.name: getattr(self._proxy, v.name, None)
-            for v in self.description.modelVariables
-        }
-        return {"time": self._time, "values": vals}
+        return self._proxy.getFMUstate()
 
     def set_state(self, state: Dict[str, Any]):
-        self._time = float(state.get("time", 0.0))
-        for k, v in (state.get("values", {}) or {}).items():
-            if k in self.var_name2attr:
-                self._set_variable(k, v)
+        self._proxy.setFMUstate(state)
 
     # No-op to keep compatibility with abstract root class
     def cancel_step(self):
