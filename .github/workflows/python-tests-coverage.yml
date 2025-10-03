@@ -7,6 +7,10 @@ on:
   push:
     branches: 
       - main
+      - dev
+  pull_request:
+    branches:
+      - main
 
 jobs:
   coverage:
@@ -36,6 +40,7 @@ jobs:
           coverage-badge -f -o /tmp/badge/coverage.svg
 
       - name: Switch to `badges` branch and copy badge
+        if: github.ref == 'refs/heads/main'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -46,6 +51,7 @@ jobs:
           cp /tmp/badge/coverage.svg .github/badges/coverage.svg
 
       - name: Commit badge to `badges` branch
+        if: github.ref == 'refs/heads/main'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update coverage badge"
