@@ -35,13 +35,16 @@ from fmpy import read_model_description
 from rich.console import Console
 from rich.table import Table
 
+import csv
 
-def extract_fmu_info(fmu_path):
+
+def extract_fmu_info(fmu_path, output_file):
     """
     Extracts information from an FMU file and displays it in a structured format.
 
     Args:
         fmu_path (str): Path to the FMU file.
+        output_file (str): Path to the optional output file (csv file)
 
     """
     console = Console()
@@ -50,6 +53,19 @@ def extract_fmu_info(fmu_path):
     if not os.path.isfile(fmu_path):
         console.print(f"[red]❌ Error: FMU file '{fmu_path}' not found.[/red]")
         return
+
+    has_output_file = False
+    spam_writer = None
+    # check output file requested. If yes => extract information to file
+    if output_file is not None:
+        has_output_file = True
+        print(f"Create file {output_file}")
+        csvfile = open(output_file, 'w', newline='')
+        spam_writer = csv.writer(
+            csvfile, delimiter=',',
+            quotechar='|', quoting=csv.QUOTE_MINIMAL
+        )
+        spam_writer.writerow(['Category', 'name', 'type', 'type', 'unit', 'start_value'])
 
     # Extract FMU content
     unpacked_fmu_dir = extract(fmu_path)
@@ -62,6 +78,7 @@ def extract_fmu_info(fmu_path):
     table.add_column("Category", style="cyan", no_wrap=True)
     table.add_column("Variable", style="magenta")
     table.add_column("Type", style="green")
+    table.add_column("Unit", style="green")
     table.add_column("Start Value", style="white")
 
     # FMU version
@@ -85,9 +102,24 @@ def extract_fmu_info(fmu_path):
         )
         name = variable.name
         var_type = variable.variability.capitalize()
+        var_unit = variable.unit
         start_value = variable.start if variable.start is not None else "-"
 
-        table.add_row(category, name, var_type, str(start_value))
+        # Append table row for console display
+        table.add_row(category, name, var_type, var_unit, str(start_value))
+
+        # Append line into csv file (if output file)
+        if has_output_file:
+            spam_writer.writerow(
+                [
+                    category,
+                    variable.name,
+                    variable.variability,
+                    variable.type,
+                    variable.unit,
+                    str(start_value)
+                ]
+            )
 
     # Display table
     console.print(table)
@@ -95,18 +127,24 @@ def extract_fmu_info(fmu_path):
     # Cleanup extracted FMU folder
     shutil.rmtree(unpacked_fmu_dir, ignore_errors=True)
 
+    print(output_file)
+
 
 def main():
     """
     Main function to parse command-line arguments and call the extraction function.
+
+    command line example to extract info from my_fmu.fmu to extract_infos.csv file :
+        >> python extract_fmu.py my_fmu.fmu" --output_file "./extract_infos.csv"
     """
     parser = argparse.ArgumentParser(
         description="Extracts and displays FMU information in a structured format."
     )
     parser.add_argument("fmu_file", help="Path to the FMU file")
+    parser.add_argument("--output_file", help="Path to the output file", required=False)
     args = parser.parse_args()
 
-    extract_fmu_info(args.fmu_file)
+    extract_fmu_info(args.fmu_file, args.output_file)
 
 
 if __name__ == "__main__":
