@@ -164,6 +164,8 @@ class FmuXHandler(ABC):
         # Instantiate the FMU
         self.fmu.instantiate(loggingOn=False)
 
+        self.cache_inputs = {}
+
     def set_variables(self, input_dict: dict):
         """Sets the FMU variables to the given values.
 
@@ -538,6 +540,14 @@ class Fmu3Handler(FmuXHandler):
             name (str): The name of the input variable to change
             value (float/int/bool/...): The desired value to set the variable with
         """
+        # Check cache for better performances
+        if name in self.cache_inputs:
+            if value == self.cache_inputs[name]:
+                return
+            else:
+                self.cache_inputs[name] = value
+        else:
+            self.cache_inputs[name] = value
         variable = self.var_name2attr[name]
         # this is a hack to dynamically call the correct setter function
         # based on the variable type. For example, if the variable type
