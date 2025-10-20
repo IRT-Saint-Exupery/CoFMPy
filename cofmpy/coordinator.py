@@ -189,6 +189,7 @@ class Coordinator:
             iterative=config["iterative"],
             fixed_point=fixed_point_init,
             fixed_point_kwargs=fixed_point_kwargs,
+            exported_outputs=config["exported_outputs"]
         )
         self.master.init_simulation(input_dict={})
 

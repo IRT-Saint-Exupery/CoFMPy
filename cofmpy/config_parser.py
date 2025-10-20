@@ -123,6 +123,7 @@ class ConfigParser:
         self.config_dict.setdefault("edge_sep", edge_sep)
         self.config_dict.setdefault("cosim_method", cosim_method)
         self.config_dict.setdefault("iterative", iterative)
+        self.config_dict.setdefault("exported_outputs", [])
 
         # Add connections if not present
         self.config_dict["connections"] = self.config_dict.get("connections", [])
@@ -185,6 +186,7 @@ class ConfigParser:
         self.master_config["sequence_order"] = None
         self.master_config["cosim_method"] = self.config_dict["cosim_method"]
         self.master_config["iterative"] = self.config_dict["iterative"]
+        self.master_config["exported_outputs"] = self.config_dict["exported_outputs"]
 
         for connection in self.config_dict["connections"]:
             source = connection["source"]

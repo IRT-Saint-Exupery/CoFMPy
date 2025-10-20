@@ -123,6 +123,7 @@ class Master:
         iterative: bool = False,
         fixed_point=False,
         fixed_point_kwargs=None,
+        exported_outputs=None
     ):
         """
         Initializes the Master class with FMU configurations, connection details,
@@ -189,11 +190,30 @@ class Master:
             fmu_id: np.zeros(len(fmu.get_input_names()))
             for fmu_id, fmu in self.fmu_handlers.items()
         }
+        self._output_dict = {}
+        if exported_outputs is not None and exported_outputs != []:
+            self._exported_outputs = exported_outputs
+            # Init output dict list : for each fmu list all expected (exported_outputs)
+            # and useful (Sources of connections) outputs, ignore others
+            for fmu_id, fmu in self.fmu_handlers.items():
+                output_map_fmu = {}
+                # If in exported outputs => add to output list
+                for output_name in fmu.get_output_names():
+                    if (fmu_id + "." + output_name) in exported_outputs:
+                        output_map_fmu[output_name] = [0]
+                # If in Sources of connection => add to output list
+                for (fmu_id_conn, output_name) in self.connections.keys():
+                    if fmu_id_conn == fmu_id and not output_name in output_map_fmu:
+                        output_map_fmu[output_name] = [0]
+                self._output_dict[fmu_id] = output_map_fmu
+        else:
+            self._exported_outputs = []
+            for fmu_id, fmu in self.fmu_handlers.items():
+                self._output_dict[fmu_id] = {}
+                for name in fmu.get_output_names():
+                    self._output_dict[fmu_id][name] = [0]
+                    self._exported_outputs.append(fmu_id + "." + name)
 
-        self._output_dict = {
-            fmu_id: np.zeros(len(fmu.get_output_names()))
-            for fmu_id, fmu in self.fmu_handlers.items()
-        }
         # Results dictionary to store the output values for each step
         self._results = defaultdict(list)
 
@@ -378,10 +398,13 @@ class Master:
         **Note**: The FMUs are reset after setting the initial values.
         """
 
-        # # Init output and input dictionaries
+        # Init output and input dictionaries
         for fmu_id, fmu in self.fmu_handlers.items():
-            self._output_dict[fmu_id] = {key: [0] for key in fmu.get_output_names()}
+            #self._output_dict[fmu_id] = {key: [0] for key in fmu.get_output_names()}
             self._input_dict[fmu_id] = {key: [0] for key in fmu.get_input_names()}
+        for fmu_id in self._output_dict.keys():
+            for output in self._output_dict[fmu_id]:
+                self._output_dict[fmu_id][output] = [0]
 
         # Init current_time of simulation to 0
         self.current_time = 0.0
@@ -479,7 +502,9 @@ class Master:
                 # Save inputs for check coherence
                 inputs[fmu_id] = copy.deepcopy(self._input_dict[fmu_id])
                 output[fmu_id] = fmu.step(
-                    self.current_time, step_size, self._input_dict[fmu_id]
+                    self.current_time, step_size,
+                    self._input_dict[fmu_id],
+                    self._output_dict[fmu_id].keys()
                 )
 
                 # Update inputs, only for gauss-seidel algo
@@ -590,7 +615,8 @@ class Master:
 
                     if record_outputs:
                         # add each output to the result dict, (FMU_ID + Var) as key
-                        self._results[(fmu_id, output_name)].extend(value)
+                        if fmu_id + "." + output_name in self._exported_outputs:
+                            self._results[(fmu_id, output_name)].extend(value)
 
                     # add each output to the output dict, [FMU_ID][Var] as key
                     self._output_dict[fmu_id][output_name] = value

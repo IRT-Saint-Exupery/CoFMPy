@@ -297,7 +297,7 @@ class FmuXHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def step(self, current_time, step_size, input_dict):
+    def step(self, current_time, step_size, input_dict, output_variable_list: list):
         """
         Performs a simulation step with the given current time, step size, and input
         values.
@@ -426,7 +426,13 @@ class FmuProxyHandler(FmuXHandler):
             if k in self.var_name2attr:
                 self._set_variable(k, v)
 
-    def step(self, current_time: float, step_size: float, input_dict: Dict[str, Any]):
+    def step(
+        self,
+        current_time: float,
+        step_size: float,
+        input_dict: Dict[str, Any],
+        output_variable_list: list = None
+    ):
         # 1) Apply inputs/parameters before stepping
         if input_dict:
             for k, v_list in input_dict.items():
@@ -480,7 +486,13 @@ class Fmu2Handler(FmuXHandler):
         self.fmu.enterInitializationMode()
         self.fmu.exitInitializationMode()
 
-    def step(self, current_time: float, step_size: float, input_dict: dict) -> dict:
+    def step(
+        self,
+        current_time: float,
+        step_size: float,
+        input_dict: dict,
+        output_variable_list: list = None
+    ) -> dict:
         """
         Performs a simulation step with the given current time, step size, and input
         values.
@@ -490,6 +502,7 @@ class Fmu2Handler(FmuXHandler):
             step_size (float): the size of the simulation step.
             input_dict (dict): dictionary containing input variable names and their
                 corresponding values.
+            output_variable_list: variable list to get at the end of the step
 
         Returns:
             Dictionary containing output variable names and their corresponding values
@@ -503,9 +516,11 @@ class Fmu2Handler(FmuXHandler):
         self.fmu.doStep(
             currentCommunicationPoint=current_time, communicationStepSize=step_size
         )
+        if output_variable_list is None:
+            output_variable_list = self.output_var_names
         result = {
             name: self.fmu.getReal([self.var_name2attr[name].valueReference])
-            for name in self.get_output_names()
+            for name in output_variable_list
         }
         return result
 
@@ -533,12 +548,38 @@ class Fmu3Handler(FmuXHandler):
         except Exception as e:
             raise ValueError(f"Variable type {variable.type} not supported") from e
 
+    def _get_variable(self, name: str):
+        """
+        Gets the variable matching the given name.
+
+        Args:
+            name (str): The name of the input variable to retrieve
+        """
+        variable = self.var_name2attr[name]
+        # this is a hack to dynamically call the correct getter function
+        # based on the variable type. For example, if the variable type
+        # is "Float64", then the getter function is "getFloat64"
+        try:
+            if variable.type == 'UInt8':
+                return [0]
+            getter = eval("self.fmu.get" + variable.type)
+            return getter([variable.valueReference])
+        except Exception as e:
+            print(f"Unsuccessful fmu.get{variable.type} method for {len([variable.valueReference])} variables")
+            return [0]
+
     def reset(self):
         """Resets the FMU to its initial state"""
         self.fmu.enterInitializationMode()
         self.fmu.exitInitializationMode()
 
-    def step(self, current_time: float, step_size: float, input_dict: dict) -> dict:
+    def step(
+        self,
+        current_time: float,
+        step_size: float,
+        input_dict: dict,
+        output_variable_list: list = None
+    ) -> dict:
         """
         Performs a simulation step with the given current time, step size, and input
         values.
@@ -548,6 +589,7 @@ class Fmu3Handler(FmuXHandler):
             step_size (float): the size of the simulation step.
             input_dict (dict): dictionary containing input variable names and their
                 corresponding values.
+            output_variable_list: variable list to get at the end of the step
 
         Returns:
             Dictionary containing output variable names and their corresponding values
@@ -555,17 +597,15 @@ class Fmu3Handler(FmuXHandler):
         """
         # Set all the input variable that are given
         for name, value in input_dict.items():
-            if self.var_name2attr[name].type == "Boolean":
-                self.fmu.setBoolean([self.var_name2attr[name].valueReference], value)
-            else:
-                self.fmu.setFloat64([self.var_name2attr[name].valueReference], value)
-            # print(f"{name} : {value}")
+            self._set_variable(name, value)
 
         self.fmu.doStep(
             currentCommunicationPoint=current_time, communicationStepSize=step_size
         )
+        if output_variable_list is None:
+            output_variable_list = self.output_var_names
         result = {
-            name: self.fmu.getFloat64([self.var_name2attr[name].valueReference])
-            for name in self.output_var_names
+            name: self._get_variable(name)
+            for name in output_variable_list
         }
         return result
