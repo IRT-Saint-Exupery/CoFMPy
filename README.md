@@ -1,3 +1,7 @@
+<head>
+    <meta name="google-site-verification" content="HUjgL1QM39SrK6ApRFAZ1diXfGd99dwkvwsCYaNpi9c" />
+</head>
+
 <div align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo_cofmpy_dark.png">
@@ -19,13 +23,13 @@
         <img alt="Tests" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml/badge.svg"></a>
     <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests-coverage.yml">
         <img alt="Coverage" src="https://raw.githubusercontent.com/IRT-Saint-Exupery/CoFMPy/badges/.github/badges/coverage.svg""></a>
-   
+
 </div>
 <br>
 
 ## 👋 About CoFMPy
 
-CoFMPy is a Python library designed for rapid prototyping of digital twins through 
+CoFMPy is a Python library designed for rapid prototyping of digital twins through
 the co-simulation of Functional Mock-up Units (FMUs).
 It offers advanced master coordination features, such as solving algebraic loops between
 FMUs and managing the interaction between various simulation components. This library

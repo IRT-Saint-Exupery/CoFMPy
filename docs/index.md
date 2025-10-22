@@ -1,3 +1,7 @@
+<head>
+    <meta name="google-site-verification" content="HUjgL1QM39SrK6ApRFAZ1diXfGd99dwkvwsCYaNpi9c" />
+</head>
+
 <div align="center">
     <img src="./assets/logo_cofmpy_dark.png#only-dark" width="75%" alt="Logo CoFMPy" align="center" />
     <img src="./assets/logo_cofmpy_light.png#only-light" width="75%" alt="Logo CoFMPy" align="center" />
