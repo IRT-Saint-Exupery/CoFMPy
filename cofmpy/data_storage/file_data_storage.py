@@ -39,23 +39,30 @@ class FileDataStorage(BaseDataStorage):
 
     type_name = "file"
 
-    def __init__(self, output_dir, overwrite=True):
-        self.output_dir = output_dir
+    def __init__(self, path, overwrite=True, labels: list = [], items: list = []):
+        self.output_dir = os.path.dirname(path)
+        self.file_path = path
+        self.items = items
 
         # Raise error if directory already exists and overwrite is False
         if overwrite is False:
-            if os.path.exists(output_dir):
-                raise FileExistsError(f"Directory {output_dir} already exists.")
+            if os.path.exists(self.output_dir):
+                raise FileExistsError(f"Directory {self.output_dir} already exists.")
 
         # Create directory if it does not exist
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
 
         # Empty directory
-        for f in os.listdir(output_dir):
-            os.remove(os.path.join(output_dir, f))
+        for f in os.listdir(self.output_dir):
+            os.remove(os.path.join(self.output_dir, f))
 
-    def save(self, variable_name, data, metadata=None):
+        # write the header for the results file
+        with open(self.file_path, mode="a", encoding="utf-8") as f:
+            f.write("t,")
+            f.write(",".join(labels) + "\n")
+
+    def save(self, variable_name, time, data, metadata=None):
         """Save data to a file for the given variable.
 
         The data must be a list of lists, where each list contains the data for a row
@@ -63,12 +70,18 @@ class FileDataStorage(BaseDataStorage):
 
         Args:
             variable_name (str): variable name.
+            time (any): current time
             data (list): list of lists with the data to save
             metadata (dict, optional): metadata associated with the data.
         """
-        with open(self._file_path(variable_name), mode="a", encoding="utf-8") as f:
-            for d in data:
-                f.write(",".join(map(str, d)) + "\n")
+        with open(self.file_path, mode="a", encoding="utf-8") as f:
+            f.write(str(time) + ",")   # write time
+            # then write each configured output for this storage
+            for fmu_id, output_name in self.items:
+                f.write(",".join(map(str, data[fmu_id][output_name])) + ",")
+            f.write("\n")
+            #for d in data:
+            #    f.write(",".join(map(str, d)) + "\n")
 
     def load(self, variable_name):
         """Load data from a file for the given variable.
@@ -79,10 +92,8 @@ class FileDataStorage(BaseDataStorage):
         Returns:
             pd.DataFrame: loaded data.
         """
-        return pd.read_csv(self._file_path(variable_name), header="infer")
+        return pd.read_csv(self.file_path, header="infer")
 
     def delete(self, variable_name):
-        os.remove(self._file_path(variable_name))
+        os.remove(self.file_path)
 
-    def _file_path(self, variable_name):
-        return os.path.join(self.output_dir, f"{variable_name}.csv")
