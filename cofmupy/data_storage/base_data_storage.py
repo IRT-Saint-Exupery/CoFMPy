@@ -98,11 +98,12 @@ class BaseDataStorage(ABC):
         return cls._data_storages_registry[storage_type](**config_dict["config"])
 
     @abstractmethod
-    def save(self, variable_name, data, metadata=None):
+    def save(self, variable_name, time, data, metadata=None):
         """Save data to the storage.
 
         Args:
             variable_name (str): variable name.
+            time (any): current time
             data (any): data to save.
             metadata (dict, optional): metadata associated with the data.
         """
