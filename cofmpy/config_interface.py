@@ -1,0 +1,181 @@
+
+from typing import Union
+from typing import Dict
+from dataclasses import dataclass
+
+FMU_TYPE = "fmu"
+
+
+class ConfigConnectionBase:
+    type: str
+
+
+class ConfigConnectionFmu(ConfigConnectionBase):
+    id: str
+    variable: str
+    unit: str
+
+    def __init__(
+        self,
+        id: str,
+        variable: str,
+        unit: str = "",
+        type: str = FMU_TYPE,
+        **kwargs
+    ):
+        self.type = type
+        self.id = id
+        self.variable = variable
+        self.unit = unit
+
+        # Add warning for not used properties
+        for arg in kwargs.keys():
+            print(f"Unknown property is ignore : {arg}")
+
+
+class ConfigConnectionStream(ConfigConnectionBase):
+    values: Dict
+    id: str
+    variable: str = ""
+
+    def __init__(
+        self,
+        type: str,
+        values: Dict,
+        **kwargs
+    ):
+        self.type = type
+        self.values = values
+
+        # Add warning for not used properties
+        for arg in kwargs.keys():
+            print(f"Unknown property is ignore : {arg}")
+
+
+class ConfigConnectionStorage(ConfigConnectionBase):
+    id: str
+    variable: str = ""
+    alias: str
+
+    def __init__(
+        self,
+        id: str,
+        alias: str,
+        type: str,
+        **kwargs
+    ):
+        self.type = type
+        self.id = id
+        self.alias = alias
+
+        # Add warning for not used properties
+        for arg in kwargs.keys():
+            print(f"Unknown property is ignore : {arg}")
+
+
+class ConfigDataStorage:
+    name: str
+    type: str
+    config: Dict
+
+    def __init__(
+        self,
+        name: str,
+        type: str,
+        config: Dict,
+        **kwargs
+    ):
+        self.name = name
+        self.type = type
+        self.config = config
+
+        # Add warning for not used properties
+        for arg in kwargs.keys():
+            print(f"Unknown property is ignore : {arg}")
+
+
+class ConfigConnection:
+    source: Union[ConfigConnectionFmu, ConfigConnectionStream]
+    target: list[Union[ConfigConnectionFmu, ConfigConnectionStorage]] = []
+
+    def __init__(
+        self,
+        source: Dict,
+        target: list[Dict],
+        **kwargs
+    ):
+        if source["type"] == FMU_TYPE:
+            self.source = ConfigConnectionFmu(**source)
+        else:
+            self.source = ConfigConnectionStream(**source)
+
+        if not isinstance(target, list):
+            # TODO : Manage error on config format
+            print(f"target is not a list")
+            return
+
+        self.target = []
+        for target_dict in target:
+            if target_dict["type"] != FMU_TYPE:
+                self.target.append(ConfigConnectionStorage(**target_dict))
+            else:
+                self.target.append(ConfigConnectionFmu(**target_dict))
+
+        # Add warning for not used properties
+        for arg in kwargs.keys():
+            print(f"Unknown property is ignore : {arg}")
+
+
+class ConfigFmu:
+    id: str
+    name: str
+    path: str
+    initialization: Dict = {}
+
+    def __init__(
+        self,
+        id: str,
+        name: str,
+        path: str,
+        initialization: dict,
+        **kwargs
+    ):
+        self.id = id
+        self.name = name
+        self.path = path
+        self.initialization = initialization
+
+        # Add warning for not used properties
+        for arg in kwargs.keys():
+            print(f"Unknown property is ignore : {arg}")
+
+
+class ConfigDict:
+    root: str
+    edge_sep: str
+    cosim_method: str
+    iterative: bool
+    fmus: list[ConfigFmu] = []
+    connections: list[ConfigConnection] = []
+    data_storages: list[ConfigDataStorage] = []
+
+    def __init__(
+        self,
+        fmus: list[ConfigFmu],
+        connections: list[ConfigConnection],
+        data_storages: list[ConfigDataStorage],
+        edge_sep: str = " -> ",
+        cosim_method: str = "jacobi",
+        iterative: bool = False,
+        **kwargs
+    ):
+        self.fmus = [ConfigFmu(**fmu_dict) for fmu_dict in fmus]
+        self.connections = [ConfigConnection(**connection_dict) for connection_dict in connections]
+        self.data_storages = [ConfigDataStorage(**storage_dict) for storage_dict in data_storages]
+        self.edge_sep = edge_sep
+        self.cosim_method = cosim_method
+        self.iterative = iterative
+
+        # Add warning for not used properties
+        for arg in kwargs.keys():
+            print(f"Unknown property is ignore : {arg}")
