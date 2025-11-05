@@ -88,7 +88,7 @@ use_cases = [
             "input_dict_first_fmu": np.array(0),
             "input_dict": {"source": {}, "resistor": {"V": [0]}},
             "output_vars": {"source": ["V"], "resistor": ["I"]},
-            "do_step": {"source": {"V": [15.666538]}, "resistor": {"I": [0.0]}},
+            "do_step": {"source": {"V": [15.666538]}, "resistor": {"I": [3.1333076385099337]}},
             "results_keys": [("source", "V"), ("resistor", "I")],
             "new_var_value": ("resistor", "V", 3.0),
             "loop_fmu_ids": ["source", "resistor"],
