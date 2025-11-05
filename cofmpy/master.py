@@ -483,9 +483,7 @@ class Master:
                     else:  # Save state
                         fmu_states[fmu_id] = fmu.get_state()
 
-                outputs[fmu_id] = fmu.step(
-                    self.current_time, step_size, inputs[fmu_id]
-                )
+                outputs[fmu_id] = fmu.step(self.current_time, step_size, inputs[fmu_id])
 
                 # Update inputs into fmu loop, only for gauss-seidel algo
                 if algo == "gauss_seidel":
