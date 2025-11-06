@@ -44,7 +44,15 @@ def temp_cwd(path):
 def test_load_config_from_dict():
     config_data = {"fmus": [], "connections": []}
     parser = ConfigParser(config_data)
-    assert parser.config_dict == config_data
+
+    # Add default values to expected result
+    config_data["cosim_method"] = "jacobi"
+    config_data["edge_sep"] = " -> "
+    config_data["iterative"] = False
+    config_data["root"] = ""
+    config_data["data_storages"] = []
+
+    assert parser.get_config_dict() == config_data
 
 
 def test_load_config_from_file(tmp_path):
@@ -53,21 +61,24 @@ def test_load_config_from_file(tmp_path):
         "connections": [
             {
                 "source": {"id": "A", "variable": "x", "type": "fmu", "unit": ""},
-                "target": {"id": "B", "variable": "y", "type": "fmu", "unit": ""},
+                "target": [{"id": "B", "variable": "y", "type": "fmu", "unit": ""}],
             }
         ],
         "edge_sep": "test_sep",
         "cosim_method": "test_solver",
         "iterative": True,
         "root": "",
+        "data_storages": []
     }
     config_file = tmp_path / "config.json"
     config_file.write_text(json.dumps(config_data))
 
-    parser = ConfigParser(
-        str(config_file), cosim_method="test_solver_default", edge_sep="test_sep_default"
-    )
-    assert parser.config_dict == config_data
+    parser = ConfigParser(str(config_file))
+
+    # Append with default name value for fmus
+    for fmu in config_data["fmus"]:
+        fmu["name"] = fmu["id"]
+    assert parser.get_config_dict() == config_data
 
 
 def test_invalid_file_path():
@@ -83,24 +94,18 @@ def test_invalid_config_format():
 def test_apply_defaults():
     config_data = {"fmus": [], "connections": []}
     parser = ConfigParser(config_data)
-    assert parser.config_dict["cosim_method"] == "jacobi"
-    assert parser.config_dict["edge_sep"] == " -> "
-    assert parser.config_dict["iterative"] == False
-
-    config_data = {"fmus": [], "connections": []}
-    parser2 = ConfigParser(config_data, cosim_method="test_solver_default", edge_sep="test_sep_default", iterative=True)
-    assert parser2.config_dict["cosim_method"] == "test_solver_default"
-    assert parser2.config_dict["edge_sep"] == "test_sep_default"
-    assert parser2.config_dict["iterative"] == True
+    assert parser.get_config_dict()["cosim_method"] == "jacobi"
+    assert parser.get_config_dict()["edge_sep"] == " -> "
+    assert parser.get_config_dict()["iterative"] == False
 
 
 def test_missing_keys():
     config_data = {"fmus": []}  # Missing "connections"
-    parser = ConfigParser(config_data)
-    assert parser.config_dict == config_data
+    with pytest.raises(TypeError):
+        ConfigParser(config_data)
 
     config_data = {"connections": []}  # Missing "fmus"
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ConfigParser(config_data)
 
 
@@ -110,7 +115,7 @@ def test_build_graph_config():
         "connections": [
             {
                 "source": {"id": "A", "variable": "x", "type": "fmu", "unit": ""},
-                "target": {"id": "B", "variable": "y", "type": "fmu", "unit": ""},
+                "target": [{"id": "B", "variable": "y", "type": "fmu", "unit": ""}],
             }
         ],
         "edge_sep": " -> ",
@@ -121,12 +126,12 @@ def test_build_graph_config():
 
 
 def test_update_paths_in_dict(tmp_path):
-    config_data = {"fmus": [{"path": "model.fmu"}], "connections": []}
+    config_data = {"fmus": [{"id": "A", "path": "model.fmu"}], "connections": []}
     model_file = tmp_path / "model.fmu"
     model_file.touch()
 
     parser = ConfigParser(config_data)
-    assert parser.config_dict["fmus"][0]["path"] == "model.fmu"
+    assert parser.get_config_dict()["fmus"][0]["path"] == "model.fmu"
 
 
 @pytest.mark.parametrize("algo_name", ["jacobi", "gauss_seidel"])
@@ -139,7 +144,7 @@ def test_build_master_config(algo_name):
         "connections": [
             {
                 "source": {"id": "FMU1", "variable": "x", "type": "fmu", "unit": ""},
-                "target": {"id": "FMU2", "variable": "y", "type": "fmu", "unit": ""},
+                "target": [{"id": "FMU2", "variable": "y", "type": "fmu", "unit": ""}],
             }
         ],
         "cosim_method": algo_name
@@ -162,7 +167,7 @@ def test_build_handlers_config():
                     "type": "csv",
                     "unit": "",
                 },
-                "target": {"id": "FMU1", "variable": "x", "type": "fmu", "unit": ""},
+                "target": [{"id": "FMU1", "variable": "x", "type": "fmu", "unit": ""}],
             }
         ],
     }
@@ -177,7 +182,7 @@ def test_add_symbolic_nodes():
         "connections": [
             {
                 "source": {"type": "csv", "variable": "data"},
-                "target": {"id": "FMU1", "variable": "x", "type": "fmu"},
+                "target": [{"id": "FMU1", "variable": "x", "type": "fmu"}],
             }
         ],
     }
