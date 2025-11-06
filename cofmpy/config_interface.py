@@ -135,13 +135,15 @@ class ConfigFmu:
     def __init__(
         self,
         id: str,
-        name: str,
         path: str,
-        initialization: dict,
+        name: str = "",
+        initialization: dict = {},
         **kwargs
     ):
         self.id = id
         self.name = name
+        if name == "":
+            self.name = id
         self.path = path
         self.initialization = initialization
 
@@ -150,7 +152,7 @@ class ConfigFmu:
             print(f"Unknown property is ignore : {arg}")
 
 
-class ConfigDict:
+class ConfigObject:
     root: str
     edge_sep: str
     cosim_method: str
@@ -163,7 +165,8 @@ class ConfigDict:
         self,
         fmus: list[ConfigFmu],
         connections: list[ConfigConnection],
-        data_storages: list[ConfigDataStorage],
+        data_storages: list[ConfigDataStorage] = [],
+        root: str = "",
         edge_sep: str = " -> ",
         cosim_method: str = "jacobi",
         iterative: bool = False,
@@ -175,6 +178,7 @@ class ConfigDict:
         self.edge_sep = edge_sep
         self.cosim_method = cosim_method
         self.iterative = iterative
+        self.root = root
 
         # Add warning for not used properties
         for arg in kwargs.keys():

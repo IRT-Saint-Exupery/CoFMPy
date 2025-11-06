@@ -45,7 +45,7 @@ from typing import Union
 from cofmpy.config_interface import ConfigConnectionFmu
 from cofmpy.config_interface import ConfigConnectionStorage
 from cofmpy.config_interface import ConfigConnectionStream
-from cofmpy.config_interface import ConfigDict
+from cofmpy.config_interface import ConfigObject
 from cofmpy.config_interface import FMU_TYPE
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,8 @@ class ConfigParser:
         file_path (Union[str, Dict]): Path to the configuration file. Can also be
             a dictionary if the user prefers to provide the configuration directly
             without using a JSON file.
-        _config_dict (ConfigDict): The parsed configuration object (type ConfigDict).
+        _config_object (ConfigObject): The parsed configuration object (type
+            ConfigObject)
         graph_config (Dict): Configuration for the graph engine.
         master_config (Dict): Configuration for the master solver.
         data_storages (Dict): Storage settings for external data.
@@ -73,20 +74,20 @@ class ConfigParser:
 
     def __init__(
         self,
-        file_path: Union[str, Dict],
+        file_path: Union[str, Dict]
     ) -> None:
         # Arguments
         self.file_path = file_path
 
-        self._config_dict: ConfigDict
+        self._config_object: ConfigObject
         self.graph_config: Dict = {}
         self.master_config: Dict = {}
         self.data_storages: Dict = {}
         self.stream_handlers: Dict = {}
         self.error_in_config: bool = False
 
-        # ------------ 1. Load config: self._config_dict ------------------
-        self._config_dict = self._load_config(file_check=True)
+        # ------------ 1. Load config: self._config_object ------------------
+        self._config_object = self._load_config(file_check=True)
 
         # ------------ 2. Apply defaults and perform validation ------------
         self._validate_configuration()
@@ -100,12 +101,24 @@ class ConfigParser:
         self._build_handlers_config()
         self._build_graph_config()
 
-    def _load_config(self, file_check: bool) -> ConfigDict:
+    def get_config_dict(self):
+        config_dict = self._config_object.__dict__
+        config_dict["fmus"] = [fmu.__dict__ for fmu in config_dict["fmus"]]
+        config_dict["connections"] = [
+            {
+                "source": connection.source.__dict__,
+                "target": [target.__dict__ for target in connection.target]
+            } for connection in self._config_object.connections
+        ]
+        config_dict["data_storages"] = [storage.__dict__ for storage in self._config_object.data_storages]
+        return config_dict
+
+    def _load_config(self, file_check: bool) -> ConfigObject:
         """Load JSON configuration from a file or dictionary."""
         if isinstance(self.file_path, dict):
             # If input is a dictionary, use directly.
-            config_dict = ConfigDict(**self.file_path)
-            return config_dict
+            config_object = ConfigObject(**self.file_path)
+            return config_object
 
         if isinstance(self.file_path, str) and self.file_path.endswith(".json"):
             if file_check and not os.path.exists(self.file_path):
@@ -116,13 +129,13 @@ class ConfigParser:
             with open(self.file_path, "r", encoding="utf-8") as file:
 
                 my_dict = json.load(file)
-                config_dict = ConfigDict(**my_dict)
-                return config_dict
+                config_object = ConfigObject(**my_dict)
+                return config_object
 
         raise TypeError(f"Invalid configuration format: {type(self.file_path)}")
 
     def _build_storage_config(self):
-        for storage in self._config_dict.data_storages:
+        for storage in self._config_object.data_storages:
             storage_dict = storage.__dict__
             storage_dict["config"]["labels"] = []
             storage_dict["config"]["items"] = []
@@ -138,12 +151,12 @@ class ConfigParser:
             None. Builds self.graph_config.
         """
         self.graph_config = {}
-        self.graph_config["fmus"] = [fmu.__dict__ for fmu in self._config_dict.fmus]
+        self.graph_config["fmus"] = [fmu.__dict__ for fmu in self._config_object.fmus]
         self.graph_config["symbolic_nodes"] = self._add_symbolic_nodes()
         self.graph_config["connections"] = []
-        self.graph_config["edge_sep"] = self._config_dict.edge_sep
+        self.graph_config["edge_sep"] = self._config_object.edge_sep
 
-        for connection in self._config_dict.connections:
+        for connection in self._config_object.connections:
             for target_unit in connection.target:
                 if connection.source.type == FMU_TYPE and target_unit.type == FMU_TYPE:
                     graph_conn = {
@@ -173,13 +186,13 @@ class ConfigParser:
             None. Builds self.master_config.
         """
 
-        self.master_config["fmus"] = [fmu.__dict__ for fmu in self._config_dict.fmus]
+        self.master_config["fmus"] = [fmu.__dict__ for fmu in self._config_object.fmus]
         self.master_config["connections"] = {}
         self.master_config["sequence_order"] = None
-        self.master_config["cosim_method"] = self._config_dict.cosim_method
-        self.master_config["iterative"] = self._config_dict.iterative
+        self.master_config["cosim_method"] = self._config_object.cosim_method
+        self.master_config["iterative"] = self._config_object.iterative
 
-        for connection in self._config_dict.connections:
+        for connection in self._config_object.connections:
             source = connection.source
             for target in connection.target:
 
@@ -211,7 +224,7 @@ class ConfigParser:
             None. Builds self.data_storages and self.stream_handlers.
         """
         self.stream_handlers = {}
-        for connection in self._config_dict.connections:
+        for connection in self._config_object.connections:
             source = connection.source
             for target in connection.target:
 
@@ -237,10 +250,10 @@ class ConfigParser:
     def _add_symbolic_nodes(self) -> List:
         """
         Search for external data connections in:
-        * self._config_dict.connections.source
-        * self._config_dict.connections.target
+        * self._config_object.connections.source
+        * self._config_object.connections.target
         i.e. if their type is not "fmu".
-        If present, add a symbolic node to self._config_dict.fmus.
+        If present, add a symbolic node to self._config_object.fmus.
         Also required fields for graph configuration: 'id', 'variable'
 
         Such a node is a dictionary with the contents:
@@ -248,7 +261,7 @@ class ConfigParser:
             <direction ('source' or 'target')>_<data type>_<variable or na>
         * 'id_as_list': unique id as a list:
             [<direction ('source' or 'target')>, <data type>, <variable or na>]
-        * 'loc': index in self._config_dict.connections list
+        * 'loc': index in self._config_object.connections list
             and direction ('source' or 'target').
 
         Example of symbolic node:
@@ -262,7 +275,7 @@ class ConfigParser:
         """
         symbolic_nodes = []
         # Explore all sources and targets in the connections
-        for conn_index, connection in enumerate(self._config_dict.connections):
+        for conn_index, connection in enumerate(self._config_object.connections):
             if connection.source.type != FMU_TYPE:
                 if connection.source.variable == "":
                     connection.source.variable = "na"
@@ -371,5 +384,5 @@ class ConfigParser:
                 Defaults to "path".
         """
 
-        for fmu_dict in self._config_dict.fmus:
+        for fmu_dict in self._config_object.fmus:
             fmu_dict.path = self._find_corrected_relative_path(fmu_dict.path)
