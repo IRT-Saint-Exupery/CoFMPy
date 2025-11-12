@@ -23,7 +23,6 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import unittest
-from unittest.mock import MagicMock
 from unittest.mock import patch
 
 from cofmpy.data_stream_handler.kafka_utils import KafkaHandlerConfig
@@ -38,9 +37,7 @@ class TestKafkaHandlerConfig(unittest.TestCase):
             "group_id": "group-123",
         }
 
-    @patch("cofmpy.utils.Interpolator")
-    def test_valid_init(self, MockInterpolator):
-        MockInterpolator.return_value._registry = {"previous": MagicMock()}
+    def test_valid_init(self):
         config = KafkaHandlerConfig(
             topic="topic1",
             server_url="localhost",
@@ -78,9 +75,7 @@ class TestKafkaHandlerConfig(unittest.TestCase):
             )
         self.assertIn("Timeout must be non-negative", str(context.exception))
 
-    @patch("cofmpy.utils.Interpolator")
-    def test_invalid_auto_offset_reset(self, MockInterpolator):
-        MockInterpolator.return_value._registry = {"previous": MagicMock()}
+    def test_invalid_auto_offset_reset(self):
         with self.assertRaises(ValueError) as context:
             KafkaHandlerConfig(
                 topic="t",
@@ -92,9 +87,7 @@ class TestKafkaHandlerConfig(unittest.TestCase):
             )
         self.assertIn("Invalid auto_offset_reset", str(context.exception))
 
-    @patch("cofmpy.utils.Interpolator")
-    def test_invalid_interpolation(self, MockInterpolator):
-        MockInterpolator.return_value._registry = {"linear": MagicMock()}
+    def test_invalid_interpolation(self):
         with self.assertRaises(ValueError) as context:
             KafkaHandlerConfig(
                 topic="t",
@@ -106,9 +99,7 @@ class TestKafkaHandlerConfig(unittest.TestCase):
             )
         self.assertIn("Invalid interpolation method", str(context.exception))
 
-    @patch("cofmpy.utils.Interpolator")
-    def test_from_dict_valid(self, MockInterpolator):
-        MockInterpolator.return_value._registry = {"previous": MagicMock()}
+    def test_from_dict_valid(self):
         config = KafkaHandlerConfig.from_dict(self.valid_config_dict)
         self.assertEqual(config.server_url, "localhost")
         self.assertEqual(config.port, "9092")

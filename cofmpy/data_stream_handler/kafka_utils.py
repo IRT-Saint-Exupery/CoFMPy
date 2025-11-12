@@ -72,8 +72,7 @@ class KafkaHandlerConfig:  # pylint: disable=too-many-instance-attributes
                 f"Must be one of {valid_offsets}"
             )
 
-        interpolator = Interpolator()
-        valid_interpolation = set(interpolator._registry.keys())
+        valid_interpolation = Interpolator._registry.keys()
         if self.interpolation not in valid_interpolation:
             raise ValueError(
                 f"Invalid interpolation method: '{self.interpolation}'. "
