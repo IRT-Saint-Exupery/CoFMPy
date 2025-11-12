@@ -11,28 +11,24 @@
       
       
       
-        <link rel="prev" href="../cosimulation_initialization/">
-      
-      
-        <link rel="next" href="../helpers/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/favicon_cofmpy_light.png">
+      <link rel="icon" href="../../../assets/favicon_cofmpy_light.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
-        <title>Managing data sources - CoFMPy</title>
+        <title>KafkaHandlerConfig - CoFMPy</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,19 +47,19 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../css/custom.css">
+      <link rel="stylesheet" href="../../../css/custom.css">
     
-      <link rel="stylesheet" href="../../sg_gallery-rendered-html.css">
+      <link rel="stylesheet" href="../../../sg_gallery-rendered-html.css">
     
-      <link rel="stylesheet" href="../../sg_gallery.css">
+      <link rel="stylesheet" href="../../../sg_gallery.css">
     
-      <link rel="stylesheet" href="../../sg_gallery-dataframe.css">
+      <link rel="stylesheet" href="../../../sg_gallery-dataframe.css">
     
-      <link rel="stylesheet" href="../../sg_gallery-binder.css">
+      <link rel="stylesheet" href="../../../sg_gallery-binder.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -88,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#managing-data-sources" class="md-skip">
+        <a href="#kafkahandlerconfig" class="md-skip">
           Skip to content
         </a>
       
@@ -104,9 +100,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="CoFMPy" class="md-header__button md-logo" aria-label="CoFMPy" data-md-component="logo">
+    <a href="../../.." title="CoFMPy" class="md-header__button md-logo" aria-label="CoFMPy" data-md-component="logo">
       
-  <img src="../../assets/logo_cofmpy_light.png" alt="logo">
+  <img src="../../../assets/logo_cofmpy_light.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -123,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Managing data sources
+              KafkaHandlerConfig
             
           </span>
         </div>
@@ -239,9 +235,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="CoFMPy" class="md-nav__button md-logo" aria-label="CoFMPy" data-md-component="logo">
+    <a href="../../.." title="CoFMPy" class="md-nav__button md-logo" aria-label="CoFMPy" data-md-component="logo">
       
-  <img src="../../assets/logo_cofmpy_light.png" alt="logo">
+  <img src="../../../assets/logo_cofmpy_light.png" alt="logo">
 
     </a>
     CoFMPy
@@ -268,7 +264,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -295,7 +291,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/" class="md-nav__link">
+      <a href="../../../getting_started/" class="md-nav__link">
         
   
   
@@ -319,10 +315,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -340,11 +334,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -365,7 +359,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -383,7 +377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../configuration_file/" class="md-nav__link">
+      <a href="../../configuration_file/" class="md-nav__link">
         
   
   
@@ -411,7 +405,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../cosimulation_initialization/" class="md-nav__link">
+      <a href="../../cosimulation_initialization/" class="md-nav__link">
         
   
   
@@ -436,37 +430,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Managing data sources
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../data_sources/" class="md-nav__link">
         
   
   
@@ -482,70 +449,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#single-values-the-simplest-approach" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Single values, the simplest approach
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-csv-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A CSV file
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-kafka-stream" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A Kafka stream
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#custom-data-sources" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Custom data sources
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -558,7 +461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../helpers/" class="md-nav__link">
+      <a href="../../helpers/" class="md-nav__link">
         
   
   
@@ -637,7 +540,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../advanced/custom_stream_handler/" class="md-nav__link">
+      <a href="../custom_stream_handler/" class="md-nav__link">
         
   
   
@@ -702,7 +605,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../generated/gallery/" class="md-nav__link ">
+            <a href="../../../generated/gallery/" class="md-nav__link ">
               
   
   
@@ -799,7 +702,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../generated/gallery/plot_00_get_started/" class="md-nav__link">
+      <a href="../../../generated/gallery/plot_00_get_started/" class="md-nav__link">
         
   
   
@@ -827,7 +730,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../generated/gallery/plot_01_fmu_proxy/" class="md-nav__link">
+      <a href="../../../generated/gallery/plot_01_fmu_proxy/" class="md-nav__link">
         
   
   
@@ -916,7 +819,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../generated/gallery/academic_examples/plot_00_bouncing_ball/" class="md-nav__link">
+      <a href="../../../generated/gallery/academic_examples/plot_00_bouncing_ball/" class="md-nav__link">
         
   
   
@@ -944,7 +847,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../generated/gallery/academic_examples/plot_01_dual_mass_oscillator/" class="md-nav__link">
+      <a href="../../../generated/gallery/academic_examples/plot_01_dual_mass_oscillator/" class="md-nav__link">
         
   
   
@@ -1015,7 +918,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../api/" class="md-nav__link ">
+            <a href="../../../api/" class="md-nav__link ">
               
   
   
@@ -1059,7 +962,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/coordinator/" class="md-nav__link">
+      <a href="../../../api/coordinator/" class="md-nav__link">
         
   
   
@@ -1087,7 +990,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/master/" class="md-nav__link">
+      <a href="../../../api/master/" class="md-nav__link">
         
   
   
@@ -1115,7 +1018,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/wrappers/" class="md-nav__link">
+      <a href="../../../api/wrappers/" class="md-nav__link">
         
   
   
@@ -1143,7 +1046,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/config_parser/" class="md-nav__link">
+      <a href="../../../api/config_parser/" class="md-nav__link">
         
   
   
@@ -1171,7 +1074,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/graph_engine/" class="md-nav__link">
+      <a href="../../../api/graph_engine/" class="md-nav__link">
         
   
   
@@ -1206,7 +1109,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../contributing/" class="md-nav__link">
+      <a href="../../../contributing/" class="md-nav__link">
         
   
   
@@ -1253,10 +1156,77 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#single-values-the-simplest-approach" class="md-nav__link">
+  <a href="#1-initialization" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Single values, the simplest approach
+        1. Initialization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Initialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-creating-from-a-dictionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Creating from a dictionary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Creating from a dictionary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Usage
       
     </span>
   </a>
@@ -1264,32 +1234,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#a-csv-file" class="md-nav__link">
+  <a href="#4-logging-and-error-handling" class="md-nav__link">
     <span class="md-ellipsis">
       
-        A CSV file
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-kafka-stream" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A Kafka stream
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#custom-data-sources" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Custom data sources
+        4. Logging and Error Handling
       
     </span>
   </a>
@@ -1316,112 +1264,74 @@
   
 
 
-<h1 id="managing-data-sources">Managing data sources<a class="headerlink" href="#managing-data-sources" title="Permanent link">&para;</a></h1>
-<p>External data can be useful to control variable parameters, to use as input from an
-other system simulation or just to get from measurements from a physical twin.
-CoFMPy provides multiple data source handlers detailed below.</p>
-<p>Whatever the data source, the connection between the data source and the target variable
-of the simulation is defined in the JSON configuration file as a connection:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;connections&quot;</span><span class="p">:</span><span class="err"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fmu_target&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;variable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_variable&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_unit&quot;</span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="err">...</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">]</span>
+<h1 id="kafkahandlerconfig">KafkaHandlerConfig<a class="headerlink" href="#kafkahandlerconfig" title="Permanent link">&para;</a></h1>
+<p><code>KafkaHandlerConfig</code> is a <strong>dataclass</strong> used to configure Kafka connections for data handlers. It provides default values and validates configuration parameters automatically.</p>
+<hr />
+<h2 id="1-initialization">1. Initialization<a class="headerlink" href="#1-initialization" title="Permanent link">&para;</a></h2>
+<p>You can create an instance by passing the required parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">your_module</span><span class="w"> </span><span class="kn">import</span> <span class="n">KafkaHandlerConfig</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">KafkaHandlerConfig</span><span class="p">(</span>
+    <span class="n">topic</span><span class="o">=</span><span class="s2">&quot;my_topic&quot;</span><span class="p">,</span>
+    <span class="n">server_url</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+    <span class="n">port</span><span class="o">=</span><span class="s2">&quot;9092&quot;</span><span class="p">,</span>
+    <span class="n">group_id</span><span class="o">=</span><span class="s2">&quot;my_group&quot;</span><span class="p">,</span>
+    <span class="n">variable</span><span class="o">=</span><span class="s2">&quot;temperature&quot;</span>
+<span class="p">)</span>
 </code></pre></div>
-<h2 id="single-values-the-simplest-approach">Single values, the simplest approach<a class="headerlink" href="#single-values-the-simplest-approach" title="Permanent link">&para;</a></h2>
-<p>If your variable is fixed or only changes a few times, this is the simplest way to
-define the values. This is done directly in the JSON configuration file. The expected
-format is a dictionary with times and values. For example <code>{"0": 1.0, "0.5": 2.8}</code>
-corresponds to a variable that takes value 1.0 at the beginning of the simulation (t=0)
-and have a single change at t=0.5 with the value 2.8. You can have either zero changes
-(i.e. a fixed value for the whole simulation) or any changes you want.</p>
-<p>The JSON configuration file must follow the syntax below:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;local&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;0&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;0.1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">12.2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;0.5&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">8.6</span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FMU2&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;variable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Iload_in&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>In case the variable has many changes, we suggest to use the second method, a CSV file.</p>
-<h2 id="a-csv-file">A CSV file<a class="headerlink" href="#a-csv-file" title="Permanent link">&para;</a></h2>
-<p>Data can be read directly from a CSV file. It must contain a first column with the time
-instants, and other following columns with the values for one or several variables. A
-file must start with a header containing the names of the columns: <code>t</code> for the first
-column and the variable names for others, e.g. <code>t,R,V_out,Iload</code>.</p>
-<p>Here is an example of data source CSV file:</p>
-<div class="highlight"><pre><span></span><code>t,R,V_out,Iload
-0,100,5,0
-0.1,100,5,0.8
-0.5,100,10,0.8
-0.7,200,5,2.5
-</code></pre></div>
-<p>To connect CSV data to an FMU variable in CoFMPy, the connection is described in the
-JSON configuration file as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;csv&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;path/to/the/file.csv&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;variable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;R&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;interpolation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;previous&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ohm&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;resistor&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;variable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;R&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ohm&quot;</span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Note that a parameter can be defined when configuring the CSV source handler:</p>
+<h3 id="optional-parameters">Optional Parameters<a class="headerlink" href="#optional-parameters" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>interpolation</code>: specifies the type of interpolation used when the system needs a
-  value between two time points in the CSV file. It can be set to <code>previous</code>, which
-  returns the previous value, or <code>linear</code>, which calculates a linearly interpolated
-  value between the previous and next points. For example in the CSV file above, if
-  <code>R</code> must be retrieved at t=0.65, if <code>interpolation="previous"</code> the data handler will
-  return 100, being the previous value at t=0.5. If <code>interpolation="linear"</code> the data
-  handler will return 175, being the linear interpolation between t=0.5 (R=100) and
-  t=0.7 (R=200).</li>
+<li><code>timeout</code> (float, default <code>0.1</code>): Maximum wait time for Kafka operations (seconds). Must be non-negative.</li>
+<li><code>interpolation</code> (str, default <code>"previous"</code>): Method to interpolate missing data. Must be one of the registered methods in <code>Interpolator</code>.</li>
+<li><code>auto_offset_reset</code> (str, default <code>"earliest"</code>): Kafka consumer offset reset strategy. Options: <code>"earliest"</code>, <code>"latest"</code>, <code>"none"</code>.</li>
+<li><code>enable_auto_commit</code> (bool, default <code>True</code>): Whether Kafka consumer auto-commits offsets.</li>
 </ul>
-<h2 id="a-kafka-stream">A Kafka stream<a class="headerlink" href="#a-kafka-stream" title="Permanent link">&para;</a></h2>
-<p>The last data source proposed in CoFMPy is a Kafka broker. Data is retrieved from a
-Kafka topic in a specific format: a message must contain the time instants and their
-corresponding values. For example, a message with three values must be formatted as a
-list of tuples:</p>
-<div class="highlight"><pre><span></span><code><span class="p">[</span>
-<span class="w">    </span><span class="err">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="err">)</span><span class="p">,</span>
-<span class="w">    </span><span class="err">(</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="err">)</span><span class="p">,</span>
-<span class="w">    </span><span class="err">(</span><span class="mf">1.3</span><span class="p">,</span><span class="w"> </span><span class="mi">52</span><span class="err">)</span>
-<span class="p">]</span>
-</code></pre></div>
-<p>TODO: a topic per variable? Or a common topic and variables are received in the message?</p>
-<p>To connect the Kafka topic to a FMU variable, the connection is described in the JSON
-configuration file as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kafka&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;localhost:5000&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;group_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_group&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;topic&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V_in&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;variable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V_in&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;voltage_source&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;variable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V_in&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;V&quot;</span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Some parameters of the Kafka stream must be set:</p>
+<h3 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>uri</code>: the address of the Kafka server (with port information)</li>
-<li><code>group_id</code>: the consumer group id</li>
-<li><code>topic</code>: the topic to listen to</li>
+<li><code>port</code> must be numeric.</li>
+<li><code>timeout</code> must be non-negative.</li>
+<li><code>auto_offset_reset</code> must be a valid value (<code>earliest</code>, <code>latest</code>, <code>none</code>).</li>
+<li><code>interpolation</code> must be a valid method registered in <code>Interpolator</code>.</li>
 </ul>
-<h2 id="custom-data-sources">Custom data sources<a class="headerlink" href="#custom-data-sources" title="Permanent link">&para;</a></h2>
-<p>For advanced users, it is possible to create your own custom data stream handler that
-feeds FMUs with external data. See page
-<a href="../advanced/custom_stream_handler/">Create your own data stream handler</a>.</p>
+<hr />
+<h2 id="2-creating-from-a-dictionary">2. Creating from a dictionary<a class="headerlink" href="#2-creating-from-a-dictionary" title="Permanent link">&para;</a></h2>
+<p>You can build a configuration from a dictionary (e.g., loaded from <code>config.json</code>) using <code>from_dict</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">config_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost:9092&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;topic&quot;</span><span class="p">:</span> <span class="s2">&quot;my_topic&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;variable&quot;</span><span class="p">:</span> <span class="s2">&quot;temperature&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;group_id&quot;</span><span class="p">:</span> <span class="s2">&quot;my_group&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="s2">&quot;interpolation&quot;</span><span class="p">:</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;auto_offset_reset&quot;</span><span class="p">:</span> <span class="s2">&quot;latest&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;enable_auto_commit&quot;</span><span class="p">:</span> <span class="kc">False</span>
+<span class="p">}</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">KafkaHandlerConfig</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">config_dict</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The <code>uri</code> field must be in the form <code>"server_url:port"</code>.</li>
+<li>Required dictionary keys: <code>"uri"</code>, <code>"topic"</code>, <code>"variable"</code>, <code>"group_id"</code>. Missing keys will raise a <code>KeyError</code>.</li>
+<li>Optional keys override the default values.</li>
+</ul>
+<hr />
+<h2 id="3-usage">3. Usage<a class="headerlink" href="#3-usage" title="Permanent link">&para;</a></h2>
+<p>Once created, <code>KafkaHandlerConfig</code> instances store all necessary Kafka connection parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">topic</span><span class="p">)</span>           <span class="c1"># &quot;my_topic&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">server_url</span><span class="p">)</span>      <span class="c1"># &quot;localhost&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>            <span class="c1"># &quot;9092&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">interpolation</span><span class="p">)</span>   <span class="c1"># &quot;linear&quot;</span>
+</code></pre></div>
+<ul>
+<li>This object is typically passed to <code>KafkaDataStreamHandler</code> classes that manage consumption or production of data streams.</li>
+</ul>
+<hr />
+<h2 id="4-logging-and-error-handling">4. Logging and Error Handling<a class="headerlink" href="#4-logging-and-error-handling" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Missing required dictionary keys are logged with <code>logger.error</code>.</li>
+<li>Invalid values for <code>port</code>, <code>timeout</code>, <code>auto_offset_reset</code>, or <code>interpolation</code> raise <code>ValueError</code> during initialization.</li>
+</ul>
 
 
 
@@ -1471,16 +1381,16 @@ feeds FMUs with external data. See page
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
-        <script src="../../js/custom.js"></script>
+        <script src="../../../js/custom.js"></script>
       
     
   </body>
