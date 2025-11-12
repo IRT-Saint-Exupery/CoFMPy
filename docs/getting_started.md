@@ -26,24 +26,18 @@ We've already prepared FMUs and configuration file associated to this scenario. 
 
 ```python
 import os
-import requests
+import urllib.request
 import zipfile
 
 url = "https://share-is.pf.irt-saintexupery.com/s/39zaG9HkQWnePbi/download"
-# Local path to ressources folder
-ressources_path = "example1.zip"  #
-# Download the file
-response = requests.get(url, stream=True)
-with open(ressources_path, "wb") as f:
-    for chunk in response.iter_content(chunk_size=8192):
-        f.write(chunk)
-    print(f"Ressources downloaded as {ressources_path}.")
-# Unzip the file
-with zipfile.ZipFile("example1.zip", "r") as zip_ref:
+resources_path = "example1.zip"
+
+urllib.request.urlretrieve(url, resources_path)
+with zipfile.ZipFile(resources_path, "r") as zip_ref:
     zip_ref.extractall(".")
-# remove the zip file
-os.remove(ressources_path)
-print("Ressources unzipped in example1 folder!")
+os.remove(resources_path)
+
+print("Resources unzipped in example1 folder!")
 ```
 
 ### Step 1: Instantiate the Coordinator
