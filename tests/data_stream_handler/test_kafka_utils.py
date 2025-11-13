@@ -22,8 +22,6 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import unittest
-from unittest.mock import patch
 
 from cofmpy.data_stream_handler.kafka_utils import KafkaHandlerConfig
 
@@ -77,96 +75,3 @@ def test_invalid_interpolation(interp):
 def test_malformed_uri():
     with pytest.raises(ValueError, match="Malformed URI"):
         KafkaHandlerConfig(topic="t", uri="justahost", variable="v", group_id="g")
-
-# class TestKafkaHandlerConfig(unittest.TestCase):
-#     def setUp(self):
-#         self.valid_config_dict = {
-#             "uri": "localhost:9092",
-#             "topic": "test-topic",
-#             "variable": "some-var",
-#             "group_id": "group-123",
-#         }
-
-#     def test_valid_init(self):
-#         config = KafkaHandlerConfig(
-#             topic="topic1",
-#             server_url="localhost",
-#             port="9092",
-#             group_id="group1",
-#             variable="var1",
-#             timeout=1.0,
-#             interpolation="previous",
-#             auto_offset_reset="earliest",
-#             enable_auto_commit=True,
-#         )
-#         self.assertEqual(config.port, "9092")
-#         self.assertEqual(config.timeout, 1.0)
-
-#     def test_invalid_port(self):
-#         with self.assertRaises(ValueError) as context:
-#             KafkaHandlerConfig(
-#                 topic="t",
-#                 server_url="host",
-#                 port="not-a-port",
-#                 group_id="gid",
-#                 variable="v",
-#             )
-#         self.assertIn("Port must be numeric", str(context.exception))
-
-#     def test_negative_timeout(self):
-#         with self.assertRaises(ValueError) as context:
-#             KafkaHandlerConfig(
-#                 topic="t",
-#                 server_url="host",
-#                 port="9092",
-#                 group_id="gid",
-#                 variable="v",
-#                 timeout=-1,
-#             )
-#         self.assertIn("Timeout must be non-negative", str(context.exception))
-
-#     def test_invalid_auto_offset_reset(self):
-#         with self.assertRaises(ValueError) as context:
-#             KafkaHandlerConfig(
-#                 topic="t",
-#                 server_url="host",
-#                 port="9092",
-#                 group_id="gid",
-#                 variable="v",
-#                 auto_offset_reset="unknown",
-#             )
-#         self.assertIn("Invalid auto_offset_reset", str(context.exception))
-
-#     def test_invalid_interpolation(self):
-#         with self.assertRaises(ValueError) as context:
-#             KafkaHandlerConfig(
-#                 topic="t",
-#                 server_url="host",
-#                 port="9092",
-#                 group_id="gid",
-#                 variable="v",
-#                 interpolation="not-valid",
-#             )
-#         self.assertIn("Invalid interpolation method", str(context.exception))
-
-#     def test_from_dict_valid(self):
-#         config = KafkaHandlerConfig.from_dict(self.valid_config_dict)
-#         self.assertEqual(config.server_url, "localhost")
-#         self.assertEqual(config.port, "9092")
-
-#     @patch("cofmpy.data_stream_handler.kafka_utils.logger")
-#     def test_from_dict_missing_keys(self, mock_logger):
-#         config = {"uri": "localhost:9092", "topic": "t"}
-#         with self.assertRaises(KeyError):
-#             KafkaHandlerConfig.from_dict(config)
-#         mock_logger.error.assert_called()
-
-#     def test_from_dict_malformed_uri(self):
-#         config = {"uri": "localhost", "topic": "t", "group_id": "gid", "variable": "v"}
-#         with self.assertRaises(ValueError) as context:
-#             KafkaHandlerConfig.from_dict(config)
-#         self.assertIn("Malformed URI", str(context.exception))
-
-
-# if __name__ == "__main__":
-#     unittest.main()
