@@ -179,7 +179,9 @@ class KafkaThreadManager:
             self.start_time = time.time()
         if not self.running:
             self.running = True
+            # Create a background thread to run the consume loop
             self.thread = threading.Thread(target=self._consume_loop)
+            # Make it a daemon so it stops with the main program
             self.thread.daemon = True
             self.thread.start()
             logger.info(
