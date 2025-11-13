@@ -64,7 +64,7 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             "variable": variable,
         }
         kwargs.update(positional)
-        self.config = KafkaHandlerConfig.from_dict(kwargs)
+        self.config = KafkaHandlerConfig(**kwargs)
         logger.debug(f"Parsed config for {self}: {vars(self.config)}")
 
         # Data-related instances
