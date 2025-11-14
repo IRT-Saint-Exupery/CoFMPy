@@ -44,7 +44,8 @@ from typing import Union
 
 from cofmpy.config_interface import ConfigConnectionFmu
 from cofmpy.config_interface import ConfigConnectionStorage
-from cofmpy.config_interface import ConfigConnectionStream
+from cofmpy.config_interface import ConfigConnectionLocalStream
+from cofmpy.config_interface import ConfigConnectionCsvStream
 from cofmpy.config_interface import ConfigObject
 from cofmpy.config_interface import FMU_TYPE
 
@@ -229,15 +230,39 @@ class ConfigParser:
             for target in connection.target:
 
                 # source is external data
-                if isinstance(source, ConfigConnectionStream):
-
-                    handler_key = (target.id, target.variable)
-                    handler_val = {
-                        "type": source.type,
-                        "config": {"values": source.values},
-                    }
-                    self.stream_handlers[handler_key] = handler_val
-
+                if isinstance(source, ConfigConnectionLocalStream) or isinstance(source, ConfigConnectionCsvStream):
+                    # If target is FMU => it's a stream handler
+                    if isinstance(target, ConfigConnectionFmu):
+                        handler_key = (target.id, target.variable)
+                        if isinstance(source, ConfigConnectionLocalStream):
+                            handler_val = {
+                                "type": source.type,
+                                "config": {
+                                    "values": source.values,
+                                    "interpolation": source.interpolation
+                                },
+                            }
+                        else:
+                            handler_val = {
+                                "type": source.type,
+                                "config": {
+                                    "path": source.path,
+                                    "variable": source.variable,
+                                    "interpolation": source.interpolation
+                                },
+                            }
+                        if handler_key not in self.stream_handlers:
+                            self.stream_handlers[handler_key] = handler_val
+                    # Si ce n'est pas un fmu, c'est un input à stocker dans les storages
+                    elif isinstance(target, ConfigConnectionStorage):
+                        for target2 in connection.target:
+                            if isinstance(target2, ConfigConnectionFmu):
+                                self.data_storages[target.id]["config"]["labels"].append(
+                                    target.alias
+                                )
+                                self.data_storages[target.id]["config"]["items"].append(
+                                    (target2.id, target2.variable)
+                                )
 
                 # target is external data
                 elif isinstance(target, ConfigConnectionStorage):

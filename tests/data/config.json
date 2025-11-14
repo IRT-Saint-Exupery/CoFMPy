@@ -18,11 +18,13 @@
     {
       "source": {
         "id": "source",
+        "type": "fmu",
         "variable": "V",
         "unit": "V"
       },
       "target": {
         "id": "resistor",
+        "type": "fmu",
         "variable": "V",
         "unit": "V"
       }

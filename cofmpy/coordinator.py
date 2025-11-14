@@ -221,6 +221,9 @@ class Coordinator:
 
         # Save results and data
         if save_data:
+            for input_key in data_for_master.keys():
+                for input_variable_name in data_for_master[input_key].keys():
+                    outputs[input_key][input_variable_name] = data_for_master[input_key][input_variable_name]
             self.storage_handler.notify_results(
                 "file", self.master.current_time, outputs
             )

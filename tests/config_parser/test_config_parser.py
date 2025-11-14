@@ -162,10 +162,9 @@ def test_build_handlers_config():
         "connections": [
             {
                 "source": {
-                    "id": "ext_source",
+                    "path": "ext_source",
                     "variable": "data",
-                    "type": "csv",
-                    "unit": "",
+                    "type": "csv"
                 },
                 "target": [{"id": "FMU1", "variable": "x", "type": "fmu", "unit": ""}],
             }
@@ -181,7 +180,7 @@ def test_add_symbolic_nodes():
         "fmus": [],
         "connections": [
             {
-                "source": {"type": "csv", "variable": "data"},
+                "source": {"path": "ext_source", "type": "csv", "variable": "data"},
                 "target": [{"id": "FMU1", "variable": "x", "type": "fmu"}],
             }
         ],

@@ -4,6 +4,8 @@ from typing import Dict
 from dataclasses import dataclass
 
 FMU_TYPE = "fmu"
+CSV_TYPE = "csv"
+LITERAL_TYPE = "literal"
 
 
 class ConfigConnectionBase:
@@ -33,19 +35,44 @@ class ConfigConnectionFmu(ConfigConnectionBase):
             print(f"Unknown property is ignore : {arg}")
 
 
-class ConfigConnectionStream(ConfigConnectionBase):
+class ConfigConnectionLocalStream(ConfigConnectionBase):
     values: Dict
-    id: str
+    interpolation: str
     variable: str = ""
 
     def __init__(
         self,
         type: str,
         values: Dict,
+        interpolation="previous",
         **kwargs
     ):
         self.type = type
         self.values = values
+        self.interpolation = interpolation
+
+        # Add warning for not used properties
+        for arg in kwargs.keys():
+            print(f"Unknown property is ignore : {arg}")
+
+
+class ConfigConnectionCsvStream(ConfigConnectionBase):
+    path: str
+    variable: str = ""
+    interpolation: str
+
+    def __init__(
+        self,
+        type: str,
+        path: str,
+        variable: str,
+        interpolation="previous",
+        **kwargs
+    ):
+        self.type = type
+        self.path = path
+        self.variable = variable
+        self.interpolation = interpolation
 
         # Add warning for not used properties
         for arg in kwargs.keys():
@@ -95,7 +122,7 @@ class ConfigDataStorage:
 
 
 class ConfigConnection:
-    source: Union[ConfigConnectionFmu, ConfigConnectionStream]
+    source: Union[ConfigConnectionFmu, ConfigConnectionLocalStream, ConfigConnectionCsvStream]
     target: list[Union[ConfigConnectionFmu, ConfigConnectionStorage]] = []
 
     def __init__(
@@ -106,13 +133,15 @@ class ConfigConnection:
     ):
         if source["type"] == FMU_TYPE:
             self.source = ConfigConnectionFmu(**source)
-        else:
-            self.source = ConfigConnectionStream(**source)
+        elif source["type"] == CSV_TYPE:
+            self.source = ConfigConnectionCsvStream(**source)
+        elif source["type"] == LITERAL_TYPE:
+            self.source = ConfigConnectionLocalStream(**source)
 
         if not isinstance(target, list):
             # TODO : Manage error on config format
             print(f"target is not a list")
-            return
+            target = [target]
 
         self.target = []
         for target_dict in target:

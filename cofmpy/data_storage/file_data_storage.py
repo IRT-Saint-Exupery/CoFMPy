@@ -59,7 +59,7 @@ class FileDataStorage(BaseDataStorage):
 
         # write the header for the results file
         with open(self.file_path, mode="a", encoding="utf-8") as f:
-            f.write("t,")
+            f.write("time,")
             f.write(",".join(labels) + "\n")
 
     def save(self, variable_name, time, data, metadata=None):
@@ -75,10 +75,11 @@ class FileDataStorage(BaseDataStorage):
             metadata (dict, optional): metadata associated with the data.
         """
         with open(self.file_path, mode="a", encoding="utf-8") as f:
-            f.write(str(time) + ",")   # write time
+            f.write(str(time))   # write time
             # then write each configured output for this storage
             for fmu_id, output_name in self.items:
-                f.write(",".join(map(str, data[fmu_id][output_name])) + ",")
+                if fmu_id in data and output_name in data[fmu_id]:
+                    f.write("," + ",".join(map(str, data[fmu_id][output_name])))
             f.write("\n")
             #for d in data:
             #    f.write(",".join(map(str, d)) + "\n")
