@@ -47,7 +47,10 @@ pytestmark = pytest.mark.skipif(
 def test_kafka_resistor(kafka_resistor_test):
 
     config, expected_result, kafka_producer = kafka_resistor_test
-    var_name = config.get("variable")
+    # var_name = config.get("variable")
+    for arg in ("type", "id", "unit"):
+        _ = config.pop(arg)
+    var_name = config.pop("variable")
     node_var = ("node", "diagram_var")  # from the would-be diagram
 
     try_start_kafka_docker(docker_compose_path, command="up", options="-d")
