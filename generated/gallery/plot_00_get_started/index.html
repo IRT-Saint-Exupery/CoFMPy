@@ -1,0 +1,1652 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Python library for Cosimulation based on FMI standard">
+      
+      
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../plot_01_fmu_proxy/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/favicon_cofmpy_light.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>A first example: an AC voltage source and a resistor - CoFMPy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../css/custom.css">
+    
+      <link rel="stylesheet" href="../../../sg_gallery-dataframe.css">
+    
+      <link rel="stylesheet" href="../../../sg_gallery-rendered-html.css">
+    
+      <link rel="stylesheet" href="../../../sg_gallery.css">
+    
+      <link rel="stylesheet" href="../../../sg_gallery-binder.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="dark" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#a-first-example-an-ac-voltage-source-and-a-resistor" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="CoFMPy" class="md-header__button md-logo" aria-label="CoFMPy" data-md-component="logo">
+      
+  <img src="../../../assets/logo_cofmpy_light.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CoFMPy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              A first example: an AC voltage source and a resistor
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="dark" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/IRT-Saint-Exupery/CoFMPy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cofmpy
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="CoFMPy" class="md-nav__button md-logo" aria-label="CoFMPy" data-md-component="logo">
+      
+  <img src="../../../assets/logo_cofmpy_light.png" alt="logo">
+
+    </a>
+    CoFMPy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/IRT-Saint-Exupery/CoFMPy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    cofmpy
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/configuration_file/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration file
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/cosimulation_initialization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proper Initialization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/data_sources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Managing data sources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/helpers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Helpers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/advanced/custom_stream_handler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Create your own data stream handler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    General examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    General examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A first example: an AC voltage source and a resistor
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A first example: an AC voltage source and a resistor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-json-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The JSON configuration file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the simulation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualizing-the-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visualizing the results
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plot_01_fmu_proxy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    A follow-up example: mixing an FMU with a Python proxy FMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Academic FMU examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Academic FMU examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../academic_examples/plot_00_bouncing_ball/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The "Bouncing Ball"
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../academic_examples/plot_01_dual_mass_oscillator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The "Dual Mass Oscillator"
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API documentation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API documentation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/master/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Master
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/wrappers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FMU Wrappers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/config_parser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ConfigParser
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/graph_engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GraphEngine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-json-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The JSON configuration file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the simulation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualizing-the-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visualizing the results
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+ DO NOT EDIT.
+ THIS FILE WAS AUTOMATICALLY GENERATED BY mkdocs-gallery.
+ TO MAKE CHANGES, EDIT THE SOURCE PYTHON FILE:
+ "docs/examples/plot_00_get_started.py"
+ LINE NUMBERS ARE GIVEN BELOW.
+-->
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a href="#download_links">here</a>
+to download the full example code</p>
+</div>
+<h1 id="a-first-example-an-ac-voltage-source-and-a-resistor">A first example: an AC voltage source and a resistor<a class="headerlink" href="#a-first-example-an-ac-voltage-source-and-a-resistor" title="Permanent link">&para;</a></h1>
+<p>This is a simple example of how to use CoFMPy to load a co-simulation system (JSON
+configuration file and FMUs) and run the simulation.</p>
+<p>The use case is a simple system with an AC voltage source and a resistor. The AC voltage
+source generates a sinusoidal voltage signal, and the resistor consumes the power from
+the source. The resistor has a variable resistance that can be changed during the
+simulation.</p>
+<p><img alt="source resistor system" src="../../../assets/source_resistor.png" /></p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 41-43 -->
+
+<p>We will first download all necessary resources such as the FMUs (source and resistor)
+and the configuration file from the public link provided below.</p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 43-62 -->
+
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://share-is.pf.irt-saintexupery.com/s/39zaG9HkQWnePbi/download&quot;</span>
+
+<span class="c1"># Local path to resources folder</span>
+<span class="n">resources_path</span> <span class="o">=</span> <span class="s2">&quot;example1.zip&quot;</span>
+
+<span class="c1"># Download and unzip the file</span>
+<span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">resources_path</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">resources_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_ref</span><span class="p">:</span>
+    <span class="n">zip_ref</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+<span class="c1"># Remove the zip file</span>
+<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">resources_path</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Resources unzipped in example1 folder!&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p class="mkd-glr-script-out">Out:</p>
+<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>Resources<span class="w"> </span>unzipped<span class="w"> </span><span class="k">in</span><span class="w"> </span>example1<span class="w"> </span>folder!
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 63-71 -->
+
+<p>Now that we have all the necessary resources, we can start the example.</p>
+<p>The base object in CoFMPy is the <a href="../../../api/coordinator/"><strong>Coordinator</strong></a>. It
+manages all the components of CoFMPy: the Master algorithm, the graph engine, the data
+stream handlers, etc. In this tutorial, we only deal with the Coordinator that
+communicates automatically with the different components.</p>
+<p>We will first import the Coordinator object from CoFMPy and create an instance of it.</p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 71-76 -->
+
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">cofmpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Coordinator</span>
+
+<span class="n">coordinator</span> <span class="o">=</span> <span class="n">Coordinator</span><span class="p">()</span>
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 77-87 -->
+
+<h2 id="the-json-configuration-file">The JSON configuration file<a class="headerlink" href="#the-json-configuration-file" title="Permanent link">&para;</a></h2>
+<p>The first step is to create the JSON configuration file based on your simulation
+system. This file must contain the information about the FMUs, the connections between
+them, and the simulation settings. For more information, check the page on <a href="../../../user_guide/configuration_file/">how to
+create a JSON configuration file</a>, see this
+page. The system also requires input data to run the simulation (here, the variable
+resistor from a CSV file).</p>
+<p>Here is the content of the configuration file for this example:</p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 87-92 -->
+
+<div class="highlight"><pre><span></span><code><span class="n">config_path</span> <span class="o">=</span> <span class="s2">&quot;example1/config_with_csv.json&quot;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</code></pre></div>
+<p class="mkd-glr-script-out">Out:</p>
+<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code><span class="o">{</span>
+<span class="w">  </span><span class="s2">&quot;fmus&quot;</span>:<span class="w"> </span><span class="o">[</span>
+<span class="w">    </span><span class="o">{</span>
+<span class="w">      </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;source&quot;</span>,
+<span class="w">      </span><span class="s2">&quot;path&quot;</span>:<span class="w"> </span><span class="s2">&quot;example1/source.fmu&quot;</span>,
+<span class="w">      </span><span class="s2">&quot;supplier&quot;</span>:<span class="w"> </span><span class="s2">&quot;IRT Saint Exupéry&quot;</span>
+<span class="w">    </span><span class="o">}</span>,
+<span class="w">    </span><span class="o">{</span>
+<span class="w">      </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;resistor&quot;</span>,
+<span class="w">      </span><span class="s2">&quot;path&quot;</span>:<span class="w"> </span><span class="s2">&quot;example1/resistor.fmu&quot;</span>,
+<span class="w">      </span><span class="s2">&quot;initialization&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;R&quot;</span>:<span class="w"> </span><span class="m">0</span>.5
+<span class="w">      </span><span class="o">}</span>,
+<span class="w">      </span><span class="s2">&quot;supplier&quot;</span>:<span class="w"> </span><span class="s2">&quot;IRT Saint Exupéry&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="w">  </span><span class="o">]</span>,
+<span class="w">  </span><span class="s2">&quot;connections&quot;</span>:<span class="w"> </span><span class="o">[</span>
+<span class="w">    </span><span class="o">{</span>
+<span class="w">      </span><span class="s2">&quot;source&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;source&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;variable&quot;</span>:<span class="w"> </span><span class="s2">&quot;V&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;unit&quot;</span>:<span class="w"> </span><span class="s2">&quot;V&quot;</span>
+<span class="w">      </span><span class="o">}</span>,
+<span class="w">      </span><span class="s2">&quot;target&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;resistor&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;variable&quot;</span>:<span class="w"> </span><span class="s2">&quot;V&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;unit&quot;</span>:<span class="w"> </span><span class="s2">&quot;V&quot;</span>
+<span class="w">      </span><span class="o">}</span>
+<span class="w">    </span><span class="o">}</span>,
+<span class="w">    </span><span class="o">{</span>
+<span class="w">      </span><span class="s2">&quot;source&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;type&quot;</span>:<span class="w"> </span><span class="s2">&quot;csv&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;path&quot;</span>:<span class="w"> </span><span class="s2">&quot;example1/resistor.csv&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;variable&quot;</span>:<span class="w"> </span><span class="s2">&quot;R&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;unit&quot;</span>:<span class="w"> </span><span class="s2">&quot;Ohm&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;interpolation&quot;</span>:<span class="w"> </span><span class="s2">&quot;previous&quot;</span>
+<span class="w">      </span><span class="o">}</span>,
+<span class="w">      </span><span class="s2">&quot;target&quot;</span>:<span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;id&quot;</span>:<span class="w"> </span><span class="s2">&quot;resistor&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;variable&quot;</span>:<span class="w"> </span><span class="s2">&quot;R&quot;</span>,
+<span class="w">        </span><span class="s2">&quot;unit&quot;</span>:<span class="w"> </span><span class="s2">&quot;Ohm&quot;</span>
+<span class="w">      </span><span class="o">}</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="w">  </span><span class="o">]</span>,
+<span class="w">  </span><span class="s2">&quot;cosim_method&quot;</span>:<span class="w"> </span><span class="s2">&quot;jacobi&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;edge_sep&quot;</span>:<span class="w"> </span><span class="s2">&quot; -&gt; &quot;</span>
+<span class="o">}</span>
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 93-108 -->
+
+<p>In the JSON configuration file, you can see the following information:</p>
+<ul>
+<li>The 2 FMUs used in the system: an AC voltage source and a resistor</li>
+<li>2 connections:<ul>
+<li>the output of the source is connected to the input of the resistor</li>
+<li>the resistance value of the resistor is set by a CSV file</li>
+</ul>
+</li>
+<li>The simulation settings: the cosimulation method and the edge separator (used in the graph
+  visualization).</li>
+</ul>
+<p>The next step is to load the configuration file via the Coordinator. This will start
+the multiple components to handle the whole simulation process:</p>
+<ul>
+<li>the Master: the main process that controls the co-simulation</li>
+<li>the data stream handlers: the objects that read and write data from/to the system</li>
+<li>the graph engine</li>
+</ul>
+<!-- GENERATED FROM PYTHON SOURCE LINES 108-111 -->
+
+<div class="highlight"><pre><span></span><code><span class="n">coordinator</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span>
+</code></pre></div>
+<p class="mkd-glr-script-out">Out:</p>
+<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>Skipping<span class="w"> </span>Fixed<span class="w"> </span>Point<span class="w"> </span>Initialization
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 112-115 -->
+
+<p>You can access the attributes of the components of the Coordinator object. For
+example, you can access the co-simulation method via the
+<code>master.cosim_method</code> attribute.</p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 115-127 -->
+
+<div class="highlight"><pre><span></span><code><span class="c1"># We can check the list of FMUs in the Master or the cosimulation method used</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FMUs in Master:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">coordinator</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">fmu_handlers</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cosimulation method: </span><span class="si">{</span><span class="n">coordinator</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">cosim_method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># ... and the stream handlers (here, the CSV source). Keys are (fmu_name, var_name)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">CSV data stream handler key:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">coordinator</span><span class="o">.</span><span class="n">stream_handlers</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">csv_data_handler</span> <span class="o">=</span> <span class="n">coordinator</span><span class="o">.</span><span class="n">stream_handlers</span><span class="p">[(</span><span class="s2">&quot;resistor&quot;</span><span class="p">,</span> <span class="s2">&quot;R&quot;</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CSV path for resistance value R:&quot;</span><span class="p">,</span> <span class="n">csv_data_handler</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CSV data for R (as Pandas dataframe):</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">csv_data_handler</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</code></pre></div>
+<p class="mkd-glr-script-out">Out:</p>
+<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>FMUs<span class="w"> </span><span class="k">in</span><span class="w"> </span>Master:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;source&#39;</span>,<span class="w"> </span><span class="s1">&#39;resistor&#39;</span><span class="o">]</span>
+Cosimulation<span class="w"> </span>method:<span class="w"> </span>jacobi
+
+CSV<span class="w"> </span>data<span class="w"> </span>stream<span class="w"> </span>handler<span class="w"> </span>key:<span class="w"> </span><span class="o">(</span><span class="s1">&#39;resistor&#39;</span>,<span class="w"> </span><span class="s1">&#39;R&#39;</span><span class="o">)</span>
+CSV<span class="w"> </span>path<span class="w"> </span><span class="k">for</span><span class="w"> </span>resistance<span class="w"> </span>value<span class="w"> </span>R:<span class="w"> </span>example1/resistor.csv
+CSV<span class="w"> </span>data<span class="w"> </span><span class="k">for</span><span class="w"> </span>R<span class="w"> </span><span class="o">(</span>as<span class="w"> </span>Pandas<span class="w"> </span>dataframe<span class="o">)</span>:
+<span class="w">       </span>t<span class="w">    </span>R
+<span class="m">0</span><span class="w">  </span><span class="m">0</span>.00<span class="w">  </span><span class="m">1</span>.0
+<span class="m">1</span><span class="w">  </span><span class="m">0</span>.42<span class="w">  </span><span class="m">1</span>.5
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 128-130 -->
+
+<p>You can also visualize the graph of the system using the <code>plot_graph</code> method. This
+method will plot the connections between the FMUs in the system.</p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 130-133 -->
+
+<div class="highlight"><pre><span></span><code><span class="n">coordinator</span><span class="o">.</span><span class="n">graph_engine</span><span class="o">.</span><span class="n">plot_graph</span><span class="p">()</span>
+</code></pre></div>
+<div class="output_subarea output_html rendered_html output_result">
+    <div>            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script type="text/javascript">if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+            <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.2.0.min.js" integrity="sha256-iZ2u/oU2wf/vDbl/ChcX93WgbBRSBvUO6N413hDz7xM=" crossorigin="anonymous"></script>                <div id="4f5b1237-3c74-44f9-a4b0-7e34d51cf3c2" class="plotly-graph-div" style="height:400px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("4f5b1237-3c74-44f9-a4b0-7e34d51cf3c2")) {                    Plotly.newPlot(                        "4f5b1237-3c74-44f9-a4b0-7e34d51cf3c2",                        [{"hoverinfo":"text","hovertext":["id: source\u003cbr\u003epath: example1\u002fsource.fmu\u003cbr\u003esupplier: IRT Saint Exup\u00e9ry\u003cbr\u003einitialization: {}"],"marker":{"color":"rgba(148, 120, 255, 1.0)","line":{"width":3},"showscale":false,"size":40},"mode":"markers+text","name":"source","text":"source","textposition":"top center","x":[-0.237176573927214],"y":[1.0],"type":"scatter"},{"hoverinfo":"text","hovertext":["V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V",null,"","","","",null],"line":{"color":"#888","width":3},"mode":"lines","showlegend":false,"text":["V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V","V -\u003e V",null,"","","","",null],"x":[-0.237176573927214,-0.20573320709043247,-0.1748246238019453,-0.14445082406175247,-0.11461180786985399,-0.08530757522624982,-0.05653812613093997,-0.028303460583924592,-0.0006035785852034244,0.02656151986522332,0.053191834767355825,0.07928736612119389,0.10484811392673768,0.12987407818398705,0.15436525889294214,0.17832165605360284,0.20174326966596923,0.22463009973004128,0.24698214624581893,0.26879940921330236,0.2900818886324913,0.31082958450338605,0.3310424968259863,0.3507206256002924,0.36986397082630396,0.3884725325040213,0.4065463106334442,0.4240853052145728,0.4410895162474071,0.45755894373194705,0.4734935876681926,0.4888934480561439,0.5037585248958008,0.5180888181871633,0.5318843279302317,0.5451450541250054,0.557870996771485,0.5700621558696701,0.581718531419561,0.5928401234211575,0.6034269318744596,0.6134789567794675,0.622996198136181,0.6319786559446001,0.6404263302047248,0.6483392209165553,0.6557173280800915,0.6625606516953333,0.6688691917622807,0.6746429482809337,null,0.6677031201731776,0.6839298986451704,0.6445365135934286,0.6677031201731776,null],"y":[1.0,0.9891002821790338,0.9777448444802461,0.9659336869036369,0.9536668094492058,0.9409442121169529,0.9277658949068786,0.9141318578189828,0.9000421008532652,0.8854966240097257,0.8704954272883647,0.8550385106891822,0.8391258742121779,0.8227575178573521,0.8059334416247046,0.7886536455142356,0.7709181295259446,0.7527268936598321,0.7340799379158979,0.7149772622941422,0.6954188667945647,0.6754047514171656,0.654934916161945,0.6340093610289026,0.6126280860180386,0.5907910911293529,0.5684983763628456,0.5457499417185168,0.5225457871963661,0.4988859127963939,0.4747703185186001,0.45019900436298443,0.42517197032954723,0.39968921641828836,0.3737507426292078,0.3473565489623057,0.320506635417582,0.2932010019950365,0.2654396486946694,0.2372225755164808,0.2085497824604704,0.17942126952663834,0.1498370367149846,0.11979708402550925,0.08930141145821241,0.05835001901309376,0.026942906690153458,-0.004919925510608492,-0.0372384775891921,-0.07001274954559734,null,-0.030619364493855494,-0.007452757914106496,-0.01439258602186265,-0.030619364493855494,null],"type":"scatter"},{"hoverinfo":"text","hovertext":["id: resistor\u003cbr\u003epath: example1\u002fresistor.fmu\u003cbr\u003einitialization: {'R': 0.5}\u003cbr\u003esupplier: IRT Saint Exup\u00e9ry"],"marker":{"color":"rgba(206, 195, 183, 1.0)","line":{"width":3},"showscale":false,"size":40},"mode":"markers+text","name":"resistor","text":"resistor","textposition":"top center","x":[0.6746429482809337],"y":[-0.07001274954559734],"type":"scatter"},{"hoverinfo":"text","hovertext":[],"line":{"color":"#888","width":3},"mode":"lines","showlegend":false,"text":[],"x":[],"y":[],"type":"scatter"},{"hoverinfo":"text","hovertext":["id: source_csv_R\u003cbr\u003eid_as_list: ['source', 'csv', 'R']\u003cbr\u003eloc: [1, 'source']"],"marker":{"color":"rgba(0, 210, 77, 1.0)","line":{"width":3},"showscale":false,"size":8.0},"mode":"markers+text","name":"source_csv_R","text":"source_csv_R","textposition":"top center","x":[-0.4374663743537206],"y":[-0.9299872504544029],"type":"scatter"},{"hoverinfo":"text","hovertext":["R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R",null,"","","","",null],"line":{"color":"#888","width":3},"mode":"lines","showlegend":false,"text":["R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R","R -\u003e R",null,"","","","",null],"x":[-0.4374663743537206,-0.425085661657792,-0.412275140798144,-0.39903481177477645,-0.38536467458768925,-0.3712647292368827,-0.3567349757223564,-0.3417754140441108,-0.3263860442021456,-0.3105668661964609,-0.2943178800270566,-0.27763908569393286,-0.2605304831970896,-0.24299207253652685,-0.22502385371224454,-0.2066258267242428,-0.18779799157252142,-0.16854034825708053,-0.14885289677792013,-0.12873563713504016,-0.10818856932844077,-0.0872116933581218,-0.06580500922408342,-0.04396851692632536,-0.02170221646484785,0.0009938921603492024,0.02411980894926566,0.04767553390190171,0.07166106701825736,0.0960764082983325,0.12092155774212698,0.14619651534964118,0.17190128112087483,0.1980358550558281,0.22460023715450084,0.251594427416893,0.2790184258430047,0.306872232432836,0.3351558471863868,0.363869270103657,0.3930125011846468,0.4225855404293562,0.4525883878377851,0.4830210434099335,0.5138835071458012,0.5451757790453887,0.5768978591086957,0.6090497473357223,0.6416314437264682,0.6746429482809337,null,0.6349644306516193,0.6125945968657258,0.6176557468081985,0.6349644306516193,null],"y":[-0.9299872504544029,-0.8990969967949237,-0.8687625662038166,-0.838983958681082,-0.8097611742267192,-0.7810942128407287,-0.7529830745231103,-0.7254277592738644,-0.6984282670929903,-0.6719845979804885,-0.6460967519363587,-0.6207647289606012,-0.595988529053216,-0.5717681522142029,-0.5481035984435619,-0.5249948677412933,-0.5024419601073967,-0.48044487554187226,-0.4590036140447199,-0.4381181756159398,-0.4177885602555319,-0.39801476796349616,-0.37879679873983274,-0.36013465258454125,-0.342028329497622,-0.32447782947907494,-0.3074831525289001,-0.2910442986470974,-0.27516126783366684,-0.2598340600886085,-0.24506267541192234,-0.23084711380360828,-0.21718737526366647,-0.20408345979209674,-0.1915353673888992,-0.17954309805407395,-0.1681066517876208,-0.15722602858953977,-0.14690122845983095,-0.13713225139849433,-0.12791909740552987,-0.11926176648093756,-0.11116025862471743,-0.10361457383686945,-0.09662471211739371,-0.09019067346629009,-0.08431245788355864,-0.07899006536919936,-0.07422349592321227,-0.07001274954559734,null,-0.07507389948806989,-0.057765215644648975,-0.09744373327396333,-0.07507389948806989,null],"type":"scatter"}],                        {"font":{"size":16},"height":400,"hovermode":"closest","margin":{"b":10,"l":20,"r":20,"t":40},"plot_bgcolor":"white","showlegend":true,"updatemenus":[{"buttons":[{"args":[{"visible":[true,true,true,true,true,true]},{"title":"","xaxis":{"range":null,"showgrid":false,"showticklabels":false},"yaxis":{"range":null,"showgrid":false,"showticklabels":false}}],"label":"All","method":"update"},{"args":[{"visible":[true,true,true,true,true,true]},{"title":"Zoom on source","xaxis":{"range":[-0.337176573927214,-0.137176573927214],"showgrid":false,"showticklabels":false},"yaxis":{"range":[0.9,1.1],"showgrid":false,"showticklabels":false}}],"label":"source","method":"update"},{"args":[{"visible":[true,true,true,true,true,true]},{"title":"Zoom on resistor","xaxis":{"range":[0.5746429482809338,0.7746429482809337],"showgrid":false,"showticklabels":false},"yaxis":{"range":[-0.17001274954559736,0.02998725045440266],"showgrid":false,"showticklabels":false}}],"label":"resistor","method":"update"},{"args":[{"visible":[true,true,true,true,true,true]},{"title":"Zoom on source_csv_R","xaxis":{"range":[-0.5374663743537206,-0.3374663743537206],"showgrid":false,"showticklabels":false},"yaxis":{"range":[-1.029987250454403,-0.8299872504544029],"showgrid":false,"showticklabels":false}}],"label":"source_csv_R","method":"update"}],"direction":"down","showactive":true}],"xaxis":{"gridcolor":"white","showgrid":false,"showticklabels":false,"zeroline":false,"zerolinecolor":"white"},"yaxis":{"gridcolor":"white","showgrid":false,"showticklabels":false,"zeroline":false,"zerolinecolor":"white"},"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}}},                        {"responsive": true}                    )                };            </script>        </div>
+</div>
+
+<!-- GENERATED FROM PYTHON SOURCE LINES 134-144 -->
+
+<h2 id="running-the-simulation">Running the simulation<a class="headerlink" href="#running-the-simulation" title="Permanent link">&para;</a></h2>
+<p>After loading the configuration file, you can run the simulation by calling the
+<a href="../../../api/coordinator/#cofmpy.coordinator.Coordinator.do_step"><code>do_step</code> method</a>.
+This method will run the simulation for a given time step via the Master algorithm.</p>
+<p>The <code>do_step</code> method will save the results in the data storages defined in the
+configuration file. You can access the data storages using the <code>data_storages</code>
+attribute of the Coordinator object. By default, a data storage for all outputs is
+created in the "storage/results.csv" file (see below).</p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 144-165 -->
+
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current time of the co-simulation: </span><span class="si">{</span><span class="n">coordinator</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">current_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">time_step</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">coordinator</span><span class="o">.</span><span class="n">do_step</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;Current time of the co-simulation after one step: &quot;</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coordinator</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">current_time</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Run N steps</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">coordinator</span><span class="o">.</span><span class="n">do_step</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Current time of the co-simulation after </span><span class="si">{</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> steps: &quot;</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">coordinator</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">current_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p class="mkd-glr-script-out">Out:</p>
+<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>Current<span class="w"> </span><span class="nb">time</span><span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>co-simulation:<span class="w"> </span><span class="m">0</span>.0
+Current<span class="w"> </span><span class="nb">time</span><span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>co-simulation<span class="w"> </span>after<span class="w"> </span>one<span class="w"> </span>step:<span class="w"> </span><span class="m">0</span>.01
+Current<span class="w"> </span><span class="nb">time</span><span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>co-simulation<span class="w"> </span>after<span class="w"> </span><span class="m">101</span><span class="w"> </span>steps:<span class="w"> </span><span class="m">1</span>.01
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 166-175 -->
+
+<p>It is possible to run the simulation until a specific end time by using the
+<a href="../../../api/coordinator/#cofmpy.coordinator.Coordinator.run_simulation"><code>run_simulation</code>
+method</a>. This
+method will run the simulation until the end time and return the results of the
+simulation. Note that you should recreate a new Coordinator from scratch. It is not
+possible to mix both <code>do_step</code> and <code>run_simulation</code> methods in the same Coordinator
+object.</p>
+<p>At the end of the simulation, you can also manually save results to a CSV file:</p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 175-178 -->
+
+<div class="highlight"><pre><span></span><code><span class="n">coordinator</span><span class="o">.</span><span class="n">save_results</span><span class="p">(</span><span class="s2">&quot;simulation_results.csv&quot;</span><span class="p">)</span>
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 179-183 -->
+
+<h2 id="visualizing-the-results">Visualizing the results<a class="headerlink" href="#visualizing-the-results" title="Permanent link">&para;</a></h2>
+<p>Results can be accessible directly in the Master object or in the CSV file we just
+saved.</p>
+<!-- GENERATED FROM PYTHON SOURCE LINES 183-189 -->
+
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;simulation_results.csv&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</code></pre></div>
+<p class="mkd-glr-script-out">Out:</p>
+<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code><span class="w">   </span><span class="nb">time</span><span class="w">  </span>resistor.I<span class="w">   </span>source.V
+<span class="m">0</span><span class="w">  </span><span class="m">0</span>.00<span class="w">    </span><span class="m">0</span>.000000<span class="w">   </span><span class="m">0</span>.000000
+<span class="m">1</span><span class="w">  </span><span class="m">0</span>.01<span class="w">    </span><span class="m">0</span>.000000<span class="w">   </span><span class="m">1</span>.255810
+<span class="m">2</span><span class="w">  </span><span class="m">0</span>.02<span class="w">    </span><span class="m">1</span>.255810<span class="w">   </span><span class="m">2</span>.506665
+<span class="m">3</span><span class="w">  </span><span class="m">0</span>.03<span class="w">    </span><span class="m">2</span>.506665<span class="w">   </span><span class="m">3</span>.747626
+<span class="m">4</span><span class="w">  </span><span class="m">0</span>.04<span class="w">    </span><span class="m">3</span>.747626<span class="w">   </span><span class="m">4</span>.973798
+<span class="m">5</span><span class="w">  </span><span class="m">0</span>.05<span class="w">    </span><span class="m">4</span>.973798<span class="w">   </span><span class="m">6</span>.180340
+<span class="m">6</span><span class="w">  </span><span class="m">0</span>.06<span class="w">    </span><span class="m">6</span>.180340<span class="w">   </span><span class="m">7</span>.362491
+<span class="m">7</span><span class="w">  </span><span class="m">0</span>.07<span class="w">    </span><span class="m">7</span>.362491<span class="w">   </span><span class="m">8</span>.515586
+<span class="m">8</span><span class="w">  </span><span class="m">0</span>.08<span class="w">    </span><span class="m">8</span>.515586<span class="w">   </span><span class="m">9</span>.635073
+<span class="m">9</span><span class="w">  </span><span class="m">0</span>.09<span class="w">    </span><span class="m">9</span>.635073<span class="w">  </span><span class="m">10</span>.716536
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 190-194 -->
+
+<div class="highlight"><pre><span></span><code><span class="n">results</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<p><img alt="plot 00 get started" class="mkd-glr-single-img" src="../images/mkd_glr_plot_00_get_started_001.png" srcset="../images/mkd_glr_plot_00_get_started_001.png" /></p>
+<p class="mkd-glr-script-out">Out:</p>
+<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>&lt;Axes:<span class="w"> </span><span class="nv">xlabel</span><span class="o">=</span><span class="s1">&#39;time&#39;</span>&gt;
+</code></pre></div>
+<!-- GENERATED FROM PYTHON SOURCE LINES 195-197 -->
+
+<p>We can observe that the change of resistance value at t = 0.42s effectively changes
+the current <span class="arithmatex">\(I = U/R\)</span> flowing through the resistor.</p>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  3.621 seconds)</p>
+<div id="download_links"></div>
+
+<p><a class="md-button center" href="../plot_00_get_started.py"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M256 32c0-17.7-14.3-32-32-32s-32 14.3-32 32v210.7l-41.4-41.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c12.5 12.5 32.8 12.5 45.3 0l96-96c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 242.7zM64 320c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64v-32c0-35.3-28.7-64-64-64h-46.9l-56.6 56.6c-31.2 31.2-81.9 31.2-113.1 0L110.9 320zm304 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48"/></svg></span> Download Python source code: plot_00_get_started.py</a></p>
+<p><a class="md-button center" href="../plot_00_get_started.ipynb"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M256 32c0-17.7-14.3-32-32-32s-32 14.3-32 32v210.7l-41.4-41.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c12.5 12.5 32.8 12.5 45.3 0l96-96c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 242.7zM64 320c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64v-32c0-35.3-28.7-64-64-64h-46.9l-56.6 56.6c-31.2 31.2-81.9 31.2-113.1 0L110.9 320zm304 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48"/></svg></span> Download Jupyter notebook: plot_00_get_started.ipynb</a></p>
+<p><a class="mkd-glr-signature" href="https://smarie.github.io/mkdocs-gallery">Gallery generated by mkdocs-gallery</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="../../../js/custom.js"></script>
+      
+    
+  </body>
+</html>
