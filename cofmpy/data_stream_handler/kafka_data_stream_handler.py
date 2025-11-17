@@ -27,7 +27,6 @@ This module contains the child class for Kafka data stream handler.
 """
 import json
 import logging
-import threading
 import time
 
 import pandas as pd
@@ -38,6 +37,7 @@ from confluent_kafka import KafkaException
 from ..utils import Interpolator
 from .base_data_stream_handler import BaseDataStreamHandler
 from .kafka_utils import KafkaHandlerConfig
+from .kafka_utils import KafkaThreadManager
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             "variable": variable,
         }
         kwargs.update(positional)
-        self.config = KafkaHandlerConfig.from_dict(kwargs)
+        self.config = KafkaHandlerConfig(**kwargs)
         logger.debug(f"Parsed config for {self}: {vars(self.config)}")
 
         # Data-related instances
@@ -72,22 +72,28 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         self.data = pd.DataFrame(columns=["t", self.config.variable])
 
         self._subscribed = False
-        self.consumer_thread = None
-        self.running = False
         self.first_received = None
+        self.consumer = self._create_consumer()
 
-        self._start_consumer()
-        self.start_consuming()
+        self.thread_manager = KafkaThreadManager(self.consumer, self._handle_message)
+        self.start_consumer_thread()
 
-    def _start_consumer(self):
-        """Creates and configures a Kafka consumer"""
+    def _create_consumer(self):
+        """Creates and configures a Kafka consumer
+
+        Returns:
+            confluent_kafka.Consumer: Consumer instance
+        """
         kafka_config = {
             "bootstrap.servers": f"{self.config.server_url}:{self.config.port}",
             "group.id": f"{self.config.group_id}_{self.config.variable}",
             "enable.auto.commit": self.config.enable_auto_commit,
             "auto.offset.reset": self.config.auto_offset_reset,
         }
-        self.consumer = Consumer(kafka_config)
+        logger.debug(f"Creating Kafka consumer with config: {kafka_config}")
+        consumer = Consumer(kafka_config)
+        logger.debug("Kafka consumer created successfully.")
+        return consumer
 
     def _lazy_subscribe(self):
         """One-time subscription"""
@@ -131,14 +137,14 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
 
                     self.config.timeout = -1
 
-                xp = data["t"]
-                # xp = data.index
-                yp = data[self.config.variable]
+                x_p = data["t"]
+                # x_p = data.index
+                y_p = data[self.config.variable]
 
-                return self.interpolator(xp, yp, [t])
+                return self.interpolator(x_p, y_p, [t])
 
-            except Exception as e:
-                logger.error(f"Error: {e}")
+            except (AttributeError, KeyError, ValueError) as error:
+                logger.error(f"Error: {error}")
 
             time.sleep(0.05)
 
@@ -178,31 +184,30 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
 
         return row
 
-    def _consume(self):
-        """Run the consumer in a non-blocking mode."""
-        try:
-            while self.running:
-                msg = self.consumer.poll(timeout=1)
-                if msg is None:
-                    msg_list = None
-                else:
-                    msg_list = [msg]
-                # msg_list = self.consumer.consume(timeout=0.5)
-
-                if msg_list is None:
-                    # time.sleep(0.01)
-                    continue  # No new messages, continue polling
-
-                for msg in msg_list:
-                    self._handle_message(msg)
-
-        except Exception as e:
-            logger.error(f"Error consuming messages: {e}")
-        finally:
-            self.consumer.close()
-
     def _handle_message(self, message):
-        """Process an individual Kafka message."""
+        """
+        Process a single Kafka message (typically used as callback
+        for KafkaThreadManager).
+
+        * If the message has an error, log an end-of-partition warning or raise
+        `kafka.KafkaException` for other errors.
+        * Otherwise parse the payload, merge it into `self.data`
+        (dropping duplicates), and mark the first successful message.
+        * All `AttributeError`, `KeyError`, or
+        `ValueError` raised during processing are logged and ignored.
+
+        Parameters
+        ----------
+        message : confluent_kafka.Message
+            A message returned by the consumer.
+
+        Notes
+        -----
+        * `self.first_received` is set only once, after the first
+        successfully parsed message.
+        * `self.data` is updated with new rows and reset-indexed; empty
+        frames are ignored.
+        """
         try:
             if message.error():
                 if message.error().code() == KafkaError._PARTITION_EOF:
@@ -229,24 +234,15 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
                         f"(offset: {message.offset()})"
                     )
                     self.first_received = message
-        except Exception as e:
-            logger.error(f"Error handling messages: {e}")
+        except (AttributeError, KeyError, ValueError) as error:
+            logger.error(f"Error handling messages: {error}")
 
-    def start_consuming(self):
+    def start_consumer_thread(self):
         """Start the consumer in a background thread."""
-        try:
-            if not self.running:
-                self.running = True
-                self.consumer_thread = threading.Thread(target=self._consume)
-                self.consumer_thread.daemon = True
-                self.consumer_thread.start()
-                logger.info(f"Consumer thread started: {self.consumer_thread.name}")
-        except Exception as e:
-            logger.error(f"Error while start consuming messages: {e}")
+        logger.debug("Starting Kafka consumer thread.")
+        self.thread_manager.start()
 
-    def stop_consuming(self):
+    def stop_consumer_thread(self):
         """Stop the consumer gracefully."""
-        if self.running:
-            self.running = False
-            self.consumer_thread.join()  # Wait for the consumer thread to finish
-            logger.info("Consumer thread stopped.")
+        logger.debug("Stopping Kafka consumer thread.")
+        self.thread_manager.stop()
