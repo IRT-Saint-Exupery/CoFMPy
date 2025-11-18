@@ -352,9 +352,9 @@ def kafka_resistor_test():
 def literal_two_resistors_test():
     config = {
         "fmus": [
-            {"id": "source", "path": "tests/data/source.fmu"},
-            {"id": "resistor_1", "path": "tests/data/resistor3.fmu"},
-            {"id": "resistor_2", "path": "tests/data/resistor3.fmu"},
+            {"id": "source", "path": "resources/fmus/source.fmu"},
+            {"id": "resistor_1", "path": "resources/fmus/resistor3.fmu"},
+            {"id": "resistor_2", "path": "resources/fmus/resistor3.fmu"},
         ],
         "connections": [
             {
@@ -415,9 +415,9 @@ def literal_two_resistors_test():
 def kakfa_two_resistors_test():
     config = {
         "fmus": [
-            {"id": "source", "path": "tests/data/source.fmu"},
-            {"id": "resistor_1", "path": "tests/data/resistor3.fmu"},
-            {"id": "resistor_2", "path": "tests/data/resistor3.fmu"},
+            {"id": "source", "path": "resources/fmus/source.fmu"},
+            {"id": "resistor_1", "path": "resources/fmus/resistor3.fmu"},
+            {"id": "resistor_2", "path": "resources/fmus/resistor3.fmu"},
         ],
         "connections": [
             {

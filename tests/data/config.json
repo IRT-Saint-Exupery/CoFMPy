@@ -2,12 +2,12 @@
   "fmus": [
     {
       "id": "source",
-      "path": "source.fmu",
+      "path": "resources/fmus/source.fmu",
       "supplier": "IRT Saint Exupéry"
     },
     {
       "id": "resistor",
-      "path": "resistor.fmu",
+      "path": "resources/fmus/resistor.fmu",
       "initialization": {
         "R": 0.5
       },

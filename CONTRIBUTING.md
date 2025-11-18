@@ -34,7 +34,9 @@ We love hearing about new ideas for features or improvements! To suggest a featu
 We welcome code contributions! If you want to submit code, please follow the steps
 below.
 
-1. **Fork the repository** and clone your fork to your local machine.
+1. **Fork the repository** and clone your fork to your local machine. As some files are
+   stored with Git LFS, don't forget to install git-lfs with `git lfs install` and then
+   run `git lfs checkout` to retrieve the actual LFS files after cloning.
 2. **Create a new branch** for your changes. Try to name it meaningfully, such as
    `fix/bug-description` or `feature/feature-name`.
 3. **Make your changes**. Ensure that your changes don't break the existing

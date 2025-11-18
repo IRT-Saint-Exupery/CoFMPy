@@ -45,7 +45,7 @@ use_cases = [
             "fmu_config_list": [
                 {
                     "id": "ball",
-                    "path": "tests/wrappers/assets/BouncingBall.fmu",
+                    "path": "resources/fmus/BouncingBall.fmu",
                     "initialization": {"e": 0.6},  # coefficient of restitution
                 }
             ],
@@ -70,12 +70,12 @@ use_cases = [
             "fmu_config_list": [
                 {
                     "id": "source",
-                    "path": "tests/data/source.fmu",
+                    "path": "resources/fmus/source.fmu",
                     "initialization": {"phase": 0.9},
                 },
                 {
                     "id": "resistor",
-                    "path": "tests/data/resistor.fmu",
+                    "path": "resources/fmus/resistor.fmu",
                     "initialization": {"R": 5.0},
                 },
             ],
@@ -101,12 +101,12 @@ use_cases = [
             "fmu_config_list": [
                 {
                     "id": "source",
-                    "path": "tests/data/source.fmu",
+                    "path": "resources/fmus/source.fmu",
                     "initialization": {"phase": 0.9},
                 },
                 {
                     "id": "resistor",
-                    "path": "tests/data/resistor.fmu",
+                    "path": "resources/fmus/resistor.fmu",
                     "initialization": {"R": 5.0},
                 },
             ],

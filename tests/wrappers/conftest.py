@@ -69,7 +69,7 @@ float_precision = 2
 nb_steps = 5
 current_time = 0.0
 
-DIR = "tests/wrappers/assets"
+DIR = "resources/fmus"
 fmu_2_path = os.path.join(DIR, "TimeFMU2.fmu")
 fmu_3_path = os.path.join(DIR, "BouncingBall.fmu")
 fmu_proxy_path = os.path.join(DIR, "resistor.py")
