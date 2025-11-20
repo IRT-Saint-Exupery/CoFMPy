@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import patch
+from cofmpy.data_stream_handler import CsvDataStreamHandler
 
-
-class CsvHandlerSeparated:
+class CsvHandlerSeparated(CsvDataStreamHandler):
     """Custom class to test one-handler-instance 
     per csv file ("separated") behaviour"""
     def _is_equivalent_stream(self, config):
