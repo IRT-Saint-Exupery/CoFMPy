@@ -18,10 +18,10 @@ The `data_stream_handler` module provides a unified interface for ingesting and 
 ### Included Handlers
 
 * **CSVDataStreamHandler** (`csv`): Reads data from a static CSV file.
-* **KafkaDataStreamHandler** (`kafka`): Connects to a Kafka topic, consumes real-time messages in a separate thread, and manages buffering and interpolation.
-* **LocalDataStreamHandler**: Provides a lightweight in-memory option for development or unit testing.
+* **KafkaDataStreamHandler** (`kafka`): Connects to a Kafka topic, consumes real-time messages in a separate thread and manages buffering.
+* **LocalDataStreamHandler**: Provides a lightweight in-memory option for development, unit testing, or variable with very few variations in time.
 
-Each handler need to include (explained below):
+Each handler needs to include (explained below):
 
 * `get_data(t)`
 * `is_equivalent_stream(config)`
@@ -52,7 +52,7 @@ The `BaseDataStreamHandler` provides the abstract common interface for all data 
 * Defines a uniform API for time-based data retrieval (`get_data`)
 * Enables extensibility through a registry and factory method
 * Manages alias mappings between CoFMPy connections and stream variables
-* Supports equivalence checks for instance grouping or deduplication (`is_equivalent_stream`)
+* Supports equivalence checks for grouping data streams in a single handler (`is_equivalent_stream`)
 
 ### Core Methods
 
@@ -63,7 +63,7 @@ The `BaseDataStreamHandler` provides the abstract common interface for all data 
   Updates the mapping between a COFMPy connection variable (as a `(node, endpoint)` tuple) and its name in the data stream.
 
 * `is_equivalent_stream(config: dict) -> bool`
-  Used to check if a new config would produce an equivalent stream handler instance (e.g., same file path, topic, etc.).
+  Used to check if a new config would produce an equivalent stream handler instance (e.g., same CSV file path, same Kafka topic, etc.).
 
 ### Handler Registration and Factory
 
@@ -134,7 +134,7 @@ Lightweight handler designed for manually provided in-memory data.
 
 #### Notes
 
-* Values can be passed dinamically in the workflow.
+* Values can be passed dynamically in the workflow.
 
 ### 3.3. KafkaDataStreamHandler (`type: "kafka"`)
 
@@ -157,7 +157,7 @@ This handler is suited for live Digital Twin deployments or fast-loop simulation
     }
 }
 ```
-The configuration dictionary is parsed into a strongly typed `KafkaHandlerConfig` dataclass via `KafkaHandlerConfig.from_dict()`. The `"kafka_backend_conf"` argument allows to kafka network-specific configuration as a separate JSON. Example `backend_config.json` with the available arguments:
+The configuration dictionary is parsed into a `KafkaHandlerConfig` dataclass (where data types are enforced) via `KafkaHandlerConfig.from_dict()`. The `"kafka_backend_conf"` argument allows to kafka network-specific configuration as a separate JSON. Example `backend_config.json` with the available arguments:
 
 ```json
 {
@@ -179,7 +179,7 @@ To manage Kafka consumption robustly and efficiently, the handler relies on util
 
 * A dataclass that encapsulates all Kafka-related configuration fields (e.g., topic, group ID, server URL).
 * Used to validate and control default values for incoming configuration data.
-* It also reads and parses eventual network-related configuration from a separate JSON.
+* It also reads and parses optional network-related configuration from a separate JSON.
 
 ##### `KafkaThreadManager`
 
@@ -206,8 +206,8 @@ To manage Kafka consumption robustly and efficiently, the handler relies on util
 
    * For the first message, the consumption loop retries until `first_msg_timeout` is reached, pausing for `first_delay` between attempts.
    * After the first message is received (to allow for Kafka broker consumer group stabilization, etc.), the loop continues retrying for up to `max_retries` sessions. Each session consists of sequential attempts until `timeout` is reached, with a `retry_delay` pause between each attempt.
-   * As new messages arrive, they are parsed and stored in a thread-safe `sortedcontainers.SortedDict` buffer, which scales at O(log n) and supports efficient indexing.
-   * The buffer is keyed by timestamp (`t`) to enable efficient interpolation.
+   * As new messages arrive, they are parsed and added to self.data in a thread safe way.
+   * The data is fetched in `_build_out_dict` method using timestamp (`t`) and the interpolation method.
 
 3. **Data Access:**
 
@@ -223,7 +223,6 @@ To manage Kafka consumption robustly and efficiently, the handler relies on util
 * Kafka topics must publish messages containing a `t` timestamp field when used the default code.
 * Otherwise, you can override `_handle_message` and/or `parse_kafka_message` if a custom workflow is required (decoding, data structure, etc.).
 * Lazy subscription ensures the consumer is only connected when needed.
-* When interpolation mode is 'previous', interpolation uses `SortedDict` methods instead of `Interpolator` ones (faster). This behaviour is specified in `utils.lookup_with_window` function.
 
 ---
 ## 4. Interpolation
@@ -241,7 +240,7 @@ All data stream handlers support time-based interpolation when returning values 
 
 Interpolation is configured per handler using the `interpolation` field in the config:
 
-```python
+```json
 "interpolation": "linear"
 ```
 
