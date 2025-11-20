@@ -127,8 +127,8 @@ class Coordinator:
             for output_name in outputs:
                 output_names.append(f"{fmu_id}.{output_name}")
         for handler in self.stream_handlers:
-            for (node, endpoint), _ in handler.alias_mapping.items():
-                output_names.append(f"{node}.{endpoint}")
+            for (fmu, variable), _ in handler.alias_mapping.items():
+                output_names.append(f"{fmu}.{variable}")
         self.data_storages["results"].save("results", [["t"] + output_names])
 
     def get_results(self) -> dict:

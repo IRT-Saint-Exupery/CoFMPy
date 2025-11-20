@@ -12,7 +12,7 @@ The `data_stream_handler` module provides a unified interface for ingesting and 
 * **Modularity & Extensibility:** All stream handlers inherit from `BaseDataStreamHandler`, which defines the standard interface and registration mechanism for new handlers.
 * **Handler Factory:** Stream handler instances are dynamically instantiated using the `BaseDataStreamHandler.create_handler()` factory method, based on the configuration dictionary.
 * **Grouped data streams:** Control over dynamic instantiation and variable assignment is provided by `BaseDataStreamHandler.is_equivalent_stream()` and `BaseDataStreamHandler.add_variable()` methods, respectively.
-* **Alias Mapping:** A mechanism for mapping CoFMPy internal connections (as `(node, endpoint)` tuples) to external variables in the input data stream.
+* **Alias Mapping:** A mechanism for mapping CoFMPy internal connections (as `(fmu, variable)` tuples) to external variables in the input data stream.
 * **Data Interpolation:** Each handler supports time-based interpolation (e.g., step-wise or linear), using the shared `Interpolator` utility.
 
 ### Included Handlers
@@ -25,7 +25,7 @@ Each handler needs to include (explained below):
 
 * `get_data(t)`
 * `is_equivalent_stream(config)`
-* `add_variable(endpoint, alias)`
+* `add_variable(variable, alias)`
 
 ### Example Use
 
@@ -59,8 +59,8 @@ The `BaseDataStreamHandler` provides the abstract common interface for all data 
 * `get_data(t: float) -> pd.Series`
   Must be implemented by child classes to return the data at time `t`. Interpolation behavior is defined per handler instance.
 
-* `add_variable(endpoint: tuple, stream_alias: str)`
-  Updates the mapping between a COFMPy connection variable (as a `(node, endpoint)` tuple) and its name in the data stream.
+* `add_variable(variable: tuple, stream_alias: str)`
+  Updates the mapping between a COFMPy connection variable (as a `(fmu, variable)` tuple) and its name in the data stream.
 
 * `is_equivalent_stream(config: dict) -> bool`
   Used to check if a new config would produce an equivalent stream handler instance (e.g., same CSV file path, same Kafka topic, etc.).
@@ -119,7 +119,7 @@ Reads time-indexed data from a static CSV file.
 
 * The entire CSV is loaded into memory at initialization.
 * Time interpolation is handled using the configured method (e.g., "previous", "linear").
-* Use `add_variable()` to map model endpoints to column names in the file.
+* Use `add_variable()` to map model variables to column names in the file.
 
 
 ### 3.2. LocalDataStreamHandler

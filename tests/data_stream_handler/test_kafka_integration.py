@@ -51,21 +51,21 @@ def test_kafka_resistor(kafka_resistor_test):
     for arg in ("type", "id", "unit"):
         _ = config.pop(arg)
     var_name = config.pop("variable")
-    node_var = ("node", "diagram_var")  # from the would-be diagram
+    fmu_var = ("fmu", "diagram_var")  # from the would-be diagram
 
     try_start_kafka_docker(docker_compose_path, command="up", options="-d")
     # Create and configure the handler
 
     # Start consuming with instantiation
     handler = KafkaDataStreamHandler(**config)
-    handler.add_variable(node_var, var_name)
+    handler.add_variable(fmu_var, var_name)
     time.sleep(0.1)
 
     # Start producer
     kafka_producer.start()
 
     # Collect interpolated results
-    received = [handler.get_data(t / 10)[node_var] for t in range(40)]
+    received = [handler.get_data(t / 10)[fmu_var] for t in range(40)]
 
     handler.thread_manager.stop()
     time.sleep(0.1)
