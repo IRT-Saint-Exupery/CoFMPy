@@ -34,6 +34,14 @@ class ConfigConnectionFmu(ConfigConnectionBase):
         for arg in kwargs.keys():
             print(f"Unknown property is ignore : {arg}")
 
+    def asdict(self):
+        return {
+            "type": self.type,
+            "id": self.id,
+            "variable": self.variable,
+            "unit": self.unit
+        }
+
 
 class ConfigConnectionLocalStream(ConfigConnectionBase):
     values: Dict
@@ -54,6 +62,14 @@ class ConfigConnectionLocalStream(ConfigConnectionBase):
         # Add warning for not used properties
         for arg in kwargs.keys():
             print(f"Unknown property is ignore : {arg}")
+
+    def asdict(self):
+        return {
+            "type": self.type,
+            "values": self.values,
+            "variable": self.variable,
+            "interpolation": self.interpolation
+        }
 
 
 class ConfigConnectionCsvStream(ConfigConnectionBase):
@@ -78,6 +94,14 @@ class ConfigConnectionCsvStream(ConfigConnectionBase):
         for arg in kwargs.keys():
             print(f"Unknown property is ignore : {arg}")
 
+    def asdict(self):
+        return {
+            "type": self.type,
+            "path": self.path,
+            "variable": self.variable,
+            "interpolation": self.interpolation
+        }
+
 
 class ConfigConnectionStorage(ConfigConnectionBase):
     id: str
@@ -99,6 +123,14 @@ class ConfigConnectionStorage(ConfigConnectionBase):
         for arg in kwargs.keys():
             print(f"Unknown property is ignore : {arg}")
 
+    def asdict(self):
+        return {
+            "type": self.type,
+            "id": self.id,
+            "variable": self.variable,
+            "alias": self.alias
+        }
+
 
 class ConfigDataStorage:
     name: str
@@ -119,6 +151,13 @@ class ConfigDataStorage:
         # Add warning for not used properties
         for arg in kwargs.keys():
             print(f"Unknown property is ignore : {arg}")
+
+    def asdict(self):
+        return {
+            "name": self.name,
+            "type": self.type,
+            "config": self.config
+        }
 
 
 class ConfigConnection:
@@ -180,6 +219,15 @@ class ConfigFmu:
         for arg in kwargs.keys():
             print(f"Unknown property is ignore : {arg}")
 
+    def asdict(self):
+        print('Path for fmu is '+self.path)
+        return {
+            "id": self.id,
+            "name": self.name,
+            "path": self.path,
+            "initialization": self.initialization
+        }
+
 
 class ConfigObject:
     root: str
@@ -212,3 +260,23 @@ class ConfigObject:
         # Add warning for not used properties
         for arg in kwargs.keys():
             print(f"Unknown property is ignore : {arg}")
+
+    def asdict(self):
+        connections = []
+        for connection in self.connections:
+            for target in connection.target:
+                connections.append(
+                    {
+                        "source": connection.source.asdict(),
+                        "target": target.asdict()
+                    }
+                )
+        return {
+            "root": self.root,
+            "edge_sep": self.edge_sep,
+            "cosim_method": self.cosim_method,
+            "iterative": self.iterative,
+            "fmus": [fmu.asdict() for fmu in self.fmus],
+            "connections": connections,
+            "data_storages": [storage.asdict() for storage in self.data_storages]
+        }

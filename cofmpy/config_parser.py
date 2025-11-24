@@ -103,16 +103,21 @@ class ConfigParser:
         self._build_graph_config()
 
     def get_config_dict(self):
-        config_dict = self._config_object.__dict__
+        return self._config_object.asdict()
+
+        """config_dict = self._config_object.__dict__
         config_dict["fmus"] = [fmu.__dict__ for fmu in config_dict["fmus"]]
-        config_dict["connections"] = [
-            {
-                "source": connection.source.__dict__,
-                "target": [target.__dict__ for target in connection.target]
-            } for connection in self._config_object.connections
-        ]
+
+        connections = []
+        for connection in self._config_object.connections:
+            for target in connection.target:
+                connections.append({
+                    "source": connection.source.__dict__,
+                    "target": target.__dict__
+                })
+        config_dict["connections"] = connections
         config_dict["data_storages"] = [storage.__dict__ for storage in self._config_object.data_storages]
-        return config_dict
+        return config_dict"""
 
     def _load_config(self, file_check: bool) -> ConfigObject:
         """Load JSON configuration from a file or dictionary."""
@@ -152,7 +157,7 @@ class ConfigParser:
             None. Builds self.graph_config.
         """
         self.graph_config = {}
-        self.graph_config["fmus"] = [fmu.__dict__ for fmu in self._config_object.fmus]
+        self.graph_config["fmus"] = [fmu.asdict() for fmu in self._config_object.fmus]
         self.graph_config["symbolic_nodes"] = self._add_symbolic_nodes()
         self.graph_config["connections"] = []
         self.graph_config["edge_sep"] = self._config_object.edge_sep
@@ -187,7 +192,7 @@ class ConfigParser:
             None. Builds self.master_config.
         """
 
-        self.master_config["fmus"] = [fmu.__dict__ for fmu in self._config_object.fmus]
+        self.master_config["fmus"] = [fmu.asdict() for fmu in self._config_object.fmus]
         self.master_config["connections"] = {}
         self.master_config["sequence_order"] = None
         self.master_config["cosim_method"] = self._config_object.cosim_method
