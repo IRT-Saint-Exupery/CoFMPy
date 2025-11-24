@@ -459,12 +459,8 @@ class Master:
 
         outputs = {}  # key: fmu_id, value: output_dict (var_name, value)
         # Copy useful inputs to local "inputs" variable
-        inputs = {}
-        for fmu_id in self._input_dict:
-            inputs[fmu_id] = {}
-            for input_name in self._input_dict[fmu_id]:
-                if fmu_id in fmu_ids:
-                    inputs[fmu_id][input_name] = self._input_dict[fmu_id][input_name]
+        inputs = {fmu_id: self._input_dict[fmu_id] for fmu_id in fmu_ids}
+
         current_iteration = 0
         tol = 1e-3
         max_iteration = 10
