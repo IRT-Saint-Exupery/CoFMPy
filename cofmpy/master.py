@@ -678,4 +678,5 @@ class Master:
         # If output is connected, transfer the value to the connected FMU(s)
         if (fmu_id, output_name) in self.connections:
             for target_fmu, target_variable in self.connections[(fmu_id, output_name)]:
-                input_to_update[target_fmu][target_variable] = value
+                if target_fmu in input_to_update:
+                    input_to_update[target_fmu][target_variable] = value
