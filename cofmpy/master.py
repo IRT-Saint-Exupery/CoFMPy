@@ -457,46 +457,49 @@ class Master:
                 f"Algorithm {algo} not implemented for loop solving."
             )
 
-        output = {}  # key: fmu_id, value: output_dict (var_name, value)
-        inputs = {}
+        outputs = {}  # key: fmu_id, value: output_dict (var_name, value)
+        # Copy useful inputs to local "inputs" variable
+        inputs = {fmu_id: self._input_dict[fmu_id] for fmu_id in fmu_ids}
+
         current_iteration = 0
         tol = 1e-3
         max_iteration = 10
         converged = False
-        first_iteration = True
         fmu_states = defaultdict(list)  # variable for state storage for each FMU
 
         while not converged and current_iteration < max_iteration:
+            # Save inputs for check coherence
+            inputs_before = copy.deepcopy(inputs)
             for fmu_id in fmu_ids:
                 fmu = self.fmu_handlers[fmu_id]
 
                 if iterative:
-                    if first_iteration:  # If first time => save state
+                    if fmu_id in fmu_states:  # If state exists => retrieve state
+                        fmu.set_state(fmu_states[fmu_id])
+                    else:  # Save state
                         fmu_states[fmu_id] = fmu.get_state()
-                    else:  # If not first time => retrieve state
-                        fmu.set_state(fmu_states[fmu_id])  # TODO : is exists state ?
 
-                # Save inputs for check coherence
-                inputs[fmu_id] = copy.deepcopy(self._input_dict[fmu_id])
-                output[fmu_id] = fmu.step(
-                    self.current_time, step_size, self._input_dict[fmu_id]
-                )
+                outputs[fmu_id] = fmu.step(self.current_time, step_size, inputs[fmu_id])
 
-                # Update inputs, only for gauss-seidel algo
+                # Update inputs into fmu loop, only for gauss-seidel algo
                 if algo == "gauss_seidel":
-                    self.apply_fmu_outputs_to_inputs(fmu_id, output[fmu_id])
+                    self.apply_fmu_outputs_to_inputs(inputs, fmu_id, outputs[fmu_id])
+
+            # Update inputs at the end of fmu loop, only for Jacobi algo
+            if algo == "jacobi":
+                for fmu_id in fmu_ids:
+                    self.apply_fmu_outputs_to_inputs(inputs, fmu_id, outputs[fmu_id])
 
             # Exit loop if not iterative or only 1 FMU inside loop
             if not iterative or len(fmu_ids) == 1:
                 break
 
             conv_val = True
-            residuals = self.get_residual(inputs, output)
+            residuals = self.get_residual(inputs_before, outputs)
             for fmu_id, residual in residuals.items():
                 conv_val = conv_val and residual < tol
 
             converged = conv_val
-            first_iteration = False
             current_iteration += 1
 
         """
@@ -515,7 +518,7 @@ class Master:
                     + " iterations"
                 )
         """
-        return output
+        return outputs
 
     def do_fixed_point_step(self, step_size: float, input_dict=None):
         """
@@ -550,7 +553,7 @@ class Master:
 
         # update 1 for all inputs with outputs
         for fmu_id, fmu_output_dict in self._output_dict.items():
-            self.apply_fmu_outputs_to_inputs(fmu_id, fmu_output_dict)
+            self.apply_fmu_outputs_to_inputs(self._input_dict, fmu_id, fmu_output_dict)
         self.current_time += step_size
         # Return the output value for this step
         return self._output_dict
@@ -576,6 +579,8 @@ class Master:
 
         """
         self.set_inputs(input_dict=input_dict)
+        if record_outputs:
+            self._results["time"].append(self.current_time)
         for fmu_ids in self.sequence_order:
             # out is fill with key: fmu_id, value: output_dict (var_name, value)
             out = self.solve_loop(
@@ -584,10 +589,10 @@ class Master:
 
             for fmu_id, fmu_output_dict in out.items():
                 for output_name, value in fmu_output_dict.items():
-                    if self.cosim_method == "gauss_seidel":
-                        # Update inputs connected to FMU outputs
-                        self.update_connected_inputs(fmu_id, output_name, value)
-
+                    # Update inputs connected to FMU outputs
+                    self.update_connected_inputs(
+                        self._input_dict, fmu_id, output_name, value
+                    )
                     if record_outputs:
                         # add each output to the result dict, (FMU_ID + Var) as key
                         self._results[(fmu_id, output_name)].extend(value)
@@ -595,12 +600,6 @@ class Master:
                     # add each output to the output dict, [FMU_ID][Var] as key
                     self._output_dict[fmu_id][output_name] = value
 
-        # If jacobi, update 1 for all inputs with outputs
-        if self.cosim_method == "jacobi":
-            for fmu_id, fmu_output_dict in self._output_dict.items():
-                self.apply_fmu_outputs_to_inputs(fmu_id, fmu_output_dict)
-        if record_outputs:
-            self._results["time"].append(self.current_time)
         self.current_time += step_size
         # Return the output value for this step
         return self._output_dict
@@ -634,7 +633,9 @@ class Master:
 
         return residuals
 
-    def apply_fmu_outputs_to_inputs(self, fmu_id: str, out_fmu: dict):
+    def apply_fmu_outputs_to_inputs(
+        self, input_to_update: dict, fmu_id: str, out_fmu: dict
+    ):
         """
         Performs a copy of output values into input dict.
         The copy is based on connections between given fmu/outputs and inpout dict for
@@ -645,15 +646,18 @@ class Master:
                 on a given fmu, identified by fmu_id
             fmu_id: A String identifying FMU into system. Used to find connections with
                 outputs
+            input_to_update: input dict to update
 
         Returns:
-            No return, at the end of the method, self._input_dict is fill with updated
+            No return, at the end of the method, input_to_update is fill with updated
                 values.
         """
         for output_name, value in out_fmu.items():
-            self.update_connected_inputs(fmu_id, output_name, value)
+            self.update_connected_inputs(input_to_update, fmu_id, output_name, value)
 
-    def update_connected_inputs(self, fmu_id: str, output_name: str, value):
+    def update_connected_inputs(
+        self, input_to_update: dict, fmu_id: str, output_name: str, value
+    ):
         """
         Performs a copy of output value into input dict.
         The copy is based on connections between given fmu/output name and inpout dict
@@ -665,12 +669,14 @@ class Master:
             output_name: A string that identifies name of the output. Used to find
                 connections with inputs
             value: the value to copy to inputs
+            input_to_update: input dict to update
 
         Returns:
-            No return, at the end of the method, self._input_dict is fill with updated
+            No return, at the end of the method, input_to_update is fill with updated
                 value.
         """
         # If output is connected, transfer the value to the connected FMU(s)
         if (fmu_id, output_name) in self.connections:
             for target_fmu, target_variable in self.connections[(fmu_id, output_name)]:
-                self._input_dict[target_fmu][target_variable] = value
+                if target_fmu in input_to_update:
+                    input_to_update[target_fmu][target_variable] = value
