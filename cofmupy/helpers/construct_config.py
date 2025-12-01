@@ -52,13 +52,13 @@ def check_fmu_variable(fmu_file, variable_name, from_to):
     model_desc = read_model_description(fmu_file)
     for variable in model_desc.modelVariables:
         if variable.name == variable_name:
-            if from_to == 'from' and variable.causality == 'Input':
+            if from_to == "from" and variable.causality == "Input":
                 Console().print(
                     f"❌ Error: variable '{variable_name}' on {fmu_file} "
                     f"has {variable.causality} type. It can't be used as source."
                 )
                 return False
-            elif from_to == 'to' and variable.causality == 'Output':
+            elif from_to == "to" and variable.causality == "Output":
                 Console().print(
                     f"❌ Error: variable '{variable_name}' on {fmu_file} "
                     f"has {variable.causality} type. It can't be used as target."
@@ -66,9 +66,7 @@ def check_fmu_variable(fmu_file, variable_name, from_to):
                 return False
             return True
 
-    Console().print(
-        f"❌ Error: variable '{variable_name}' not found in {fmu_file}."
-    )
+    Console().print(f"❌ Error: variable '{variable_name}' not found in {fmu_file}.")
     return False
 
 
@@ -94,36 +92,32 @@ def check_fmus(csvfile_connections, csvfile_initializations):
     connection_itr = csv.DictReader(csvfile_connections)
     for row in connection_itr:
         # Check fmu files exists
-        from_fmu_file = row['from_path'] + '/' + row['from_name']
+        from_fmu_file = row["from_path"] + "/" + row["from_name"]
         if not os.path.isfile(from_fmu_file):
-            console.print(
-                f"❌ Error: FMU file '{from_fmu_file}' not found."
-            )
+            console.print(f"❌ Error: FMU file '{from_fmu_file}' not found.")
             error = True
-        to_fmu_file = row['to_path'] + '/' + row['to_name']
+        to_fmu_file = row["to_path"] + "/" + row["to_name"]
         if not os.path.isfile(to_fmu_file):
-            console.print(
-                f"❌ Error: FMU file '{to_fmu_file}' not found."
-            )
+            console.print(f"❌ Error: FMU file '{to_fmu_file}' not found.")
             error = True
 
-        if row['from_id'] not in fmu_file_dict:
-            fmu_file_dict[row['from_id']] = from_fmu_file
-        if row['to_id'] not in fmu_file_dict:
-            fmu_file_dict[row['to_id']] = to_fmu_file
+        if row["from_id"] not in fmu_file_dict:
+            fmu_file_dict[row["from_id"]] = from_fmu_file
+        if row["to_id"] not in fmu_file_dict:
+            fmu_file_dict[row["to_id"]] = to_fmu_file
         if error:
             raise Exception("Problems occurs on check FMUs, see details above")
 
         # Check from :
         #   - Variable name exists
         #   - Type is output
-        if not check_fmu_variable(from_fmu_file, row['from_var_name'], 'from'):
+        if not check_fmu_variable(from_fmu_file, row["from_var_name"], "from"):
             error = True
 
         # Check to :
         #   - Variable name exists
         #   - Type is input
-        if not check_fmu_variable(to_fmu_file, row['to_var_name'], 'to'):
+        if not check_fmu_variable(to_fmu_file, row["to_var_name"], "to"):
             error = True
 
     # Check connection list
@@ -132,7 +126,7 @@ def check_fmus(csvfile_connections, csvfile_initializations):
         initialisation_itr = csv.DictReader(csvfile_initializations)
         for row in initialisation_itr:
             # check fmu id exists into connections list
-            if row['Fmu_id'] not in fmu_file_dict:
+            if row["Fmu_id"] not in fmu_file_dict:
                 console.print(
                     f"❌ Error: FMU id {row['Fmu_id']} not found in connections."
                 )
@@ -141,7 +135,7 @@ def check_fmus(csvfile_connections, csvfile_initializations):
 
             # Check Variable name exists
             if not check_fmu_variable(
-                    fmu_file_dict[row['Fmu_id']], row['Variable'], 'init'
+                fmu_file_dict[row["Fmu_id"]], row["Variable"], "init"
             ):
                 error = True
     if error:
@@ -167,8 +161,8 @@ def find_initialisations_for_fmu(csvfile_initializations, fmu_id):
     csvfile_initializations.seek(0)
     initialisation_itr = csv.DictReader(csvfile_initializations)
     for row in initialisation_itr:
-        if row['Fmu_id'] == fmu_id:
-            initialisation_dict[row['Variable']] = row['Value']
+        if row["Fmu_id"] == fmu_id:
+            initialisation_dict[row["Variable"]] = row["Value"]
 
     return initialisation_dict
 
@@ -192,16 +186,20 @@ def construct_fmu_list(csvfile_connections, csvfile_initializations):
     for row in connection_itr:
 
         fmu_from = {
-            "id": row['from_id'],
-            "name": row['from_id'],
-            "path": row['from_path'] + '/' + row['from_name'],
-            "initialization": find_initialisations_for_fmu(csvfile_initializations, row['from_id'])
+            "id": row["from_id"],
+            "name": row["from_id"],
+            "path": row["from_path"] + "/" + row["from_name"],
+            "initialization": find_initialisations_for_fmu(
+                csvfile_initializations, row["from_id"]
+            ),
         }
         fmu_to = {
-            "id": row['to_id'],
-            "name": row['to_id'],
-            "path": row['to_path'] + '/' + row['to_name'],
-            "initialization": find_initialisations_for_fmu(csvfile_initializations, row['to_id'])
+            "id": row["to_id"],
+            "name": row["to_id"],
+            "path": row["to_path"] + "/" + row["to_name"],
+            "initialization": find_initialisations_for_fmu(
+                csvfile_initializations, row["to_id"]
+            ),
         }
         if fmu_from not in fmus:
             fmus.append(fmu_from)
@@ -225,7 +223,7 @@ def construct_exported_outputs_list(csvfile_connections):
     csvfile_connections.seek(0)
     connection_itr = csv.DictReader(csvfile_connections)
     for row in connection_itr:
-        exported_outputs.append(row['from_id'] + '.' + row['from_var_name'])
+        exported_outputs.append(row["from_id"] + "." + row["from_var_name"])
 
     exported_outputs.sort()
     return exported_outputs
@@ -253,16 +251,16 @@ def construct_connection_list(csvfile_connections):
             {
                 "source": {
                     "type": "fmu",
-                    "id": row['from_id'],
-                    "variable": row['from_var_name'],
-                    "unit": ""
+                    "id": row["from_id"],
+                    "variable": row["from_var_name"],
+                    "unit": "",
                 },
                 "target": {
                     "type": "fmu",
-                    "id": row['to_id'],
-                    "variable": row['to_var_name'],
-                    "unit": ""
-                }
+                    "id": row["to_id"],
+                    "variable": row["to_var_name"],
+                    "unit": "",
+                },
             }
         )
     return connections
@@ -297,12 +295,12 @@ def construct_config(connections_path, initializations_path):
             return
 
     # Open and read connections_path file
-    csvfile_connections = open(connections_path, newline='')
+    csvfile_connections = open(connections_path, newline="")
 
     # Open and read initializations_path file (if any)
     csvfile_initializations = None
     if has_init_file:
-        csvfile_initializations = open(initializations_path, newline='')
+        csvfile_initializations = open(initializations_path, newline="")
 
     # Check connection_list contains correct paths to fmu
     check_fmus(csvfile_connections, csvfile_initializations)
@@ -317,7 +315,7 @@ def construct_config(connections_path, initializations_path):
         "connections": connections,
         "exported_outputs": exported_outputs,
         "edge_sep": "->",
-        "cosim_method": "jacobi"
+        "cosim_method": "jacobi",
     }
 
     # pretty print final config file into the console (json format)
@@ -326,7 +324,7 @@ def construct_config(connections_path, initializations_path):
     if connections is not None:
         print(f"Found {len(connections)} connections")
 
-    with open('config.json', 'w') as fp:
+    with open("config.json", "w") as fp:
         json.dump(config, fp, indent=4)
 
 
@@ -343,7 +341,7 @@ def main():
     parser.add_argument(
         "--initializations_file",
         help="Path to the file that contains fmus initializations",
-        required=False
+        required=False,
     )
     args = parser.parse_args()
 

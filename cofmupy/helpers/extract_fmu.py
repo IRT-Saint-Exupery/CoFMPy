@@ -39,10 +39,10 @@ import csv
 
 def display_fmu_info(fmu_path):
     """
-        Display information from an FMU file and displays it in a structured format.
+    Display information from an FMU file and displays it in a structured format.
 
-        Args:
-            fmu_path (str): Path to the FMU file.
+    Args:
+        fmu_path (str): Path to the FMU file.
     """
     console = Console()
 
@@ -100,10 +100,10 @@ def display_fmu_info(fmu_path):
 
 def retrieve_fmu_info(fmu_path):
     """
-        Retrieve information from an FMU file and return variable list.
+    Retrieve information from an FMU file and return variable list.
 
-        Args:
-            fmu_path (str): Path to the FMU file.
+    Args:
+        fmu_path (str): Path to the FMU file.
     """
     console = Console()
 
@@ -129,8 +129,10 @@ def retrieve_fmu_info(fmu_path):
             variable = {
                 "name": model_variable.name,
                 "type": model_variable.variability.capitalize(),
-                "start": model_variable.start if model_variable.start is not None else "-",
-                "category": category
+                "start": (
+                    model_variable.start if model_variable.start is not None else "-"
+                ),
+                "category": category,
             }
             variables.append(variable)
 
@@ -163,14 +165,11 @@ def export_fmu_info(fmu_path, output_file):
 
     spam_writer = None
     print(f"Create file {output_file}")
-    csvfile = open(output_file, 'w', newline='')
+    csvfile = open(output_file, "w", newline="")
     spam_writer = csv.writer(
-        csvfile, delimiter=',',
-        quotechar='|', quoting=csv.QUOTE_MINIMAL
+        csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL
     )
-    spam_writer.writerow(
-        ['Category', 'name', 'type', 'type', 'unit', 'start_value']
-    )
+    spam_writer.writerow(["Category", "name", "type", "type", "unit", "start_value"])
 
     # Extract FMU content
     unpacked_fmu_dir = fmpy.extract(fmu_path)
@@ -204,7 +203,7 @@ def export_fmu_info(fmu_path, output_file):
                 variable.variability,
                 variable.type,
                 variable.unit,
-                str(variable.start if variable.start is not None else "-")
+                str(variable.start if variable.start is not None else "-"),
             ]
         )
 
@@ -232,9 +231,9 @@ def main():
     parser.add_argument("--output_file", help="Path to the output file", required=False)
     args = parser.parse_args()
 
-    if args.action == 'display':
+    if args.action == "display":
         display_fmu_info(args.fmu_file)
-    elif args.action == 'export':
+    elif args.action == "export":
         export_fmu_info(args.fmu_file, args.output_file)
     else:
         console = Console()
