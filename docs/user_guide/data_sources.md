@@ -7,6 +7,10 @@ CoFMPy provides multiple data source handlers detailed below.
 Whatever the data source, the connection between the data source and the target variable
 of the simulation is defined in the JSON configuration file as a connection:
 
+- a `source` field defining the data handler configuration (see below the supported data
+  handlers).
+- a `target` field corresponding to the FMU variable connected to the source.
+
 ```json
 "connections": [
     {
@@ -19,25 +23,26 @@ of the simulation is defined in the JSON configuration file as a connection:
 ]
 ```
 
-## Single values, the simplest approach
+## Single values, the simplest approach (`literal` data handler)
 
 If your variable is fixed or only changes a few times, this is the simplest way to
 define the values. This is done directly in the JSON configuration file. The expected
 format is a dictionary with times and values. For example `{"0": 1.0, "0.5": 2.8}`
 corresponds to a variable that takes value 1.0 at the beginning of the simulation (t=0)
 and have a single change at t=0.5 with the value 2.8. You can have either zero changes
-(i.e. a fixed value for the whole simulation) or any changes you want.
+(i.e. a fixed value for the whole simulation) or any changes you want. As JSON only
+accepts string keys, remember that time instants must be with quote (e.g. `"0.5"`).
 
 The JSON configuration file must follow the syntax below:
 
 ```json
 {
     "source": {
-        "type": "local",
+        "type": "literal",
         "values": {"0": 0, "0.1": 12.2, "0.5": 8.6},
         "unit": "A"
     },
-    "target": {"id": "FMU2", "variable": "Iload_in", "unit": "A"}
+    "target": {"id": "FMU2", "variable": "I_load", "unit": "A"}
 }
 ```
 
@@ -45,10 +50,10 @@ In case the variable has many changes, we suggest to use the second method, a CS
 
 ## A CSV file
 
-Data can be read directly from a CSV file. It must contain a first column with the time
-instants, and other following columns with the values for one or several variables. A
-file must start with a header containing the names of the columns: `t` for the first
-column and the variable names for others, e.g. `t,R,V_out,Iload`.
+Data can be read directly from a CSV file.  The file must start with a header containing
+the names of the columns: a column titled `t` containing the time instants, and the
+other columns titled with variable names. For example, the CSV header could be
+`t,R,V_out,Iload`.
 
 Here is an example of data source CSV file:
 
@@ -69,40 +74,22 @@ JSON configuration file as follows:
         "type": "csv",
         "path": "path/to/the/file.csv",
         "variable": "R",
-        "interpolation": "previous",
         "unit": "Ohm"
     },
     "target": {"id": "resistor", "variable": "R", "unit": "Ohm"}
 }
 ```
 
-Note that a parameter can be defined when configuring the CSV source handler:
-
-- `interpolation`: specifies the type of interpolation used when the system needs a
-  value between two time points in the CSV file. It can be set to `previous`, which
-  returns the previous value, or `linear`, which calculates a linearly interpolated
-  value between the previous and next points. For example in the CSV file above, if
-  `R` must be retrieved at t=0.65, if `interpolation="previous"` the data handler will
-  return 100, being the previous value at t=0.5. If `interpolation="linear"` the data
-  handler will return 175, being the linear interpolation between t=0.5 (R=100) and
-  t=0.7 (R=200).
-
 ## A Kafka stream
 
 The last data source proposed in CoFMPy is a Kafka broker. Data is retrieved from a
 Kafka topic in a specific format: a message must contain the time instants and their
-corresponding values. For example, a message with three values must be formatted as a
-list of tuples:
+corresponding values as a dictionary:
 
 ```json
-[
-    (0, 100),
-    (0.1, 200),
-    (1.3, 52)
-]
+{"t": 0, "R": 100},
+{"t": 0.1, "R": 200}
 ```
-
-TODO: a topic per variable? Or a common topic and variables are received in the message?
 
 To connect the Kafka topic to a FMU variable, the connection is described in the JSON
 configuration file as follows:
@@ -127,8 +114,26 @@ Some parameters of the Kafka stream must be set:
 - `group_id`: the consumer group id
 - `topic`: the topic to listen to
 
+For a more detailed example of Kafka configuration, please read [Kafka Handler
+Configuration](advanced/kafka_configuration.md). For a deeper understanding of the Kafka
+Thread Manager, see [this page](advanced/kafka_thread_manager.md).
+
+## Interpolation between time instants (optional parameter)
+
+Whatever the data source, an optional parameter `interpolation` can be added to the
+configuration. This parameter specifies the type of interpolation used when the system
+needs a value between two time points. It can be set to `previous`, which returns the
+previous value (default value), or `linear`, which calculates a linearly interpolated
+value between the previous and next points. For example for a value of 100 at t=0.5 and
+200 at t=0.7, if we want to retrieve the value at t=0.65:
+
+- if `interpolation="previous"` the data handler will return 100, being the previous
+  value at t=0.5.
+- if `interpolation="linear"` the data handler will return 175, being the linear
+  interpolation between t=0.5 (R=100) and t=0.7 (R=200).
+
 ## Custom data sources
 
 For advanced users, it is possible to create your own custom data stream handler that
-feeds FMUs with external data. See page
-[Create your own data stream handler](advanced/custom_stream_handler.md).
+feeds FMUs with external data. See page [Data Stream Handler
+Module](advanced/stream_handler_module.md).
