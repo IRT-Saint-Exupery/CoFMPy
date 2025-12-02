@@ -283,6 +283,58 @@ class Master:
 
         return fmu_handlers
 
+    @property
+    def variable_names(self) -> list[tuple[str, str]]:
+        """
+        Get the names of all variables in the system.
+
+        Returns:
+            list: list of variable names as (fmu_id, var_name) tuples.
+        """
+        var_names = []
+        for fmu_id, fmu in self.fmu_handlers.items():
+            var_names += [(fmu_id, var) for var in fmu.get_variable_names()]
+        return var_names
+
+    def get_variable(self, name: tuple[str, str]):
+        """
+        Get the value of the given tuple fmu/variable.
+
+        Args:
+            name (tuple): variable name as (fmu_id, var_name).
+
+        Returns:
+            list: value of the variable, as a list.
+        """
+        fmu_id, var_name = name
+        return self.fmu_handlers[fmu_id].get_variable(var_name)
+
+    def get_causality(self, name: tuple[str, str]) -> str:
+        """
+        Gets the causality of the given variable.
+
+        Args:
+            name (tuple): variable name as (fmu_id, var_name).
+
+        Returns:
+            str: causality of the variable.
+        """
+        fmu_id, var_name = name
+        return self.fmu_handlers[fmu_id].get_causality(var_name)
+
+    def get_variable_type(self, name: tuple[str, str]) -> str:
+        """
+        Get the type of the given variable.
+
+        Args:
+            name (tuple): variable name as (fmu_id, var_name).
+
+        Returns:
+            str: type of the variable.
+        """
+        fmu_id, var_name = name
+        return self.fmu_handlers[fmu_id].get_variable_type(var_name)
+
     def initialize_values_from_config(self):
         """
         Initializes the FMU variables (inputs/outputs/parameters) with the values
