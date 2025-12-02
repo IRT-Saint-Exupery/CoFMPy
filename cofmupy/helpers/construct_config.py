@@ -58,7 +58,7 @@ def check_fmu_variable(fmu_file, variable_name, from_to):
                     f"has {variable.causality} type. It can't be used as source."
                 )
                 return False
-            elif from_to == "to" and variable.causality == "Output":
+            if from_to == "to" and variable.causality == "Output":
                 Console().print(
                     f"❌ Error: variable '{variable_name}' on {fmu_file} "
                     f"has {variable.causality} type. It can't be used as target."
@@ -295,37 +295,39 @@ def construct_config(connections_path, initializations_path):
             return
 
     # Open and read connections_path file
-    csvfile_connections = open(connections_path, newline="")
+    with open(connections_path, newline="", encoding="utf-8") as csvfile_connections:
 
-    # Open and read initializations_path file (if any)
-    csvfile_initializations = None
-    if has_init_file:
-        csvfile_initializations = open(initializations_path, newline="")
+        # Open and read initializations_path file (if any)
+        csvfile_initializations = None
+        if has_init_file:
+            csvfile_initializations = open(
+                initializations_path, newline="", encoding="utf-8"
+            )
 
-    # Check connection_list contains correct paths to fmu
-    check_fmus(csvfile_connections, csvfile_initializations)
+        # Check connection_list contains correct paths to fmu
+        check_fmus(csvfile_connections, csvfile_initializations)
 
-    fmus = construct_fmu_list(csvfile_connections, csvfile_initializations)
-    connections = construct_connection_list(csvfile_connections)
-    exported_outputs = construct_exported_outputs_list(csvfile_connections)
+        fmus = construct_fmu_list(csvfile_connections, csvfile_initializations)
+        connections = construct_connection_list(csvfile_connections)
+        exported_outputs = construct_exported_outputs_list(csvfile_connections)
 
-    # build final config file
-    config = {
-        "fmus": fmus,
-        "connections": connections,
-        "exported_outputs": exported_outputs,
-        "edge_sep": "->",
-        "cosim_method": "jacobi",
-    }
+        # build final config file
+        config = {
+            "fmus": fmus,
+            "connections": connections,
+            "exported_outputs": exported_outputs,
+            "edge_sep": "->",
+            "cosim_method": "jacobi",
+        }
 
-    # pretty print final config file into the console (json format)
-    pprint.pp(config, compact=False)
-    print(f"Found {len(fmus)} fmus")
-    if connections is not None:
-        print(f"Found {len(connections)} connections")
+        # pretty print final config file into the console (json format)
+        pprint.pp(config, compact=False)
+        print(f"Found {len(fmus)} fmus")
+        if connections is not None:
+            print(f"Found {len(connections)} connections")
 
-    with open("config.json", "w") as fp:
-        json.dump(config, fp, indent=4)
+        with open("config.json", "w", encoding="utf-8") as fp:
+            json.dump(config, fp, indent=4)
 
 
 def main():

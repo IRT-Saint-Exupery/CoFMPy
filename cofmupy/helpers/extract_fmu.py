@@ -76,7 +76,6 @@ def display_fmu_info(fmu_path):
     table.add_column("Start Value", style="white")
 
     # Iterate through variables
-    variables = []
     for variable in model_desc.modelVariables:
         category = (
             "Parameter"
@@ -110,7 +109,7 @@ def retrieve_fmu_info(fmu_path):
     # Ensure FMU exists
     if not os.path.isfile(fmu_path):
         console.print(f"[red]❌ Error: FMU file '{fmu_path}' not found.[/red]")
-        return
+        return []
 
     # Extract FMU content
     unpacked_fmu_dir = fmpy.extract(fmu_path)
@@ -155,7 +154,7 @@ def export_fmu_info(fmu_path, output_file):
 
     # Check provided output file
     if output_file is None:
-        console.print(f"[red]❌ Error: Please provide a valid export file path.[/red]")
+        console.print("[red]❌ Error: Please provide a valid export file path.[/red]")
         return
 
     # Ensure FMU exists
@@ -163,49 +162,52 @@ def export_fmu_info(fmu_path, output_file):
         console.print(f"[red]❌ Error: FMU file '{fmu_path}' not found.[/red]")
         return
 
-    spam_writer = None
-    print(f"Create file {output_file}")
-    csvfile = open(output_file, "w", newline="")
-    spam_writer = csv.writer(
-        csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL
-    )
-    spam_writer.writerow(["Category", "name", "type", "type", "unit", "start_value"])
-
     # Extract FMU content
     unpacked_fmu_dir = fmpy.extract(fmu_path)
     model_desc = fmpy.read_model_description(fmu_path)
 
-    # FMU version
-    fmu_version = model_desc.fmiVersion if model_desc.fmiVersion else "N/A"
-    console.print(f"📦 [bold]FMU Version:[/bold] {fmu_version}", style="blue")
-
-    # Integration step size (if available)
-    step_size = (
-        model_desc.defaultExperiment.stepSize if model_desc.defaultExperiment else "N/A"
-    )
-    console.print(
-        f"🕒 [bold]Default Integration Step Size:[/bold] {step_size}\n", style="blue"
-    )
-
-    # Iterate through variables
-    variables = []
-    for variable in model_desc.modelVariables:
-        category = (
-            "Parameter"
-            if variable.causality == "parameter"
-            else variable.causality.capitalize()
+    print(f"Create file {output_file}")
+    with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
+        spam_writer = csv.writer(
+            csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL
         )
-
         spam_writer.writerow(
-            [
-                category,
-                variable.name,
-                variable.variability,
-                variable.type,
-                variable.unit,
-                str(variable.start if variable.start is not None else "-"),
-            ]
+            ["Category", "name", "type", "type", "unit", "start_value"]
         )
+
+        # FMU version
+        fmu_version = model_desc.fmiVersion if model_desc.fmiVersion else "N/A"
+        console.print(f"📦 [bold]FMU Version:[/bold] {fmu_version}", style="blue")
+
+        # Integration step size (if available)
+        step_size = (
+            model_desc.defaultExperiment.stepSize
+            if model_desc.defaultExperiment
+            else "N/A"
+        )
+        console.print(
+            f"🕒 [bold]Default Integration Step Size:[/bold] {step_size}\n",
+            style="blue",
+        )
+
+        # Iterate through variables
+        for variable in model_desc.modelVariables:
+            category = (
+                "Parameter"
+                if variable.causality == "parameter"
+                else variable.causality.capitalize()
+            )
+
+            spam_writer.writerow(
+                [
+                    category,
+                    variable.name,
+                    variable.variability,
+                    variable.type,
+                    variable.unit,
+                    str(variable.start if variable.start is not None else "-"),
+                ]
+            )
 
     # Cleanup extracted FMU folder
     shutil.rmtree(unpacked_fmu_dir, ignore_errors=True)
