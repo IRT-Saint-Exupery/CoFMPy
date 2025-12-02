@@ -25,7 +25,7 @@
 import os
 import pytest
 
-from cofmupy.master import Master
+from cofmupy.master import DefaultMaster
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -64,7 +64,7 @@ def test_fmu_for_cosimulation():
         "connections": {},
         "sequence_order": [],
     }
-    master = Master(**correct_config)
+    master = DefaultMaster(**correct_config)
 
 
 def test_rollback_v2():
@@ -87,7 +87,7 @@ def test_rollback_v2():
         },
         "sequence_order": [["math1", "math2"]],
     }
-    master = Master(**correct_config)
+    master = DefaultMaster(**correct_config)
     math1_handler = master.fmu_handlers["math1"]
 
     math1_handler.set_variables({"u": [8]})
@@ -131,7 +131,7 @@ def test_rollback_v3():
         },
         "sequence_order": [["math1", "math2"]],
     }
-    master = Master(**correct_config)
+    master = DefaultMaster(**correct_config)
     math1_handler = master.fmu_handlers["math1"]
 
     math1_handler.set_variables({"u": [8]})
@@ -174,4 +174,4 @@ def test_bad_fmu_for_cosimulation():
         match="Can't get or set States on fmu MathFMUV3Bad.fmu but it "
         + "is required for iterative solvers.",
     ):
-        master = Master(**bad_config)
+        master = DefaultMaster(**bad_config)

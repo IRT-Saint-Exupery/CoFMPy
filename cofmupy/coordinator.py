@@ -32,7 +32,7 @@ from .config_parser import ConfigParser
 from .data_storage import BaseDataStorage
 from .data_stream_handler import BaseDataStreamHandler
 from .graph_engine import GraphEngine
-from .master import Master
+from .master import DefaultMaster
 
 
 class Coordinator:
@@ -183,7 +183,7 @@ class Coordinator:
                 case the default values are used "solver": "fsolve",
                 "time_step": minimum_default_step_size, and "xtol": 1e-5.
         """
-        self.master = Master(
+        self.master = DefaultMaster(
             fmu_config_list=config["fmus"],
             connections=config["connections"],
             sequence_order=config["sequence_order"],

@@ -29,20 +29,20 @@
 """
 Module for managing and executing co-simulations involving multiple FMUs.
 
-This module provides a `Master` class that handles FMU initialization, input setting,
-stepping, and result collection during simulation.
+This module provides a `DefaultMaster` class that handles FMU initialization, input
+setting, stepping, and result collection during simulation.
 
 """
 from collections import defaultdict
 
 import numpy as np
 
-from .utils import FixedPointInitializer
-from .wrappers import FmuHandlerFactory
+from ..utils import FixedPointInitializer
+from ..wrappers import FmuHandlerFactory
 import copy
 
 
-class Master:
+class DefaultMaster:
     """
     Manages and executes the co-simulation involving multiple FMUs.
 
