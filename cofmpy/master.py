@@ -41,6 +41,8 @@ from .utils import FixedPointInitializer
 from .wrappers import FmuHandlerFactory
 import copy
 
+from OMSimulator import SSP, CRef, Settings, FMU
+
 
 class Master:
     """
@@ -145,9 +147,7 @@ class Master:
                 "time_step": minimum_default_step_size, and "xtol": 1e-5.
         """
 
-        self.fmu_config_list = (
-            fmu_config_list  # List of FMU configurations (dict) from config file
-        )
+        self.fmu_config_list = fmu_config_list  # List of FMU configurations (dict) from config file
         self.connections = connections  # Dict of connections between FMUs
 
         # Cosimulation method (default: Jacobi)
@@ -156,58 +156,35 @@ class Master:
         self.iterative = iterative
 
         # Load FMUs into dict of FMU Handlers
-        self.fmu_handlers = self._load_fmus()
+        self.fmu_handlers = {}
+        self.model = SSP()
+        self._add_fmus_to_ssp()
+        self._add_connections_to_ssp()
+        self.model.list()
+        self.model = self.model.instantiate()
 
         # Check if the names of the variables match between the connection dict and
         # the FMUs
-        self._check_connections()
-
-        default_step_sizes = []
-        for fmu in self.fmu_handlers.values():
-            default_step_sizes.append(fmu.default_step_size)
-
-        ## find the smaller of all step sizes
-        # remove None from default_step_sizes
-        default_step_sizes = [x for x in default_step_sizes if x is not None]
-        if len(default_step_sizes) == 0:
-            self.default_step_size = 1.0
-        else:
-            self.default_step_size = np.min(default_step_sizes)
+        # self._check_connections()
 
         # Sequence order of execution as a List of FMU IDs. Extracted by config
         # parser module
         # Sequence order of execution as a List of FMU IDs. Extracted by config parser
-        self.sequence_order = sequence_order
-        if self.sequence_order is None:
-            self.sequence_order = [d[self.__keys["id"]] for d in self.fmu_config_list]
+        # self.sequence_order = sequence_order
+        # if self.sequence_order is None:
+        #     self.sequence_order = [d[self.__keys["id"]] for d in self.fmu_config_list]
 
         # init current_time to None to check if init_simulation() has been called
         self.current_time = None
         # Init output and input dictionaries for FMUs to maintain state between steps
         # Initialize arrays for inputs and outputs
-        self._input_dict = {
-            fmu_id: np.zeros(len(fmu.get_input_names()))
-            for fmu_id, fmu in self.fmu_handlers.items()
-        }
+        # self._input_dict = {fmu_id: np.zeros(len(fmu.get_input_names())) for fmu_id, fmu in self.fmu_handlers.items()}
 
-        self._output_dict = {
-            fmu_id: np.zeros(len(fmu.get_output_names()))
-            for fmu_id, fmu in self.fmu_handlers.items()
-        }
+        # self._output_dict = {
+        #     fmu_id: np.zeros(len(fmu.get_output_names())) for fmu_id, fmu in self.fmu_handlers.items()
+        # }
         # Results dictionary to store the output values for each step
         self._results = defaultdict(list)
-
-        self.fixed_point = fixed_point
-        self.fixed_point_kwargs = fixed_point_kwargs
-
-        if fixed_point and fixed_point_kwargs is None:
-            self.fixed_point_kwargs = {
-                "solver": "fsolve",
-                "time_step": self.default_step_size,
-                "xtol": 1e-5,
-            }
-
-        # self.init_simulation(fixed_point=False)
 
     def sanity_check(self):  # TODO
         """
@@ -246,42 +223,25 @@ class Master:
                         f"{self.fmu_handlers[target_fmu].get_input_names()}"
                     )
 
-    def _load_fmus(self, id_key="id", path_key="path"):
-        """Loads FMU Handlers and stores them in a dictionary. This method also check
-            if fmus are ready to make cosimulation :
-            - Cosimulation mode (not ModelExchange)
-            - Can Get and Set States (for loop solver iterations)
-
-        Args:
-            id_key (str): Key for FMU IDs (default: "id").
-            path_key (str): Key for FMU paths (default: "path").
-
-        Returns:
-            Dictionary of FMU Handlers.
-        """
-        fmu_handlers = {}
+    def _add_fmus_to_ssp(self):
+        """ """
         for fmu_info_dict in self.fmu_config_list:
-            # Load FMU (custom handler from wrappers)
-            fmu_path = fmu_info_dict[path_key]
+            fmu_id = fmu_info_dict["id"]
+            fmu_path = fmu_info_dict["path"]
+            print("Adding FMU to SSP:", fmu_id, fmu_path)
+            self.fmu_handlers[fmu_id] = FMU(fmu_path)
+            resource_name = "resource/" + fmu_id + ".fmu"
+            self.model.addResource(fmu_path, resource_name)
+            self.model.addComponent(CRef("default", fmu_id), resource_name)
 
-            # Store it into fmus dictionary
-            fmu_handlers[fmu_info_dict[id_key]] = FmuHandlerFactory(fmu_path)()
-
-            # Check fmu parameters are correct for cosimulation
-            # Check Cosimulation mode
-            model_description = fmu_handlers[fmu_info_dict[id_key]].description
-            if model_description.coSimulation is None:
-                raise Exception(f"Fmu {fmu_path} is not in co-simulation mode.")
-            # if iterative algorithm requested, check fmus are able to set/get states
-            if self.iterative and (
-                not model_description.coSimulation.canGetAndSetFMUstate
-            ):
-                raise Exception(
-                    f"Can't get or set States on fmu {fmu_path} but it is "
-                    f"required for iterative solvers."
+    def _add_connections_to_ssp(self):
+        """ """
+        for (source_fmu, source_var), targets in self.connections.items():
+            for target_fmu, target_var in targets:
+                self.model.addConnection(
+                    CRef("default", source_fmu, source_var),
+                    CRef("default", target_fmu, target_var),
                 )
-
-        return fmu_handlers
 
     def initialize_values_from_config(self):
         """
@@ -291,16 +251,13 @@ class Master:
         If the variable is an input, it is also added to the input dictionary
         """
         if self.current_time is None:
-            raise RuntimeError(
-                "Current time is not initialized. Call init_simulation() first."
-            )
+            raise RuntimeError("Current time is not initialized. Call init_simulation() first.")
 
-        for fmu in self.fmu_config_list:
-            fmu_handler = self.fmu_handlers[fmu[self.__keys["id"]]]
-            for key, value in fmu[self.__keys["init"]].items():
-                fmu_handler.set_variables({key: [value]})
-                if key in fmu_handler.get_input_names():
-                    self._input_dict[fmu[self.__keys["id"]]][key] = [value]
+        for fmu_config in self.fmu_config_list:
+            init_values = fmu_config["initialization"]
+            for key, value in init_values.items():
+                print("DEBUG - setting initial value:", fmu_config["id"], key, value)
+                self.model.setValue(CRef("default", fmu_config["id"], key), value)
 
     def set_inputs(self, input_dict=None):
         """
@@ -323,29 +280,15 @@ class Master:
                 this method.
         """
         if self.current_time is None:
-            raise RuntimeError(
-                "Current time is not initialized. Call init_simulation() first."
-            )
+            raise RuntimeError("Current time is not initialized. Call init_simulation() first.")
 
-        if input_dict:  # True if input_dict is not empty
-            for fmu in input_dict:
-                if fmu not in self.fmu_handlers:
-                    raise ValueError(
-                        f"FMU '{fmu}' not found in FMUs: "
-                        f"{list(self.fmu_handlers.keys())}."
-                    )
-                for variable in input_dict[fmu]:
-                    if (
-                        variable
-                        not in self.fmu_handlers[fmu].get_input_names()
-                        + self.fmu_handlers[fmu].get_parameter_names()
-                    ):
-                        raise ValueError(
-                            f"Variable '{variable}' not found in inputs of FMU '{fmu}':"
-                            f" {self.fmu_handlers[fmu].get_input_names()}."
-                        )
-                    # Set given values (will overide values set previously in init)
-                    self._input_dict[fmu][variable] = input_dict[fmu][variable]
+        if input_dict is None:
+            return
+
+        for fmu_id, vars in input_dict.items():
+            for var_name, value in vars.items():
+                print("DEBUG - setting input value:", fmu_id, var_name, value[0])
+                self.model.setValue(CRef("default", fmu_id, var_name), value[0])
 
     def get_input_dict(self) -> dict:
         """
@@ -379,9 +322,9 @@ class Master:
         """
 
         # # Init output and input dictionaries
-        for fmu_id, fmu in self.fmu_handlers.items():
-            self._output_dict[fmu_id] = {key: [0] for key in fmu.get_output_names()}
-            self._input_dict[fmu_id] = {key: [0] for key in fmu.get_input_names()}
+        # for fmu_id, fmu in self.fmu_handlers.items():
+        #     self._output_dict[fmu_id] = {key: [0] for key in fmu.get_output_names()}
+        #     self._input_dict[fmu_id] = {key: [0] for key in fmu.get_input_names()}
 
         # Init current_time of simulation to 0
         self.current_time = 0.0
@@ -389,21 +332,10 @@ class Master:
         # Init input/output/parameter variables with the values provided in the config
         self.initialize_values_from_config()
 
-        # INIT: call fixed_step()
-        if self.fixed_point:
-            print("Calling Fixed Point Initialization")
-            self.set_inputs(input_dict=input_dict)
-            fixed_point_solver = FixedPointInitializer(self, **self.fixed_point_kwargs)
-            fixed_point_solution = fixed_point_solver.solve()
-            self.set_inputs(input_dict=fixed_point_solution)
-        else:
-            print("Skipping Fixed Point Initialization")
-            self.set_inputs(input_dict=input_dict)
+        print("DEBUG model.initialize() called")
+        self.model.initialize()
 
-        for fmu_id, fmu_handler in self.fmu_handlers.items():
-            init_dict = self._input_dict[fmu_id]
-            fmu_handler.set_variables(init_dict)
-            fmu_handler.reset()
+        self.model.simulate()
 
     def get_outputs(self) -> dict[str, list]:
         """
@@ -413,7 +345,14 @@ class Master:
             dict: A dictionary containing the output values of the current step,
                 structured as `[FMU_ID][Var]`.
         """
-        return self._output_dict
+        output_dict = {}
+        for fmu_id, fmu in self.fmu_handlers.items():
+            output_dict[fmu_id] = {}
+            for var in fmu.variables:
+                if var.causality.name == "output":
+                    output_dict[fmu_id][str(var.name)] = self.model.getValue(CRef("default", fmu_id, var.name))
+        print("DEBUG get_outputs:", output_dict)
+        return output_dict
 
     def get_results(self) -> dict:
         """
@@ -427,9 +366,7 @@ class Master:
         """
         return self._results
 
-    def solve_loop(
-        self, fmu_ids, step_size: float, algo="jacobi", iterative=False
-    ) -> dict:
+    def solve_loop(self, fmu_ids, step_size: float, algo="jacobi", iterative=False) -> dict:
         """
         Performs a single simulation step on the given FMUs, using the defined algorithm
         to solve algebraic loops in the simulation.
@@ -453,9 +390,7 @@ class Master:
 
         # Verify algo is a known algo name
         if algo not in ("jacobi", "gauss_seidel"):
-            raise NotImplementedError(
-                f"Algorithm {algo} not implemented for loop solving."
-            )
+            raise NotImplementedError(f"Algorithm {algo} not implemented for loop solving.")
 
         outputs = {}  # key: fmu_id, value: output_dict (var_name, value)
         # Copy useful inputs to local "inputs" variable
@@ -579,20 +514,29 @@ class Master:
 
         """
         self.set_inputs(input_dict=input_dict)
+
+        # Run one step simulation
+        self.model.stepUntil(self.current_time + step_size)
+        out = self.get_outputs()
+
+        # Save outputs
         if record_outputs:
             self._results["time"].append(self.current_time)
+            for fmu_id, outputs in out.items():
+                for var_name, value in outputs.items():
+                    self._results[(fmu_id, var_name)].extend([value])
+
+        self.current_time += step_size
+        return out
+
         for fmu_ids in self.sequence_order:
             # out is fill with key: fmu_id, value: output_dict (var_name, value)
-            out = self.solve_loop(
-                fmu_ids, step_size, algo=self.cosim_method, iterative=self.iterative
-            )
+            out = self.solve_loop(fmu_ids, step_size, algo=self.cosim_method, iterative=self.iterative)
 
             for fmu_id, fmu_output_dict in out.items():
                 for output_name, value in fmu_output_dict.items():
                     # Update inputs connected to FMU outputs
-                    self.update_connected_inputs(
-                        self._input_dict, fmu_id, output_name, value
-                    )
+                    self.update_connected_inputs(self._input_dict, fmu_id, output_name, value)
                     if record_outputs:
                         # add each output to the result dict, (FMU_ID + Var) as key
                         self._results[(fmu_id, output_name)].extend(value)
@@ -624,18 +568,14 @@ class Master:
         for fmu_id, out_fmu in output_dict.items():
             for output_name, value in out_fmu.items():
                 if (fmu_id, output_name) in self.connections:
-                    for target_fmu, target_variable in self.connections[
-                        (fmu_id, output_name)
-                    ]:
+                    for target_fmu, target_variable in self.connections[(fmu_id, output_name)]:
                         residuals[target_fmu + "_" + target_variable] = np.abs(
                             input_dict[target_fmu][target_variable][0] - value[0]
                         )
 
         return residuals
 
-    def apply_fmu_outputs_to_inputs(
-        self, input_to_update: dict, fmu_id: str, out_fmu: dict
-    ):
+    def apply_fmu_outputs_to_inputs(self, input_to_update: dict, fmu_id: str, out_fmu: dict):
         """
         Performs a copy of output values into input dict.
         The copy is based on connections between given fmu/outputs and inpout dict for
@@ -655,9 +595,7 @@ class Master:
         for output_name, value in out_fmu.items():
             self.update_connected_inputs(input_to_update, fmu_id, output_name, value)
 
-    def update_connected_inputs(
-        self, input_to_update: dict, fmu_id: str, output_name: str, value
-    ):
+    def update_connected_inputs(self, input_to_update: dict, fmu_id: str, output_name: str, value):
         """
         Performs a copy of output value into input dict.
         The copy is based on connections between given fmu/output name and inpout dict
