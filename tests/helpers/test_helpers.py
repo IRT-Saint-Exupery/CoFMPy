@@ -30,9 +30,7 @@ The tests are based on the following use cases:
     2. resistor fmu
 
 """
-from collections import defaultdict
-
-import numpy as np
+import os
 import pytest
 
 from cofmpy.helpers import extract_fmu
@@ -40,7 +38,7 @@ from cofmpy.helpers import extract_fmu
 use_cases = [
     {  # Use case 1: source fmu
         "use_case_name": "source",
-        "path": "tests/data/source.fmu",
+        "path": "../data/source.fmu",
         "expected_results": [
             {'name': 'amplitude', 'type': 'Fixed', 'start': '20', 'category': 'Parameter'},
             {'name': 'frequency', 'type': 'Fixed', 'start': '1', 'category': 'Parameter'},
@@ -51,7 +49,7 @@ use_cases = [
     {  # Use case 2: resistor fmu
        # jacobi algo
         "use_case_name": "resistor",
-        "path": "tests/data/resistor.fmu",
+        "path": "../data/resistor.fmu",
         "expected_results": [
             {'name': 'I', 'type': 'Continuous', 'start': '-', 'category': 'Output'},
             {'name': 'V', 'type': 'Continuous', 'start': '20', 'category': 'Input'},
@@ -76,7 +74,9 @@ def use_case(request):
     Returns:
         tuple: the fmu path, and the expected results.
     """
-    return request.param["path"], request.param["expected_results"]
+    current_test_filepath = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(current_test_filepath, request.param["path"])
+    return path, request.param["expected_results"]
 
 
 @pytest.fixture

@@ -70,7 +70,7 @@ def check_fmu_variable(fmu_file, variable_name, from_to):
     return False
 
 
-def check_fmus(csvfile_connections, csvfile_initializations):
+def check_fmus(csvfile_connections: any, csvfile_initializations: any = None):
     """
     Check input files, connections list and initialisation list :
         - Check expected fmus exist
@@ -79,7 +79,7 @@ def check_fmus(csvfile_connections, csvfile_initializations):
 
     Args:
         csvfile_connections: connection list file (csv).
-        csvfile_initializations: initialisation list file (csv).
+        csvfile_initializations: initialisation list file (csv). Default is None
 
     Returns:
         Result of the check : true if all is ok.
@@ -167,7 +167,7 @@ def find_initialisations_for_fmu(csvfile_initializations, fmu_id):
     return initialisation_dict
 
 
-def construct_fmu_list(csvfile_connections, csvfile_initializations):
+def construct_fmu_list(csvfile_connections: any, csvfile_initializations: any = None):
     """
     Construct fmu list (config format) from connection list (tabular format) and
         initialisation list : Parse information from connections iterator to construct
@@ -175,7 +175,7 @@ def construct_fmu_list(csvfile_connections, csvfile_initializations):
 
     Args:
         csvfile_connections: connection list file (csv).
-        csvfile_initializations: initialisation list file (csv).
+        csvfile_initializations: initialisation list file (csv). Default is None
 
     Returns:
         Object list of FMUs (config file format).
@@ -298,16 +298,19 @@ def construct_config(connections_path, initializations_path):
     with open(connections_path, newline="", encoding="utf-8") as csvfile_connections:
 
         # Open and read initializations_path file (if any)
-        csvfile_initializations = None
         if has_init_file:
-            csvfile_initializations = open(
+            with open(
                 initializations_path, newline="", encoding="utf-8"
-            )
+            ) as csvfile_initializations:
+                # Check connection_list contains correct paths to fmu
+                check_fmus(csvfile_connections, csvfile_initializations)
 
-        # Check connection_list contains correct paths to fmu
-        check_fmus(csvfile_connections, csvfile_initializations)
+                fmus = construct_fmu_list(csvfile_connections, csvfile_initializations)
+        else:
+            # Check connection_list contains correct paths to fmu
+            check_fmus(csvfile_connections)
 
-        fmus = construct_fmu_list(csvfile_connections, csvfile_initializations)
+            fmus = construct_fmu_list(csvfile_connections)
         connections = construct_connection_list(csvfile_connections)
         exported_outputs = construct_exported_outputs_list(csvfile_connections)
 
