@@ -42,12 +42,12 @@ from typing import Dict
 from typing import List
 from typing import Union
 
-from cofmpy.config_interface import ConfigConnectionFmu
-from cofmpy.config_interface import ConfigConnectionStorage
-from cofmpy.config_interface import ConfigConnectionLocalStream
-from cofmpy.config_interface import ConfigConnectionCsvStream
-from cofmpy.config_interface import ConfigObject
-from cofmpy.config_interface import FMU_TYPE
+from .config_interface import ConfigConnectionFmu
+from .config_interface import ConfigConnectionStorage
+from .config_interface import ConfigConnectionLocalStream
+from .config_interface import ConfigConnectionCsvStream
+from .config_interface import ConfigObject
+from .config_interface import FMU_TYPE
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class ConfigParser:
         self._validate_configuration()
 
         # ------------ 3. Prepend 'root' dir to present paths ------------
-        self._update_paths_in_dict()
+        #self._update_paths_in_dict()
 
         # ------------ 4. Build configurations ---------------------------
         self._build_storage_config()
@@ -192,7 +192,12 @@ class ConfigParser:
             None. Builds self.master_config.
         """
 
-        self.master_config["fmus"] = [fmu.asdict() for fmu in self._config_object.fmus]
+        fmus = []
+        for fmu in self._config_object.fmus:
+            fmu = fmu.asdict()
+            fmu["path"] = self._find_corrected_relative_path(fmu["path"])
+            fmus.append(fmu)
+        self.master_config["fmus"] = fmus
         self.master_config["connections"] = {}
         self.master_config["sequence_order"] = None
         self.master_config["cosim_method"] = self._config_object.cosim_method

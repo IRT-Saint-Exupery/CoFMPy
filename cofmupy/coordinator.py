@@ -257,8 +257,12 @@ class Coordinator:
         if self.master is None:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
+        count = 0;
         while self.master.current_time < end_time:
             self.do_step(step_size, save_data=save_data)
+            count += 1
+            if count % 10 == 0:
+                print(f"Current step is {self.master.current_time}")
 
     def save_results(self, filename: str):
         """
