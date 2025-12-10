@@ -51,12 +51,12 @@ repo](https://github.com/OpenModelica/OMSimulator/tree/master/testsuite/resource
 fmus = [
     {
         "id": "mass1",
-        "path": "DualMassOscillator.System1.fmu",
+        "path": "../../../resources/fmus/DualMassOscillator.System1.fmu",
         "initialization": {"m1": 1.0, "k1": 10.0, "c1": 0.2, "x1_start": 0.0},
     },
     {
         "id": "mass2",
-        "path": "DualMassOscillator.System2.fmu",
+        "path": "../../../resources/fmus/DualMassOscillator.System2.fmu",
         "initialization": {
             "m2": 1.0,
             "k2": 10.0,
