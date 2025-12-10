@@ -26,12 +26,19 @@
 Integration test of KafkaDataStreamHandler using docker-compose for Kafka services.
 """
 import numpy as np
+from unittest.mock import patch
 import pytest
 import time
 
 from cofmpy.data_stream_handler import KafkaDataStreamHandler
 from tests.data_stream_handler.mock_producer import try_start_kafka_docker
+class KafkaHandlerSeparated(KafkaDataStreamHandler):
+    """Custom class to test one-handler-instance 
+    per Kafka topic ("separated") behaviour"""
+    def _is_equivalent_stream(self, config):
+        return False
 
+# ====== Start Docker ======
 docker_compose_path = "./tests/data_stream_handler/docker-compose.yml"
 
 has_kafka_started = try_start_kafka_docker(
@@ -77,12 +84,25 @@ def test_kafka_resistor(kafka_resistor_test):
     ).all(), "Mismatch in streamed vs expected data"
 
 
-def test_kafka_two_resistors(kafka_two_resistors_test, run_integration_test):
+def test_kafka_two_resistors_separated(kafka_two_resistors_test, run_integration_test):
 
     try_start_kafka_docker(docker_compose_path, command="up", options="-d")
 
-    config, expected_results, kafka_producer = kafka_two_resistors_test
-    kafka_producer.start()
+    config, expected_results, kafka_producers = kafka_two_resistors_test(combined=False)
+    _ = [m_prod.start() for m_prod in kafka_producers]
+    with patch("cofmpy.data_stream_handler.KafkaDataStreamHandler", KafkaHandlerSeparated):
+        run_integration_test(config, expected_results)
+    time.sleep(0.1)
+
+    try_start_kafka_docker(docker_compose_path, command="down")
+
+
+def test_kafka_two_resistors_combined(kafka_two_resistors_test, run_integration_test):
+
+    try_start_kafka_docker(docker_compose_path, command="up", options="-d")
+
+    config, expected_results, kafka_producers = kafka_two_resistors_test(combined=True)
+    _ = [m_prod.start() for m_prod in kafka_producers]
     run_integration_test(config, expected_results)
     time.sleep(0.1)
 

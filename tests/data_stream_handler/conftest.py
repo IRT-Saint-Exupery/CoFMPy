@@ -171,8 +171,6 @@ def make_producer(
     )
 
 # ====== Integration tests fixtures ======
-
-
 @pytest.fixture
 def run_integration_test():
     def _make(config, expected_res):
