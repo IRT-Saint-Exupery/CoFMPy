@@ -297,18 +297,14 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
         Returns:
             bool: True if the handlers are equivalent, False otherwise.
         """
-        # equivalent items: {uri, topic, group_id}
-        self_uri = f"{self.config.server_url}:{self.config.port}"
-        self_topic = self.config.topic
-        self_group_id = self.config.group_id
-
-        positional = {"topic": topic, "uri": uri, "group_id": group_id}
-        alt_config.update(positional)
-
+        # equivalent items: {uri, topic, group_id, interpolation}
+        # if one is different, the compared streams are not equivalent
+        interp_method = alt_config.get("interpolation", "previous")
         same = (
-            alt_config["uri"] == self_uri
-            and alt_config["topic"] == self_topic
-            and alt_config["group_id"] == self_group_id
+            f"{self.config.server_url}:{self.config.port}" == uri
+            and self.config.topic == topic
+            and self.config.group_id == group_id
+            and self.config.interpolation == interp_method
         )
         logger.debug("Stream equivalence check: %s", same)
         return same

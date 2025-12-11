@@ -95,7 +95,9 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
         Returns:
             bool: True if the handlers are equivalent, False otherwise.
         """
-        logger.debug(f"'interpolation' arg not used: {interpolation}")
-
-        # equivalence item: csv path (self.path)
-        return path == self.path
+        # items to compare: {path, interpolation}
+        same = (
+            self.path == path
+            and self.interpolator.method == interpolation
+        )
+        return same
