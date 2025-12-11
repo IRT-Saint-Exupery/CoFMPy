@@ -1,6 +1,6 @@
 # 🚀 Getting Started with CoFMPy
 
-CoFMPy is a framework designed to make co-simulation and prototyping digital twins easy and efficient. This guide walks you through setting up and running a your first simulation with CoFMPy!
+CoFMPy is a framework designed to make co-simulation and prototyping digital twins easy and efficient. This guide walks you through setting up and running your first simulation with CoFMPy!
 
 ## 🐾 Installation
 
@@ -20,7 +20,7 @@ For now, we will keep it simple and consider the system consisting of an alterna
 </figure>
 
 * The source outputs a voltage signal, denoted as $V$ (in Volts).
-* The resistor takes $V$ as input and produces an output current $I$ (in Amperes). The resistance parameter $R$ is set to $0.5$ \Omega$.
+* The resistor takes $V$ as input and produces an output current $I$ (in Amperes). The resistance parameter $R$ is set to $0.5 \Omega$.
 
 We've already prepared FMUs and configuration file associated to this scenario. Let's start by downloading them.
 
@@ -54,6 +54,8 @@ coordinator = Coordinator()
 # Load the simulation setup from a JSON configuration file
 coordinator.start("example1/config.json")
 ```
+
+For a quick view of the JSON configuration file, take a look at our first [tutorial](../generated/gallery/plot_00_get_started/#the-json-configuration-file).
 
 To make sure your simulation is correctly set up, you can visualize the connection graph of your system:
 

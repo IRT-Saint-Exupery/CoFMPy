@@ -36,7 +36,8 @@ FMUs and managing the interaction between various simulation components. This li
 provides a seamless interface to orchestrate complex physics simulations and handle the
 data exchange between FMUs.
 
-The documentation is available online: https://irt-saint-exupery.github.io/CoFMPy/
+The documentation is available online:
+[https://irt-saint-exupery.github.io/CoFMPy](https://irt-saint-exupery.github.io/CoFMPy)
 
 ## 🐾 Installation
 

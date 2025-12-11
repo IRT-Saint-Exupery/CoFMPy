@@ -220,7 +220,7 @@ class Coordinator:
 
     def do_step(self, step_size: float, save_data=False):
         """
-        Perform a simulation step.
+        Performs a simulation step.
 
         Args:
             step_size (float): simulation step size

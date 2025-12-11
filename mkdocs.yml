@@ -12,7 +12,10 @@ nav:
     - Managing data sources: user_guide/data_sources.md
     - Helpers : user_guide/helpers.md
     - Advanced usage:
-      - Create your own data stream handler: user_guide/advanced/custom_stream_handler.md
+      - Data Stream Handler Module: user_guide/advanced/stream_handler_module.md
+      - Kafka Data Handler:
+        - Kafka Handler Configuration: user_guide/advanced/kafka_configuration.md
+        - Kafka Thread Manager: user_guide/advanced/kafka_thread_manager.md
   - Examples: generated/gallery
   - API documentation:
     - api/index.md

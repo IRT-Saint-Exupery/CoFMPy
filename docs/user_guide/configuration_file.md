@@ -5,12 +5,30 @@ properties, the connections between FMUs and connections with external data.
 
 ## Structure of the configuration file
 
-The configuration file consists of three main sections:
+The JSON configuration file consists of three main sections:
 
 1. FMUs (`fmus`): defines individual FMUs and their properties (id, path, step size,
   supplier, etc.)
 2. Connections (`connections`): describes the connection graph.
 3. Global settings: specifies global configuration options.
+
+The skeleton of the configuration file looks like:
+
+```json
+{
+  "fmus": [
+    {...},
+    {...}
+  ],
+  "connections": [
+    {...},
+    {...},
+    {...}
+  ],
+  "one_global_setting": ...,
+  "another_global_setting": ...
+}
+```
 
 ## 1. Defining FMUs
 
@@ -18,9 +36,9 @@ The `fmus` section contains the list of FMUs. Each FMU is represented by a dicti
 with the following attributes:
 
 - `id`: a unique identifier for the FMU (e.g., "FMU1" or "rotor").
+- `name` (optional): a human-readable name for the FMU (e.g., "load").
 - `path`: the file path of the FMU (see below).
 - `stepsize`: the step size for the FMU simulation (e.g., "0.3 sec").
-- `name` (optional): a human-readable name for the FMU (e.g., "load").
 - `initialization` (optional): key-value pairs to initialize variables in the FMU. An
   initialization value could be overridden if a connection is defined for this variable.
 - `supplier` (optional): the supplier or creator of the FMU.
@@ -30,9 +48,9 @@ Here is an example of an FMU description:
 ```json
 {
     "id": "load",
-    "path": "load.fmu",
-    "stepsize": "0.2 sec",
     "name": "variable load",
+    "path": "path/to/load.fmu",
+    "stepsize": "0.2 sec",
     "initialization": {"V_in": 800, "R": 2.5},
     "supplier": "My company"
 }
@@ -42,12 +60,12 @@ Here is an example of an FMU description:
 
 Paths to FMU files can be specified as:
 
-1. Relative paths. The configuration parser will search for files using `path` value,
-by considering the following:
-  * Files are placed at the same level than the configuration JSON file or in nested folders.
-  * Each FMU file at the previously mentioned location has a unique name.
-
-2. Absolute paths. In this case, the `path` field will remain untouched and the FMUs will
+1. Paths relative to the JSON configuration file. CoFMPy will search for files using
+   `path` value, by considering the following:
+    - Files are placed at the same level than the configuration JSON file or in nested
+      folders.
+    - Each FMU file at the previously mentioned location has a unique name.
+1. Absolute paths. In this case, the `path` field will remain untouched and the FMUs will
 be loaded from the specified locations.
 
 ## 2. Defining Connections
@@ -66,15 +84,15 @@ Three types of connections can be defined in the JSON file:
 
 - a connection between two FMUS
 - a connection from a data source to an FMU
-- a connection from an FMU to a data "sink"
+- a connection from an FMU to a data "sink" (storage or outbound data stream)
 
 Each connection type is described in the following subsections.
 
 ### Between two FMUs
 
 A connection between two FMUs represents the interaction between the subsystems in
-the co-simulation. The connection links the output variable of an FMU to the input
-variable of another FMU. A source/target for an FMU is defined with:
+the co-simulation. The connection links the output variable of an FMU (source) to the
+input variable of another FMU (target). A source/target is defined with:
 
 - `id`: the FMU id as defined in the `fmus` section.
 - `variable`: the variable name in the FMU
@@ -105,7 +123,8 @@ from a CSV file, or from a Kafka stream. You can also create your own data sourc
 documentation).
 
 The information required varies depending on the data source. For each type of source,
-a field `type` is required. Note that for all types, the field `unit` is optional.
+a corresponding field `type` is defined. Note that for all types, the field `unit` is
+optional.
 
 #### **From single values (literal)**
 
@@ -172,7 +191,6 @@ The variable `V` of FMU `battery` is controlled according to the values in the C
 - `interpolation`: (optional) interpolation method (see [interpolation reference](#interpolation-reference)). Defaults to `previous`.
 - `timeout`: (optional) delay, in seconds, to wait (blocking) after reception of the first message before proceeding with the rest of the cosimulation. Defaults to `2`.
 
-
 If you want to know how Kafka messages must be formatted to be correctly read by CoFMPy,
 refer to the section on [Kafka data source](data_sources.md#a-kafka-stream).
 
@@ -210,8 +228,7 @@ file for each simulation step. The location of this file is `storage/results.csv
 
 - `type`: `csv`
 - `output_dir`: the directory where the CSV file will be created.
-- `variable`: the name of the variable, used as the CSV filename and the header column
-  name in the CSV file.
+- `variable`: the name of the variable, used as the header column name in the CSV file.
 - `overwrite`: (optional) overwrite an existing file if `true`. Defaults to `true`.
 - `unit`: (optional) the unit of the variable.
 
@@ -264,6 +281,8 @@ also specifies global settings used by CoFMPy.
 
 - `cosim_method`: specifies the algorithm for solving system loops (e.g., `jacobi`,
   `gauss-seidel`).
+- `iterative`: boolean to specify whether the master algorithm solves algebraic loops in
+  an iterative way (`true`) or in a single pass (`false`).
 - `edge_sep`: defines the separator for connection naming. Default is ` -> `.
 - `root`: specifies the root directory for relative paths.
 
@@ -281,14 +300,19 @@ effectively. A full JSON example is provided in the "Examples" section.
 ## Interpolation reference
 
 Interpolation is used when the system
-needs a value between two time points when data external to FMUs is used (literal, csv, kafka, etc.).
+needs a value between two time points when data external to FMUs is used (literal, csv,
+kafka, etc.).
 
-The interpolation uses `cofmpy.utils.Interpolator` class which supports a wide variety of interpolation methods. The currently tested methods are:
+The interpolation uses `cofmpy.utils.Interpolator` class which supports a wide variety
+of interpolation methods. The currently tested methods are:
+
 - `previous`, which returns the value at the previous time point (default value)
 - `linear`, which calculates a linearly interpolated value between the previous and
   next points.
 
 The other methods will log the following warning:
+
 `Method '{method}' is in beta version. We recommend using 'linear' or 'previous'`
 
-For more details, please refer to: `./notebooks/interpolator.ipynb`
+For more details, please refer to the
+[corresponding notebook](https://github.com/IRT-Saint-Exupery/CoFMPy/blob/dev/notebooks/interpolator.ipynb)
