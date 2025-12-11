@@ -38,7 +38,7 @@ from cofmpy.helpers import extract_fmu
 use_cases = [
     {  # Use case 1: source fmu
         "use_case_name": "source",
-        "path": "../data/source.fmu",
+        "path": "../../resources/fmus/source.fmu",
         "expected_results": [
             {'name': 'amplitude', 'type': 'Fixed', 'start': '20', 'category': 'Parameter'},
             {'name': 'frequency', 'type': 'Fixed', 'start': '1', 'category': 'Parameter'},
@@ -49,7 +49,7 @@ use_cases = [
     {  # Use case 2: resistor fmu
        # jacobi algo
         "use_case_name": "resistor",
-        "path": "../data/resistor.fmu",
+        "path": "../../resources/fmus/resistor.fmu",
         "expected_results": [
             {'name': 'I', 'type': 'Continuous', 'start': '-', 'category': 'Output'},
             {'name': 'V', 'type': 'Continuous', 'start': '20', 'category': 'Input'},
