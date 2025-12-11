@@ -18,7 +18,7 @@ The FMU simulates a ball bouncing on the ground.
 from cofmpy import Coordinator
 
 # We define a simple CoFMPy config dictionary with a single FMU and no connection
-config = {"fmus": [{"id": "bouncing_ball", "path": "BouncingBall.fmu"}]}
+config = {"fmus": [{"id": "bouncing_ball", "path": "../../../resources/fmus/BouncingBall.fmu"}]}
 
 # We create a Coordinator object and start it with the config dictionary
 coordinator = Coordinator()
@@ -81,7 +81,7 @@ config = {
     "fmus": [
         {
             "id": "bouncing_ball",
-            "path": "../fmus/BouncingBall.fmu",
+            "path": "../../../resources/fmus/BouncingBall.fmu",
             "initialization": {"e": 0.5},  # Set initial value
         }
     ]
@@ -103,7 +103,7 @@ config = {
     "fmus": [
         {
             "id": "bouncing_ball",
-            "path": "../fmus/BouncingBall.fmu",
+            "path": "../../../resources/fmus/BouncingBall.fmu",
             "initialization": {"e": 0.5, "h": 5},
         }
     ]
