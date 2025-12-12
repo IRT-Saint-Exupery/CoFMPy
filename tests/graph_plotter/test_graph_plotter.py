@@ -33,7 +33,7 @@ import numpy as np
 import plotly.graph_objects as go
 import pytest
 
-from cofmpy.graph_plotter import GraphPlotter
+from cofmupy.graph_plotter import GraphPlotter
 
 
 DEFAULT_CONFIG = {
@@ -119,7 +119,7 @@ def test_compute_bezier_curve():
 
 
 @patch("plotly.graph_objects.Figure.write_html")
-@patch("cofmpy.graph_plotter.datetime")
+@patch("cofmupy.graph_plotter.datetime")
 def test_save_plotly_figure(mock_datetime, mock_write_html, plotter):
     """Test saving a Plotly figure with a timestamped filename."""
     fig = go.Figure()

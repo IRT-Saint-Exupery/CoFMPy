@@ -43,7 +43,7 @@ repos:
     hooks:
       - id: pylint
         args: [--rcfile=.pylintrc]
-        files: ^cofmpy/
+        files: ^cofmupy/
 
 
   - repo: https://github.com/commitizen-tools/commitizen

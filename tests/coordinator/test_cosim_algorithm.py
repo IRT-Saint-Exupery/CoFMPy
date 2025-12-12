@@ -25,7 +25,7 @@
 import os
 import pytest
 
-from cofmpy import Coordinator
+from cofmupy import Coordinator
 
 fmu_definitions = [
     {
@@ -56,13 +56,13 @@ use_cases = [
         "config": {
             "fmus": fmu_definitions,
             "connections": fmu_connections,
-            "cosim_method": "jacobi"
+            "cosim_method": "jacobi",
         },
         "expected_results": {
             "first_sequence_order_fmu": "math1",
             "simulation": {
-                'time': [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
-                ('math1', 'y'): [
+                "time": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
+                ("math1", "y"): [
                     18.0,
                     0.5599999999999998,
                     12.72,
@@ -72,9 +72,9 @@ use_cases = [
                     7.178112000000002,
                     2.6063206400000003,
                     5.793991680000002,
-                    2.8680452096000004
+                    2.8680452096000004,
                 ],
-                ('math2', 'y'): [
+                ("math2", "y"): [
                     -1.8,
                     13.4,
                     -0.552,
@@ -84,9 +84,9 @@ use_cases = [
                     0.7579008000000003,
                     4.7424896000000025,
                     1.0850565120000004,
-                    3.635193344000002
-                ]
-            }
+                    3.635193344000002,
+                ],
+            },
         },
     },
     {
@@ -94,13 +94,13 @@ use_cases = [
         "config": {
             "fmus": fmu_definitions,
             "connections": fmu_connections,
-            "cosim_method": "gauss_seidel"
+            "cosim_method": "gauss_seidel",
         },
         "expected_results": {
             "first_sequence_order_fmu": "math1",
             "simulation": {
-                'time': [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
-                ('math1', 'y'): [
+                "time": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0],
+                ("math1", "y"): [
                     18.0,
                     12.72,
                     9.340800000000002,
@@ -110,9 +110,9 @@ use_cases = [
                     4.341218992128002,
                     3.978380154961922,
                     3.74616329917563,
-                    3.5975445114724036
+                    3.5975445114724036,
                 ],
-                ('math2', 'y'): [
+                ("math2", "y"): [
                     13.4,
                     9.176000000000002,
                     6.472640000000002,
@@ -122,9 +122,9 @@ use_cases = [
                     2.472975193702402,
                     2.182704123969538,
                     1.9969306393405044,
-                    1.878035609177923
-                ]
-            }
+                    1.878035609177923,
+                ],
+            },
         },
     },
 ]
@@ -187,8 +187,10 @@ def test_cosimulation(coordinator_instance, coordinator_config, expected_results
     coordinator_instance.start(conf_path=coordinator_config, fixed_point_init=False)
     # Force sequence order with an array of array (instead of array of set)
     coordinator_instance.master.sequence_order = [["math1", "math2"]]
-    assert next(iter(coordinator_instance.master.sequence_order[0])) \
-           == expected_results["first_sequence_order_fmu"]
+    assert (
+        next(iter(coordinator_instance.master.sequence_order[0]))
+        == expected_results["first_sequence_order_fmu"]
+    )
     coordinator_instance.run_simulation(step_size=1, end_time=10)
     results_df = coordinator_instance.get_results()
     assert results_df == expected_results["simulation"]

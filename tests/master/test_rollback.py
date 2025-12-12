@@ -25,7 +25,7 @@
 import os
 import pytest
 
-from cofmpy.master import Master
+from cofmupy.master import Master
 
 
 @pytest.fixture(scope="module", autouse=True)

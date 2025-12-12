@@ -250,7 +250,7 @@ def import_module_from_path(path: str):
     """Import a module from an arbitrary file path (no sys.path pollution)."""
     if not os.path.isfile(path):
         raise FileNotFoundError(f"No such file: {path}")
-    module_name = f"_cofmpy_{os.path.splitext(os.path.basename(path))[0]}"
+    module_name = f"_cofmupy_{os.path.splitext(os.path.basename(path))[0]}"
     spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Cannot load module spec for {path}")

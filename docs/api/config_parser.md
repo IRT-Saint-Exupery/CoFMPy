@@ -1,3 +1,3 @@
 # The Parser for Configuration File
 
-::: cofmpy.config_parser
+::: cofmupy.config_parser
