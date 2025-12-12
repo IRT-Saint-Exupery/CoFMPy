@@ -1,3 +1,0 @@
-# FMU Wrappers
-
-::: cofmpy.wrappers
