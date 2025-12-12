@@ -1,20 +1,40 @@
+<head>
+    <meta name="google-site-verification" content="HUjgL1QM39SrK6ApRFAZ1diXfGd99dwkvwsCYaNpi9c" />
+</head>
+
 <div align="center">
     <img src="./assets/logo_cofmpy_dark.png#only-dark" width="75%" alt="Logo CoFMPy" align="center" />
     <img src="./assets/logo_cofmpy_light.png#only-light" width="75%" alt="Logo CoFMPy" align="center" />
 </div>
 <br>
 
+<!-- Badge section -->
+<div align="center">
+    <a href="#">
+        <img src="https://img.shields.io/badge/python-3.9%2B-blue"></a>
+     <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/LICENSE">
+        <img alt="License BSD" src="https://img.shields.io/badge/License-BSD%202--Clause-blue.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-linters.yml">
+        <img alt="Pylint" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-linters.yml/badge.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml">
+        <img alt="Tests" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml/badge.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests-coverage.yml">
+        <img alt="Coverage" src="https://raw.githubusercontent.com/IRT-Saint-Exupery/CoFMPy/badges/.github/badges/coverage.svg""></a>
+
+</div>
+<br>
+
 ## 👋 About CoFMPy
 
-CoFMPy is a Python library designed for rapid prototyping of digital twins through 
+CoFMPy is a Python library designed for rapid prototyping of digital twins through
 the co-simulation of Functional Mock-up Units (FMUs).
 It offers advanced master coordination features, such as solving algebraic loops between
 FMUs and managing the interaction between various simulation components. This library
 provides a seamless interface to orchestrate complex physics simulations and handle the
 data exchange between FMUs.
 
-The documentation is available online: https://irt-saint-exupery.github.io/CoFMPy/
-
+The documentation is available online:
+[https://irt-saint-exupery.github.io/CoFMPy](https://irt-saint-exupery.github.io/CoFMPy)
 
 ## 🐾 Installation
 

@@ -1,0 +1,37 @@
+name: Build MkDocs and deploy Github pages
+
+permissions:
+  contents: write  # Required to push to gh-pages branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[dev]
+
+      - name: Build Mkdocs
+        run: mkdocs build
+
+      - name: Deploy Github Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: site  #  The folder where MkDocs builds the site
+          branch: gh-pages  # The branch to deploy to

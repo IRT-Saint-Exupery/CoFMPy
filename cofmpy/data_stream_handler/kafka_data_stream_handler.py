@@ -38,6 +38,7 @@ from confluent_kafka import KafkaException
 from ..utils import Interpolator
 from .base_data_stream_handler import BaseDataStreamHandler
 from .kafka_utils import KafkaHandlerConfig
+from .kafka_utils import KafkaThreadManager
 
 logger = logging.getLogger(__name__)
 
@@ -48,46 +49,49 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
     # Type name of the handler (used in the configuration file and handler registration)
     type_name = "kafka"
 
-    def __init__(self, topic, uri, group_id, variable, **kwargs):
+    def __init__(self, topic, uri, group_id, **kwargs):
         """
         Constructor for Kafka data stream handler.
 
         Args:
             kwargs: kafka service configuration.
         """
+        super().__init__()
 
         # Configuration handling
-        positional = {
-            "topic": topic,
-            "uri": uri,
-            "group_id": group_id,
-            "variable": variable,
-        }
+        positional = {"topic": topic, "uri": uri, "group_id": group_id}
         kwargs.update(positional)
-        self.config = KafkaHandlerConfig.from_dict(kwargs)
+        self.config = KafkaHandlerConfig(**kwargs)
         logger.debug(f"Parsed config for {self}: {vars(self.config)}")
 
         # Data-related instances
         self.interpolator = Interpolator(self.config.interpolation)
-        self.data = pd.DataFrame(columns=["t", self.config.variable])
+        self.data = pd.DataFrame(columns=["t"])
 
+        self._data_lock = threading.Lock()
         self._subscribed = False
-        self.consumer_thread = None
-        self.running = False
         self.first_received = None
+        self.consumer = self._create_consumer()
 
-        self._start_consumer()
-        self.start_consuming()
+        self.thread_manager = KafkaThreadManager(self.consumer, self._handle_message)
+        self.start_consumer_thread()
 
-    def _start_consumer(self):
-        """Creates and configures a Kafka consumer"""
+    def _create_consumer(self):
+        """Creates and configures a Kafka consumer
+
+        Returns:
+            confluent_kafka.Consumer: Consumer instance
+        """
         kafka_config = {
             "bootstrap.servers": f"{self.config.server_url}:{self.config.port}",
-            "group.id": f"{self.config.group_id}_{self.config.variable}",
+            "group.id": self.config.group_id,
             "enable.auto.commit": self.config.enable_auto_commit,
             "auto.offset.reset": self.config.auto_offset_reset,
         }
-        self.consumer = Consumer(kafka_config)
+        logger.debug(f"Creating Kafka consumer with config: {kafka_config}")
+        consumer = Consumer(kafka_config)
+        logger.debug("Kafka consumer created successfully.")
+        return consumer
 
     def _lazy_subscribe(self):
         """One-time subscription"""
@@ -95,52 +99,90 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
             self.consumer.subscribe([self.config.topic])
             self._subscribed = True
 
-    def get_data(self, t: float):
-        """
-        Get the data at a specific time.
+    def _build_out_dict(self, t_s):
+        """Builds the requested dictionary (output of get_data). Iterates over alias_mapping
+        to get variable names or alias. Uses interpolator to retrieve data at requested time
+        from self.data (pd.DataFrame).
 
         Args:
-            t (float): timestamp to get the data.
+            ts (float): requested timestamp
 
         Returns:
-            dict: data at the requested time: {'var1': val1 , ...}.
+            dict[tuple:float]: requested float values per variable (tuple key)
         """
+        out_dict = {}
+        for (fmu, variable), var_name in self.alias_mapping.items():
+            out_dict[(fmu, variable)] = self.interpolator(
+                self.data["t"], self.data[var_name], [t_s]
+            )[0]
+
+        return out_dict
+
+    def get_data(self, t: float):
+        """
+        Retrieve data corresponding to a specific timestamp, with optional interpolation.
+
+        This method waits for the required data to become available in a thread-safe way.
+        It distinguishes between the first data retrieval (allowing a longer timeout to
+        handle sparse data sources) and subsequent retrievals with a shorter retry window.
+
+        Args:
+            t (float): The target timestamp for which data is requested.
+
+        Returns:
+            dict or None:
+                - A list containing the interpolated or exact data. Format: [float]
+                - Returns None if data could not be retrieved within the configured timeouts.
+
+        Notes:
+            - If the consumer thread is not running, an error is logged and None is returned.
+            - The first message is awaited with a longer timeout to better handle sparse
+                data sources.
+        """
+        logger.debug(f"Getting data for timestamp: {t}")
+
+        if not self.thread_manager.running:
+            logger.error("Consumer thread is not running. Cannot get data.")
+            return None
+
         self._lazy_subscribe()
 
-        while True:
+        with self._data_lock:
+            data_len = len(self.data)
+            logger.debug(f"Current data buffer size: {data_len}")
 
-            try:
-                data = self.data.copy()
+        # First-time handling with extended timeout
+        if data_len == 0:
+            logger.info(
+                "Waiting for first Kafka message "
+                f"(timeout = {self.config.first_msg_timeout})"
+            )
+            start_time = time.time()
+            while time.time() - start_time < self.config.first_msg_timeout:
+                try:
+                    with self._data_lock:
+                        logger.debug(
+                            "1st msg attempt: trying to fetch data. "
+                            f"Available t_series: {self.data['t']}. "
+                            f"Requested ts: {t}"
+                        )
+                        return self._build_out_dict(t)
+                except KeyError as error:
+                    logger.error(f"Missing key: {error}")
+                except (ValueError, RuntimeError) as error:
+                    logger.error(f"{type(error).__name__}: {error}")
+                time.sleep(self.config.retry_delay)
 
-                if data.shape[0] == 0:
-                    time.sleep(0.01)
-                    continue
+        # Regular retry loop for existing streams
+        for _ in range(self.config.max_retries):
+            start_time = time.time()
+            while time.time() - start_time < self.config.timeout:
+                with self._data_lock:
+                    logger.debug(f"Fetching data for ts = {t}")
+                    return self._build_out_dict(t)
+            logger.error(f"No valid data for ts = {t} after retries.")
 
-                # Data has started arriving
-                # Apply timeout only once (data should arrive at once)
-                if self.config.timeout >= 0:
-                    logging.debug(
-                        "First data recovered ('get_data')'. "
-                        f"Shape: {data.shape}. "
-                        f"Will wait {self.config.timeout} sec before proceeding."
-                    )
-
-                    # Wait and update data after timeout
-                    time.sleep(self.config.timeout)
-                    data = self.data.copy()
-
-                    self.config.timeout = -1
-
-                xp = data["t"]
-                # xp = data.index
-                yp = data[self.config.variable]
-
-                return self.interpolator(xp, yp, [t])
-
-            except Exception as e:
-                logger.error(f"Error: {e}")
-
-            time.sleep(0.05)
+        return None
 
     def send_data(self, data):
         """
@@ -178,31 +220,30 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
 
         return row
 
-    def _consume(self):
-        """Run the consumer in a non-blocking mode."""
-        try:
-            while self.running:
-                msg = self.consumer.poll(timeout=1)
-                if msg is None:
-                    msg_list = None
-                else:
-                    msg_list = [msg]
-                # msg_list = self.consumer.consume(timeout=0.5)
-
-                if msg_list is None:
-                    # time.sleep(0.01)
-                    continue  # No new messages, continue polling
-
-                for msg in msg_list:
-                    self._handle_message(msg)
-
-        except Exception as e:
-            logger.error(f"Error consuming messages: {e}")
-        finally:
-            self.consumer.close()
-
     def _handle_message(self, message):
-        """Process an individual Kafka message."""
+        """
+        Process a single Kafka message (typically used as callback
+        for KafkaThreadManager).
+
+        * If the message has an error, log an end-of-partition warning or raise
+        `kafka.KafkaException` for other errors.
+        * Otherwise parse the payload, merge it into `self.data`
+        (dropping duplicates), and mark the first successful message.
+        * All `AttributeError`, `KeyError`, or
+        `ValueError` raised during processing are logged and ignored.
+
+        Parameters
+        ----------
+        message : confluent_kafka.Message
+            A message returned by the consumer.
+
+        Notes
+        -----
+        * `self.first_received` is set only once, after the first
+        successfully parsed message.
+        * `self.data` is updated with new rows and reset-indexed; empty
+        frames are ignored.
+        """
         try:
             if message.error():
                 if message.error().code() == KafkaError._PARTITION_EOF:
@@ -229,24 +270,41 @@ class KafkaDataStreamHandler(BaseDataStreamHandler):
                         f"(offset: {message.offset()})"
                     )
                     self.first_received = message
-        except Exception as e:
-            logger.error(f"Error handling messages: {e}")
+        except (AttributeError, KeyError, ValueError) as error:
+            logger.error(f"Error handling messages: {error}")
 
-    def start_consuming(self):
+    def start_consumer_thread(self):
         """Start the consumer in a background thread."""
-        try:
-            if not self.running:
-                self.running = True
-                self.consumer_thread = threading.Thread(target=self._consume)
-                self.consumer_thread.daemon = True
-                self.consumer_thread.start()
-                logger.info(f"Consumer thread started: {self.consumer_thread.name}")
-        except Exception as e:
-            logger.error(f"Error while start consuming messages: {e}")
+        logger.debug("Starting Kafka consumer thread.")
+        self.thread_manager.start()
 
-    def stop_consuming(self):
+    def stop_consumer_thread(self):
         """Stop the consumer gracefully."""
-        if self.running:
-            self.running = False
-            self.consumer_thread.join()  # Wait for the consumer thread to finish
-            logger.info("Consumer thread stopped.")
+        logger.debug("Stopping Kafka consumer thread.")
+        self.thread_manager.stop()
+
+    # pylint: disable=W0237,W0221
+    def is_equivalent_stream(self, topic, uri, group_id, **alt_config) -> bool:
+        """
+        Check if the current data stream handler instance is equivalent to
+        another that would be created with the given config.
+        This kafka data handler groups all variables sent in the same
+        {uri, topic, group} data stream into one handler instance.
+
+        Args:
+            The constructor is exacly the same than in __init__.
+
+        Returns:
+            bool: True if the handlers are equivalent, False otherwise.
+        """
+        # equivalent items: {uri, topic, group_id, interpolation}
+        # if one is different, the compared streams are not equivalent
+        interp_method = alt_config.get("interpolation", "previous")
+        same = (
+            f"{self.config.server_url}:{self.config.port}" == uri
+            and self.config.topic == topic
+            and self.config.group_id == group_id
+            and self.config.interpolation == interp_method
+        )
+        logger.debug("Stream equivalence check: %s", same)
+        return same

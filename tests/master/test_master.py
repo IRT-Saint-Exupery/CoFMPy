@@ -45,7 +45,7 @@ use_cases = [
             "fmu_config_list": [
                 {
                     "id": "ball",
-                    "path": "tests/wrappers/assets/BouncingBall.fmu",
+                    "path": "resources/fmus/BouncingBall.fmu",
                     "initialization": {"e": 0.6},  # coefficient of restitution
                 }
             ],
@@ -70,12 +70,12 @@ use_cases = [
             "fmu_config_list": [
                 {
                     "id": "source",
-                    "path": "tests/data/source.fmu",
+                    "path": "resources/fmus/source.fmu",
                     "initialization": {"phase": 0.9},
                 },
                 {
                     "id": "resistor",
-                    "path": "tests/data/resistor.fmu",
+                    "path": "resources/fmus/resistor.fmu",
                     "initialization": {"R": 5.0},
                 },
             ],
@@ -88,7 +88,7 @@ use_cases = [
             "input_dict_first_fmu": np.array(0),
             "input_dict": {"source": {}, "resistor": {"V": [0]}},
             "output_vars": {"source": ["V"], "resistor": ["I"]},
-            "do_step": {"source": {"V": [15.666538]}, "resistor": {"I": [0.0]}},
+            "do_step": {"source": {"V": [15.666538]}, "resistor": {"I": [3.1333076385099337]}},
             "results_keys": [("source", "V"), ("resistor", "I")],
             "new_var_value": ("resistor", "V", 3.0),
             "loop_fmu_ids": ["source", "resistor"],
@@ -101,12 +101,12 @@ use_cases = [
             "fmu_config_list": [
                 {
                     "id": "source",
-                    "path": "tests/data/source.fmu",
+                    "path": "resources/fmus/source.fmu",
                     "initialization": {"phase": 0.9},
                 },
                 {
                     "id": "resistor",
-                    "path": "tests/data/resistor.fmu",
+                    "path": "resources/fmus/resistor.fmu",
                     "initialization": {"R": 5.0},
                 },
             ],

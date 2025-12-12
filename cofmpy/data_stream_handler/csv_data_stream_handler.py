@@ -25,10 +25,13 @@
 """
 This module contains the child class for CSV data stream handler.
 """
+import logging
 import pandas as pd
 
 from ..utils import Interpolator
 from .base_data_stream_handler import BaseDataStreamHandler
+
+logger = logging.getLogger(__name__)
 
 
 class CsvDataStreamHandler(BaseDataStreamHandler):
@@ -39,13 +42,12 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
     # Type name of the handler (used in the configuration file and handler registration)
     type_name = "csv"
 
-    def __init__(self, path, variable, interpolation="previous"):
+    def __init__(self, path, interpolation="previous"):
         """
         Constructor for CSV data stream handler.
 
         Args:
             path (str): path to the CSV file.
-            variable (str): name of the variable to extract from the CSV file.
             interpolation (str): type of interpolation to use when data is requested at
                 a timestamp other than available data values. The extrapolation behaviour
                 depends on the chosen method: see cofmpy.utils.Interpolator.
@@ -53,12 +55,11 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
                 Usually: 'linear', 'cubic', 'quadratic', 'previous', 'nearest', 'spline'.
                 Defaults to 'previous.
         """
+        super().__init__()
         self.path = path
-        self.variable_name = variable
 
         self.interpolator = Interpolator(interpolation)
         self.data = pd.read_csv(path)
-        self.data = self.data[["t", self.variable_name]]
 
     def get_data(self, t: float):
         """
@@ -68,6 +69,32 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
             t (float): timestamp to get the data.
 
         Returns:
-            float: data value at the requested time.
+            dict: for the requested time, returns dict of values associated to variables
+                under the data handler scope (see BaseDataStreamHandler.is_equivalent_stream).
+                Format : {(fmu_i, var_j): value_1, (fmu_k, var_l): value_2, ...}
         """
-        return self.interpolator(self.data["t"], self.data[self.variable_name], [t])[0]
+        out_dict = {}
+        for (fmu, variable), stream_alias in self.alias_mapping.items():
+            out_dict[(fmu, variable)] = self.interpolator(
+                self.data["t"], self.data[stream_alias], [t]
+            )[0]
+
+        return out_dict
+
+    # pylint: disable=W0237
+    def is_equivalent_stream(self, path, interpolation="previous") -> bool:
+        """
+        Check if the current data stream handler instance is equivalent to
+        another that would be created with the given config.
+        This csv data handler groups all variables present in one same csv into one
+        handler instance.
+
+        Args:
+            The constructor is exacly the same than in __init__.
+
+        Returns:
+            bool: True if the handlers are equivalent, False otherwise.
+        """
+        # items to compare: {path, interpolation}
+        same = self.path == path and self.interpolator.method == interpolation
+        return same

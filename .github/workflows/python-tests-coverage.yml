@@ -5,7 +5,7 @@ permissions:
 
 on:
   push:
-    branches: 
+    branches:
       - main
       - dev
   pull_request:
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,13 +31,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .[dev]
-          pip install coverage-badge  
+          pip install coverage-badge
 
       - name: Run tests and generate coverage report
         run: pytest --cov=cofmpy --cov-report=xml
 
       - name: Generate coverage badge
-        run: | 
+        run: |
           mkdir -p /tmp/badge
           coverage-badge -f -o /tmp/badge/coverage.svg
 
