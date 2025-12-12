@@ -44,7 +44,7 @@ import os
 import urllib.request
 import zipfile
 
-url = "https://share-is.pf.irt-saintexupery.com/s/HSNSeteJPoJjyXx"
+url = "https://share-is.pf.irt-saintexupery.com/s/HSNSeteJPoJjyXx/download"
 
 # Local path to resources folder
 resources_path = "example1.zip"
