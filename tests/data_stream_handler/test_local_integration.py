@@ -22,20 +22,11 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import pandas as pd
-
-from cofmpy.coordinator import Coordinator
+import pytest
 
 
-def test_literal_data_stream_handler_integration(literal_two_resistors_test):
+def test_local_integration(local_two_resistors_test, run_integration_test):
 
-    config, expected_results = literal_two_resistors_test
-    coordinator = Coordinator()
-    coordinator.start(config)
-    for _ in range(80):
-        coordinator.do_step(0.05)
+    config, expected_results = local_two_resistors_test
 
-    results = pd.DataFrame(coordinator.get_results())
-    results = results.set_index("time")
-
-    assert results.to_dict() == expected_results
+    run_integration_test(config, expected_results)

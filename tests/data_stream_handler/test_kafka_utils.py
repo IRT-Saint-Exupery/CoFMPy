@@ -31,7 +31,6 @@ def test_valid_config():
     cfg = KafkaHandlerConfig(
         topic="my_topic",
         uri="localhost:9092",
-        variable="var1",
         group_id="group1",
         timeout=0.5,
         interpolation="previous",
@@ -47,31 +46,31 @@ def test_valid_config():
 
 def test_missing_required_fields():
     with pytest.raises(TypeError):
-        KafkaHandlerConfig(uri="localhost:9092", variable="var1")  # missing topic & group_id
+        KafkaHandlerConfig(uri="localhost:9092")  # missing topic & group_id
 
 def test_uri_splitting():
-    cfg = KafkaHandlerConfig(topic="t", uri="127.0.0.1:1234", variable="v", group_id="g")
+    cfg = KafkaHandlerConfig(topic="t", uri="127.0.0.1:1234", group_id="g")
     assert cfg.server_url == "127.0.0.1"
     assert cfg.port == "1234"
 
 def test_invalid_port():
     with pytest.raises(ValueError, match="Port must be numeric"):
-        KafkaHandlerConfig(topic="t", uri="127.0.0.1:abc", variable="v", group_id="g")
+        KafkaHandlerConfig(topic="t", uri="127.0.0.1:abc", group_id="g")
 
 def test_negative_timeout():
     with pytest.raises(ValueError, match="Timeout must be non-negative"):
-        KafkaHandlerConfig(topic="t", uri="localhost:1234", variable="v", group_id="g", timeout=-1)
+        KafkaHandlerConfig(topic="t", uri="localhost:1234", group_id="g", timeout=-1)
 
 @pytest.mark.parametrize("offset", ["invalid", "start", "end"])
 def test_invalid_auto_offset_reset(offset):
     with pytest.raises(ValueError, match="Invalid auto_offset_reset"):
-        KafkaHandlerConfig(topic="t", uri="localhost:1234", variable="v", group_id="g", auto_offset_reset=offset)
+        KafkaHandlerConfig(topic="t", uri="localhost:1234", group_id="g", auto_offset_reset=offset)
 
 @pytest.mark.parametrize("interp", ["unknown", "step"])
 def test_invalid_interpolation(interp):
     with pytest.raises(ValueError, match="Invalid interpolation method"):
-        KafkaHandlerConfig(topic="t", uri="localhost:1234", variable="v", group_id="g", interpolation=interp)
+        KafkaHandlerConfig(topic="t", uri="localhost:1234", group_id="g", interpolation=interp)
 
 def test_malformed_uri():
     with pytest.raises(ValueError, match="Malformed URI"):
-        KafkaHandlerConfig(topic="t", uri="justahost", variable="v", group_id="g")
+        KafkaHandlerConfig(topic="t", uri="justahost", group_id="g")

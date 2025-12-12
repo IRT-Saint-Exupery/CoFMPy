@@ -29,13 +29,15 @@ from cofmpy.data_stream_handler.csv_data_stream_handler import CsvDataStreamHand
 TEST_DATA_PREVIOUS = [(2, 30), (1.5, 20), (3, 40)]
 TEST_DATA_OO_RANGE = [(0, 10), (3.5, 40), (5, 40)]
 TEST_DATA_LINEAR = [(1.5, 25), (2.5, 35)]
+CONN_NAME = ("endpt", "var")
+STREAM_NAME = "var"
 
 
 def get_csv_content():
     """
     Return a mock CSV content as a string.
     """
-    return """t,variable
+    return f"""t,{STREAM_NAME}
 0.5,10
 1,20
 2,30
@@ -54,19 +56,19 @@ def csv_file(tmp_path):
 
 
 def test_csv_handler_initialization(csv_file):
-    handler = CsvDataStreamHandler(csv_file, "variable")
+    handler = CsvDataStreamHandler(csv_file)
     assert handler.path == csv_file
-    assert handler.variable_name == "variable"
     assert handler.interpolator.method == "previous"
     assert not handler.data.empty
-    handler = CsvDataStreamHandler(csv_file, "variable", "spline")
+    handler = CsvDataStreamHandler(csv_file, "spline")
     assert handler.interpolator.method == "spline"
 
 
 def test_get_data_previous_interpolation(csv_file):
-    handler = CsvDataStreamHandler(csv_file, "variable")
-    for (x_, y_) in TEST_DATA_PREVIOUS:
-        interp_y = handler.get_data(x_)
+    handler = CsvDataStreamHandler(csv_file)
+    handler.add_variable(CONN_NAME, STREAM_NAME)
+    for x_, y_ in TEST_DATA_PREVIOUS:
+        interp_y = handler.get_data(x_)[CONN_NAME]
         assert isinstance(interp_y, float)
         assert interp_y == y_
 
@@ -74,17 +76,19 @@ def test_get_data_previous_interpolation(csv_file):
 def test_get_data_linear_interpolation(tmp_path):
     csv_file = tmp_path / "test_data.csv"
     csv_file.write_text(get_csv_content())
-    handler = CsvDataStreamHandler(str(csv_file), "variable", interpolation="linear")
-    for (x_, y_) in TEST_DATA_LINEAR:
-        interp_y = handler.get_data(x_)
+    handler = CsvDataStreamHandler(str(csv_file), interpolation="linear")
+    handler.add_variable(CONN_NAME, STREAM_NAME)
+    for x_, y_ in TEST_DATA_LINEAR:
+        interp_y = handler.get_data(x_)[CONN_NAME]
         assert isinstance(interp_y, float)
         assert interp_y == y_
 
 
 def test_get_data_out_of_range(csv_file):
-    handler = CsvDataStreamHandler(csv_file, "variable", interpolation="previous")
-    for (x_, y_) in TEST_DATA_OO_RANGE:
-        interp_y = handler.get_data(x_)
+    handler = CsvDataStreamHandler(csv_file, interpolation="previous")
+    handler.add_variable(CONN_NAME, STREAM_NAME)
+    for x_, y_ in TEST_DATA_OO_RANGE:
+        interp_y = handler.get_data(x_)[CONN_NAME]
         assert isinstance(interp_y, float)
         assert interp_y == y_
 
@@ -93,4 +97,4 @@ def test_invalid_interpolation(tmp_path):
     csv_file = tmp_path / "test_data.csv"
     csv_file.write_text(get_csv_content())
     with pytest.raises(ValueError, match="Unregistered method 'invalid'."):
-        CsvDataStreamHandler(str(csv_file), "variable", interpolation="invalid")
+        CsvDataStreamHandler(str(csv_file), interpolation="invalid")

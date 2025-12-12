@@ -7,7 +7,7 @@
 ## 1. Initialization
 
 ```python
-from your_module import KafkaThreadManager
+from cofmpy.data_stream_handler.kafka_utils import KafkaThreadManager
 
 manager = KafkaThreadManager(
     consumer=my_kafka_consumer,
