@@ -24,13 +24,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 CoFMPy is a Python package for co-simulation of FMUs.
+
+This module is kept for backward compatibility and will be removed in future releases.
+Please switch to the new package name 'cofmupy'.
 """
-from os import path
+import warnings
 
-with open(path.join(path.dirname(__file__), "VERSION"), encoding="utf-8") as f:
-    __version__ = f.read().strip()
+warnings.warn(
+   "The 'cofmpy' project has been renamed 'cofmupy'."
+   "Please update your imports and dependencies.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-from . import data_stream_handler
-from .data_stream_handler import BaseDataStreamHandler
-from .data_storage import BaseDataStorage
-from .coordinator import Coordinator
+from cofmupy import *

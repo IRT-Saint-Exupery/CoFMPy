@@ -80,10 +80,11 @@ setuptools.setup(
     license="BSD-2-Clause",
     packages=setuptools.find_namespace_packages(),
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=["cofmupy"],
     extras_require={"dev": dev_requirements},
     python_requires=">=3.9",
     classifiers=[
+        "Development Status :: 7 - Inactive",
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
