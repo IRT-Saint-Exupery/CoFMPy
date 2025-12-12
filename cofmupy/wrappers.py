@@ -37,7 +37,7 @@ from fmpy import extract
 from fmpy import read_model_description
 from fmpy.fmi2 import FMU2Slave
 from fmpy.fmi3 import FMU3Slave
-from cofmupy.utils.proxy import (
+from ..utils.proxy import (
     ProxyVarAttr,
     ProxyModelDescription,
     ProxyCoSimulation,
