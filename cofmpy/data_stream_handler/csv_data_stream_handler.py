@@ -96,8 +96,5 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
             bool: True if the handlers are equivalent, False otherwise.
         """
         # items to compare: {path, interpolation}
-        same = (
-            self.path == path
-            and self.interpolator.method == interpolation
-        )
+        same = self.path == path and self.interpolator.method == interpolation
         return same
