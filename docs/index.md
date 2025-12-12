@@ -3,8 +3,8 @@
 </head>
 
 <div align="center">
-    <img src="./assets/logo_cofmpy_dark.png#only-dark" width="75%" alt="Logo CoFMPy" align="center" />
-    <img src="./assets/logo_cofmpy_light.png#only-light" width="75%" alt="Logo CoFMPy" align="center" />
+    <img src="./assets/logo_cofmupy_dark.png#only-dark" width="75%" alt="Logo CoFmuPy" align="center" />
+    <img src="./assets/logo_cofmupy_light.png#only-light" width="75%" alt="Logo CoFmuPy" align="center" />
 </div>
 <br>
 
@@ -12,21 +12,21 @@
 <div align="center">
     <a href="#">
         <img src="https://img.shields.io/badge/python-3.9%2B-blue"></a>
-     <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/blob/main/LICENSE">
+     <a href="https://github.com/IRT-Saint-Exupery/CoFmuPy/blob/main/LICENSE">
         <img alt="License BSD" src="https://img.shields.io/badge/License-BSD%202--Clause-blue.svg"></a>
-    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-linters.yml">
-        <img alt="Pylint" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-linters.yml/badge.svg"></a>
-    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml">
-        <img alt="Tests" src="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests.yml/badge.svg"></a>
-    <a href="https://github.com/IRT-Saint-Exupery/CoFMPy/actions/workflows/python-tests-coverage.yml">
-        <img alt="Coverage" src="https://raw.githubusercontent.com/IRT-Saint-Exupery/CoFMPy/badges/.github/badges/coverage.svg""></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFmuPy/actions/workflows/python-linters.yml">
+        <img alt="Pylint" src="https://github.com/IRT-Saint-Exupery/CoFmuPy/actions/workflows/python-linters.yml/badge.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFmuPy/actions/workflows/python-tests.yml">
+        <img alt="Tests" src="https://github.com/IRT-Saint-Exupery/CoFmuPy/actions/workflows/python-tests.yml/badge.svg"></a>
+    <a href="https://github.com/IRT-Saint-Exupery/CoFmuPy/actions/workflows/python-tests-coverage.yml">
+        <img alt="Coverage" src="https://raw.githubusercontent.com/IRT-Saint-Exupery/CoFmuPy/badges/.github/badges/coverage.svg""></a>
 
 </div>
 <br>
 
-## 👋 About CoFMPy
+## 👋 About CoFmuPy
 
-CoFMPy is a Python library designed for rapid prototyping of digital twins through
+CoFmuPy is a Python library designed for rapid prototyping of digital twins through
 the co-simulation of Functional Mock-up Units (FMUs).
 It offers advanced master coordination features, such as solving algebraic loops between
 FMUs and managing the interaction between various simulation components. This library
@@ -34,25 +34,25 @@ provides a seamless interface to orchestrate complex physics simulations and han
 data exchange between FMUs.
 
 The documentation is available online:
-[https://irt-saint-exupery.github.io/CoFMPy](https://irt-saint-exupery.github.io/CoFMPy)
+[https://irt-saint-exupery.github.io/CoFmuPy](https://irt-saint-exupery.github.io/CoFmuPy)
 
 ## 🐾 Installation
 
-CoFMPy is available on PyPI and can be installed using `pip`:
+CoFmuPy is available on PyPI and can be installed using `pip`:
 
 ```bash
-pip install cofmpy
+pip install cofmupy
 ```
 
 ## 🐍 Python interface
 
-The Python interface allows users to use CoFMPy and run co-simulation. A high-level
+The Python interface allows users to use CoFmuPy and run co-simulation. A high-level
 API is provided to easily run and visualize a co-simulation system.
-Advanced users can also dive deeper into the structure of CoFMPy for a more advanced
+Advanced users can also dive deeper into the structure of CoFmuPy for a more advanced
 control of the components.
 
-Under the hood, CoFMPy is controlled by a component called the _Coordinator_. It is the
-entry point of CoFMPy and it manages all the other components:
+Under the hood, CoFmuPy is controlled by a component called the _Coordinator_. It is the
+entry point of CoFmuPy and it manages all the other components:
 
 - the Master algorithm which is the engine that runs the co-simulation of FMUs.
 - the Graph Engine that builds the connections and interactions between the FMUs and the
@@ -60,18 +60,18 @@ entry point of CoFMPy and it manages all the other components:
 - the data stream handlers that control the input data required by the co-simulation
   system.
 - the data storages that allow to store or send the outputs of the simulation.
-- the GUI as the frontend of CoFMPy.
+- the GUI as the frontend of CoFmuPy.
 
 ## 📜 JSON configuration file
 
 To properly define the co-simulation system, a JSON configuration file must be created.
-This file is the only information required by CoFMPy to run the simulation. It must
+This file is the only information required by CoFmuPy to run the simulation. It must
 respect a specific syntax in order to define the FMUs, the interactions between them,
 the data sources and sinks, etc.
 
 ## ✒️ Contributing
 
-Feel free to propose your ideas or come and contribute with us on the CoFMPy library!
+Feel free to propose your ideas or come and contribute with us on the CoFmuPy library!
 
 ## 🙏 Acknowledgments
 

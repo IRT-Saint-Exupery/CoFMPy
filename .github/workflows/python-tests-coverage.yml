@@ -34,7 +34,7 @@ jobs:
           pip install coverage-badge
 
       - name: Run tests and generate coverage report
-        run: pytest --cov=cofmpy --cov-report=xml
+        run: pytest --cov=cofmupy --cov-report=xml
 
       - name: Generate coverage badge
         run: |

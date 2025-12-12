@@ -1,7 +1,7 @@
-site_name: CoFMPy
+site_name: CoFmuPy
 site_description: "A Python library for Cosimulation based on FMI standard"
-repo_name: cofmpy
-repo_url: https://github.com/IRT-Saint-Exupery/CoFMPy
+repo_name: cofmupy
+repo_url: https://github.com/IRT-Saint-Exupery/CoFmuPy
 
 nav:
   - Home: index.md
@@ -28,8 +28,8 @@ nav:
 
 theme:
   name: material
-  logo: assets/logo_cofmpy_light.png
-  favicon: assets/favicon_cofmpy_light.png
+  logo: assets/logo_cofmupy_light.png
+  favicon: assets/favicon_cofmupy_light.png
   palette:
     - scheme: default
       primary: dark

@@ -30,13 +30,17 @@ from unittest.mock import patch
 import pytest
 import time
 
-from cofmpy.data_stream_handler import KafkaDataStreamHandler
+from cofmupy.data_stream_handler import KafkaDataStreamHandler
 from tests.data_stream_handler.mock_producer import try_start_kafka_docker
+
+
 class KafkaHandlerSeparated(KafkaDataStreamHandler):
-    """Custom class to test one-handler-instance 
+    """Custom class to test one-handler-instance
     per Kafka topic ("separated") behaviour"""
+
     def _is_equivalent_stream(self, config):
         return False
+
 
 # ====== Start Docker ======
 docker_compose_path = "./tests/data_stream_handler/docker-compose.yml"
@@ -90,7 +94,9 @@ def test_kafka_two_resistors_separated(kafka_two_resistors_test, run_integration
 
     config, expected_results, kafka_producers = kafka_two_resistors_test(combined=False)
     _ = [m_prod.start() for m_prod in kafka_producers]
-    with patch("cofmpy.data_stream_handler.KafkaDataStreamHandler", KafkaHandlerSeparated):
+    with patch(
+        "cofmupy.data_stream_handler.KafkaDataStreamHandler", KafkaHandlerSeparated
+    ):
         run_integration_test(config, expected_results)
     time.sleep(0.1)
 

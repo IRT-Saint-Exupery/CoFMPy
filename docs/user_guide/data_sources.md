@@ -2,7 +2,7 @@
 
 External data can be useful to control variable parameters, to use as input from an
 other system simulation or just to get from measurements from a physical twin.
-CoFMPy provides multiple data source handlers detailed below.
+CoFmuPy provides multiple data source handlers detailed below.
 
 Whatever the data source, the connection between the data source and the target variable
 of the simulation is defined in the JSON configuration file as a connection:
@@ -65,7 +65,7 @@ t,R,V_out,Iload
 0.7,200,5,2.5
 ```
 
-To connect CSV data to an FMU variable in CoFMPy, the connection is described in the
+To connect CSV data to an FMU variable in CoFmuPy, the connection is described in the
 JSON configuration file as follows:
 
 ```json
@@ -82,7 +82,7 @@ JSON configuration file as follows:
 
 ## A Kafka stream
 
-The last data source proposed in CoFMPy is a Kafka broker. Data is retrieved from a
+The last data source proposed in CoFmuPy is a Kafka broker. Data is retrieved from a
 Kafka topic in a specific format: a message must contain the time instants and their
 corresponding values as a dictionary:
 

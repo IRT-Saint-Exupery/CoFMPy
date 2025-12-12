@@ -1,3 +1,3 @@
 # The Cosimulation Graph Engine
 
-::: cofmpy.graph_engine.GraphEngine
+::: cofmupy.graph_engine.GraphEngine

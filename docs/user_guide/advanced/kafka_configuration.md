@@ -9,7 +9,7 @@
 You can create an instance by passing the required parameters:
 
 ```python
-from cofmpy import KafkaHandlerConfig
+from cofmupy import KafkaHandlerConfig
 
 config_dict = {
     "uri": "localhost:9092",

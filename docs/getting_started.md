@@ -1,18 +1,18 @@
-# 🚀 Getting Started with CoFMPy
+# 🚀 Getting Started with CoFmuPy
 
-CoFMPy is a framework designed to make co-simulation and prototyping digital twins easy and efficient. This guide walks you through setting up and running your first simulation with CoFMPy!
+CoFmuPy is a framework designed to make co-simulation and prototyping digital twins easy and efficient. This guide walks you through setting up and running your first simulation with CoFmuPy!
 
 ## 🐾 Installation
 
-Before you begin, ensure CoFMPy is installed:
+Before you begin, ensure CoFmuPy is installed:
 
 ```bash
-pip install cofmpy
+pip install cofmupy
 ```
 
 ## 💻 Running Your First Simulation
 
-With CoFMPy, you can simulate complex systems composed of multiple FMUs connected together. You can even integrate external files or network interfaces.
+With CoFmuPy, you can simulate complex systems composed of multiple FMUs connected together. You can even integrate external files or network interfaces.
 For now, we will keep it simple and consider the system consisting of an alternating voltage source and a resistor, as shown in the figure below:
 
 <figure style="text-align:center">
@@ -42,11 +42,11 @@ print("Resources unzipped in example1 folder!")
 
 ### Step 1: Instantiate the Coordinator
 
-The heart of CoFMPy is the `Coordinator`, which is responsible for managing the simulation process. We begin by instantiating it and loading the configuration file just downloaded above:
+The heart of CoFmuPy is the `Coordinator`, which is responsible for managing the simulation process. We begin by instantiating it and loading the configuration file just downloaded above:
 
 ```python
-# Import the main CoFMPy component
-from cofmpy import Coordinator
+# Import the main CoFmuPy component
+from cofmupy import Coordinator
 
 # Create an instance of the Coordinator
 coordinator = Coordinator()
@@ -102,5 +102,5 @@ print(results[("resistor", "I")])
 
 - Try modifying the configuration file to explore different scenarios.
 - Experiment with different step sizes to see how they affect results.
-- Explore CoFMPy's [examples gallery](generated/gallery/index.md).
+- Explore CoFmuPy's [examples gallery](generated/gallery/index.md).
 - Dive deeper into advanced features by checking the official documentation.

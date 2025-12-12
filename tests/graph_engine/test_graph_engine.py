@@ -28,7 +28,7 @@ from unittest.mock import patch
 import networkx as nx
 import pytest
 
-from cofmpy.graph_engine import GraphEngine
+from cofmupy.graph_engine import GraphEngine
 
 
 @pytest.fixture
@@ -332,6 +332,6 @@ def test_plot_graph_with_save(sample_data):
     fmu_list, symbolic_nodes, conn_list = sample_data
     engine = GraphEngine(fmu_list, symbolic_nodes, conn_list)
 
-    with patch("cofmpy.graph_plotter.GraphPlotter.save_plotly_figure") as mock_save:
+    with patch("cofmupy.graph_plotter.GraphPlotter.save_plotly_figure") as mock_save:
         engine.plot_graph(savefig=True)
         mock_save.assert_called_once_with(mock_save.call_args[0][0], "cosim_diagram")

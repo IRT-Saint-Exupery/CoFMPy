@@ -1,6 +1,6 @@
 # Data Stream Handler module
 
-This section describes the architecture, usage, and available implementations of data stream handlers within CoFMPy.
+This section describes the architecture, usage, and available implementations of data stream handlers within CoFmuPy.
 
 ---
 ## 1. Overview
@@ -12,7 +12,7 @@ The `data_stream_handler` module provides a unified interface for ingesting and 
 * **Modularity & Extensibility:** All stream handlers inherit from `BaseDataStreamHandler`, which defines the standard interface and registration mechanism for new handlers.
 * **Handler Factory:** Stream handler instances are dynamically instantiated using the `BaseDataStreamHandler.create_handler()` factory method, based on the configuration dictionary.
 * **Grouped data streams:** Control over dynamic instantiation and variable assignment is provided by `BaseDataStreamHandler.is_equivalent_stream()` and `BaseDataStreamHandler.add_variable()` methods, respectively.
-* **Alias Mapping:** A mechanism for mapping CoFMPy internal connections (as `(fmu, variable)` tuples) to external variables in the input data stream.
+* **Alias Mapping:** A mechanism for mapping CoFmuPy internal connections (as `(fmu, variable)` tuples) to external variables in the input data stream.
 * **Data Interpolation:** Each handler supports time-based interpolation (e.g., step-wise or linear), using the shared `Interpolator` utility.
 
 ### Included Handlers
@@ -51,7 +51,7 @@ This architecture enables rapid experimentation and stream interchangeability, m
 The `BaseDataStreamHandler` provides the abstract common interface for all data stream handlers, in particular, it: 
 * Defines a uniform API for time-based data retrieval (`get_data`)
 * Enables extensibility through a registry and factory method
-* Manages alias mappings between CoFMPy connections and stream variables
+* Manages alias mappings between CoFmuPy connections and stream variables
 * Supports equivalence checks for grouping data streams in a single handler (`is_equivalent_stream`)
 
 ### Core Methods
@@ -60,7 +60,7 @@ The `BaseDataStreamHandler` provides the abstract common interface for all data 
   Must be implemented by child classes to return the data at time `t`. Interpolation behavior is defined per handler instance.
 
 * `add_variable(variable: tuple, stream_alias: str)`
-  Updates the mapping between a COFMPy connection variable (as a `(fmu, variable)` tuple) and its name in the data stream.
+  Updates the mapping between a CoFmuPy connection variable (as a `(fmu, variable)` tuple) and its name in the data stream.
 
 * `is_equivalent_stream(config: dict) -> bool`
   Used to check if a new config would produce an equivalent stream handler instance (e.g., same CSV file path, same Kafka topic, etc.).
@@ -82,7 +82,7 @@ The `config_dict` must follow this structure:
 }
 ```
 
-For integration with the rest of CoFMPy modules, new subclasses have to be **imported and registered** in the module's `__init__.py`.
+For integration with the rest of CoFmuPy modules, new subclasses have to be **imported and registered** in the module's `__init__.py`.
 
 ### Alias Mapping
 
@@ -92,7 +92,7 @@ Handlers store connection mappings internally using a dictionary:
 alias_mapping: dict[tuple[str, str], str]
 ```
 
-This mapping is used to translate CoFMPy internal references to stream-specific variable names during data retrieval.
+This mapping is used to translate CoFmuPy internal references to stream-specific variable names during data retrieval.
 
 ---
 ## 3. Available Handlers
@@ -191,7 +191,7 @@ To manage Kafka consumption robustly and efficiently, the handler relies on util
 
 #####  `parse_kafka_message(msg)`
 
-* Parses raw Kafka messages into a CoFMPy compatible Python `dict` with a `t` field (timestamp) and associated values under alias keys.
+* Parses raw Kafka messages into a CoFmuPy compatible Python `dict` with a `t` field (timestamp) and associated values under alias keys.
 * If a different incoming data structure is used, this function provides an interface to the rest of the API.
 * Falls back to raw string output on failure, allowing standalone use of the data handler.
 
@@ -277,7 +277,7 @@ You can add support for new data sources by implementing a custom subclass of `B
 
 ### Tips
 
-* Use `add_variable()` to support alias mapping if integrattion with other CoFMPy modules is required.
+* Use `add_variable()` to support alias mapping if integrattion with other CoFmuPy modules is required.
 * Follow the same interpolation pattern as built-in handlers for consistency.
 * Use `is_equivalent_stream()` to help avoid redundant handler instances.
 

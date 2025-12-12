@@ -26,7 +26,7 @@
 A first example: an AC voltage source and a resistor
 ====================================================
 
-This is a simple example of how to use CoFMPy to load a co-simulation system (JSON
+This is a simple example of how to use CoFmuPy to load a co-simulation system (JSON
 configuration file and FMUs) and run the simulation.
 
 The use case is a simple system with an AC voltage source and a resistor. The AC voltage
@@ -44,7 +44,7 @@ import os
 import urllib.request
 import zipfile
 
-url = "https://share-is.pf.irt-saintexupery.com/s/39zaG9HkQWnePbi/download"
+url = "https://share-is.pf.irt-saintexupery.com/s/HSNSeteJPoJjyXx"
 
 # Local path to resources folder
 resources_path = "example1.zip"
@@ -62,14 +62,14 @@ print("Resources unzipped in example1 folder!")
 # %%
 # Now that we have all the necessary resources, we can start the example.
 #
-# The base object in CoFMPy is the [**Coordinator**](../../api/coordinator.md). It
-# manages all the components of CoFMPy: the Master algorithm, the graph engine, the data
+# The base object in CoFmuPy is the [**Coordinator**](../../api/coordinator.md). It
+# manages all the components of CoFmuPy: the Master algorithm, the graph engine, the data
 # stream handlers, etc. In this tutorial, we only deal with the Coordinator that
 # communicates automatically with the different components.
 #
-# We will first import the Coordinator object from CoFMPy and create an instance of it.
+# We will first import the Coordinator object from CoFmuPy and create an instance of it.
 
-from cofmpy import Coordinator
+from cofmupy import Coordinator
 
 coordinator = Coordinator()
 
@@ -134,7 +134,7 @@ coordinator.graph_engine.plot_graph()
 # ## Running the simulation
 #
 # After loading the configuration file, you can run the simulation by calling the
-# [`do_step` method](../../api/coordinator.md#cofmpy.coordinator.Coordinator.do_step).
+# [`do_step` method](../../api/coordinator.md#cofmupy.coordinator.Coordinator.do_step).
 # This method will run the simulation for a given time step via the Master algorithm.
 #
 # The `do_step` method will save the results in the data storages defined in the
@@ -165,7 +165,7 @@ print(
 # %%
 # It is possible to run the simulation until a specific end time by using the
 # [`run_simulation`
-# method](../../api/coordinator.md#cofmpy.coordinator.Coordinator.run_simulation). This
+# method](../../api/coordinator.md#cofmupy.coordinator.Coordinator.run_simulation). This
 # method will run the simulation until the end time and return the results of the
 # simulation. Note that you should recreate a new Coordinator from scratch. It is not
 # possible to mix both `do_step` and `run_simulation` methods in the same Coordinator

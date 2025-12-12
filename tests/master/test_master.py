@@ -36,7 +36,7 @@ from collections import defaultdict
 import numpy as np
 import pytest
 
-from cofmpy.master import Master
+from cofmupy.master import Master
 
 use_cases = [
     {  # Use case 1: single FMU bouncing ball
@@ -64,7 +64,7 @@ use_cases = [
         },
     },
     {  # Use case 2: two FMUs with a single connection (source -> resistor)
-       # jacobi algo
+        # jacobi algo
         "use_case_name": "source_resistor",
         "master_config": {
             "fmu_config_list": [
@@ -88,14 +88,17 @@ use_cases = [
             "input_dict_first_fmu": np.array(0),
             "input_dict": {"source": {}, "resistor": {"V": [0]}},
             "output_vars": {"source": ["V"], "resistor": ["I"]},
-            "do_step": {"source": {"V": [15.666538]}, "resistor": {"I": [3.1333076385099337]}},
+            "do_step": {
+                "source": {"V": [15.666538]},
+                "resistor": {"I": [3.1333076385099337]},
+            },
             "results_keys": [("source", "V"), ("resistor", "I")],
             "new_var_value": ("resistor", "V", 3.0),
             "loop_fmu_ids": ["source", "resistor"],
         },
     },
     {  # Use case 3: two FMUs with a single connection (source -> resistor),
-       # gauss-seidel algo
+        # gauss-seidel algo
         "use_case_name": "source_resistor_2",
         "master_config": {
             "fmu_config_list": [
@@ -119,7 +122,10 @@ use_cases = [
             "input_dict_first_fmu": np.array(0),
             "input_dict": {"source": {}, "resistor": {"V": [0]}},
             "output_vars": {"source": ["V"], "resistor": ["I"]},
-            "do_step": {"source": {"V": [15.666538]}, "resistor": {"I": [3.1333076385099337]}},
+            "do_step": {
+                "source": {"V": [15.666538]},
+                "resistor": {"I": [3.1333076385099337]},
+            },
             "results_keys": [("source", "V"), ("resistor", "I")],
             "new_var_value": ("resistor", "V", 3.0),
             "loop_fmu_ids": ["source", "resistor"],

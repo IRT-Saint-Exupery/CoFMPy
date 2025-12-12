@@ -26,7 +26,7 @@ import os
 import tempfile
 import unittest
 
-from cofmpy.coordinator import Coordinator
+from cofmupy.coordinator import Coordinator
 
 
 class CoordinatorCheck(unittest.TestCase):

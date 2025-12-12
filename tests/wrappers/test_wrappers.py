@@ -39,7 +39,7 @@ from conftest import nb_steps
 
 def test_fmi_version_not_recognized():
     # Mock the read_model_description function to return an unexpected FMI version
-    with patch("cofmpy.wrappers.read_model_description") as mock_read_model:
+    with patch("cofmupy.wrappers.read_model_description") as mock_read_model:
         mock_description = MagicMock()
         mock_description.fmiVersion = "1.0"  # Unrecognized FMI version
         mock_read_model.return_value = mock_description

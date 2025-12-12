@@ -23,7 +23,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-Unit tests for the FixedPointInitializer class in cofmpy.utils.
+Unit tests for the FixedPointInitializer class in cofmupy.utils.
 
 This module tests the FixedPointInitializer class using various use cases. All methods
 of the FixedPointInitializer are tested.
@@ -48,8 +48,8 @@ import os
 import numpy as np
 import pytest
 
-from cofmpy import Coordinator
-from cofmpy.utils import FixedPointInitializer
+from cofmupy import Coordinator
+from cofmupy.utils import FixedPointInitializer
 
 
 use_cases = [
@@ -138,7 +138,11 @@ def generate_fmus():
     The FMUs are then deleted after the tests.
     """
     current_test_filepath = os.path.dirname(os.path.abspath(__file__))
-    for fmu_script in ("../data/math_fmu.py", "../data/internal_state_fmu.py", "../data/double_fmu.py"):
+    for fmu_script in (
+        "../data/math_fmu.py",
+        "../data/internal_state_fmu.py",
+        "../data/double_fmu.py",
+    ):
         fmu_script_path = os.path.join(current_test_filepath, fmu_script)
         os.system(f"pythonfmu build -f {fmu_script_path} --no-external-tool")
 

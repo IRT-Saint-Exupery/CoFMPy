@@ -60,7 +60,7 @@ Here is an example of an FMU description:
 
 Paths to FMU files can be specified as:
 
-1. Paths relative to the JSON configuration file. CoFMPy will search for files using
+1. Paths relative to the JSON configuration file. CoFmuPy will search for files using
    `path` value, by considering the following:
     - Files are placed at the same level than the configuration JSON file or in nested
       folders.
@@ -118,7 +118,7 @@ For a connection from variable `I_out` of FMU `battery` to variable `Iload_in` o
 
 A connection from an external data source to an FMU is required when one input variable
 of a FMU is controlled by external data. The data source will be used as input values
-for the FMU. In CoFMPy, we provide multiple external data sources: from single values,
+for the FMU. In CoFmuPy, we provide multiple external data sources: from single values,
 from a CSV file, or from a Kafka stream. You can also create your own data source (see
 documentation).
 
@@ -158,7 +158,7 @@ The corresponding JSON description is:
   header name.
 - `interpolation`: (optional) interpolation method (see [interpolation reference](#interpolation-reference)). Defaults to `previous`.
 
-If you want to know how CSV files must be formatted to be correctly read by CoFMPy,
+If you want to know how CSV files must be formatted to be correctly read by CoFmuPy,
 refer to the section on [CSV data source](data_sources.md#a-csv-file).
 
 ##### Example
@@ -191,7 +191,7 @@ The variable `V` of FMU `battery` is controlled according to the values in the C
 - `interpolation`: (optional) interpolation method (see [interpolation reference](#interpolation-reference)). Defaults to `previous`.
 - `timeout`: (optional) delay, in seconds, to wait (blocking) after reception of the first message before proceeding with the rest of the cosimulation. Defaults to `2`.
 
-If you want to know how Kafka messages must be formatted to be correctly read by CoFMPy,
+If you want to know how Kafka messages must be formatted to be correctly read by CoFmuPy,
 refer to the section on [Kafka data source](data_sources.md#a-kafka-stream).
 
 ##### Example
@@ -204,7 +204,7 @@ The variable `V` of FMU `battery` is controlled by the values from a Kafka serve
         "type": "kafka",
         "uri": "172.17.0.1:5000",
         "group_id": "my_group",
-        "topic": "cofmpy_topic",
+        "topic": "cofmupy_topic",
         "variable": "voltage",
         "interpolation": "linear",
         "timeout": 1,
@@ -221,7 +221,7 @@ A sink can be a data storage system (e.g. a file or database system) or an outbo
 data stream (e.g. a Kafka data stream). The JSON description is equivalent to the
 previous cases.
 
-By default, CoFMPy will save all output variables of the co-simulation in a single CSV
+By default, CoFmuPy will save all output variables of the co-simulation in a single CSV
 file for each simulation step. The location of this file is `storage/results.csv`.
 
 #### To a CSV file
@@ -277,7 +277,7 @@ A JSON example for Kafka data stream:
 ## 3. Global settings
 
 Besides the description of the FMUs and the connections, the JSON configuration file
-also specifies global settings used by CoFMPy.
+also specifies global settings used by CoFmuPy.
 
 - `cosim_method`: specifies the algorithm for solving system loops (e.g., `jacobi`,
   `gauss-seidel`).
@@ -303,7 +303,7 @@ Interpolation is used when the system
 needs a value between two time points when data external to FMUs is used (literal, csv,
 kafka, etc.).
 
-The interpolation uses `cofmpy.utils.Interpolator` class which supports a wide variety
+The interpolation uses `cofmupy.utils.Interpolator` class which supports a wide variety
 of interpolation methods. The currently tested methods are:
 
 - `previous`, which returns the value at the previous time point (default value)
@@ -315,4 +315,4 @@ The other methods will log the following warning:
 `Method '{method}' is in beta version. We recommend using 'linear' or 'previous'`
 
 For more details, please refer to the
-[corresponding notebook](https://github.com/IRT-Saint-Exupery/CoFMPy/blob/dev/notebooks/interpolator.ipynb)
+[corresponding notebook](https://github.com/IRT-Saint-Exupery/CoFmuPy/blob/dev/notebooks/interpolator.ipynb)

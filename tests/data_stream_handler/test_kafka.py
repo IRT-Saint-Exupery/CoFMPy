@@ -29,11 +29,11 @@ import pandas as pd
 import time
 
 from confluent_kafka import Consumer
-from cofmpy.utils import Interpolator
-from cofmpy.data_stream_handler import kafka_data_stream_handler
-from cofmpy.data_stream_handler import KafkaDataStreamHandler
-from cofmpy.data_stream_handler.kafka_utils import KafkaHandlerConfig
-from cofmpy.data_stream_handler.kafka_utils import KafkaThreadManager
+from cofmupy.utils import Interpolator
+from cofmupy.data_stream_handler import kafka_data_stream_handler
+from cofmupy.data_stream_handler import KafkaDataStreamHandler
+from cofmupy.data_stream_handler.kafka_utils import KafkaHandlerConfig
+from cofmupy.data_stream_handler.kafka_utils import KafkaThreadManager
 
 
 # -----------------------------
@@ -55,9 +55,9 @@ def mock_consumer_and_thread_mgr():
     Also thread manager is Mocked up.
     """
     with patch(
-        "cofmpy.data_stream_handler.kafka_data_stream_handler.Consumer"
+        "cofmupy.data_stream_handler.kafka_data_stream_handler.Consumer"
     ) as mock_consumer, patch(
-        "cofmpy.data_stream_handler.kafka_data_stream_handler.KafkaThreadManager"
+        "cofmupy.data_stream_handler.kafka_data_stream_handler.KafkaThreadManager"
     ) as mock_thread_mgr:
 
         consumer_instance = MagicMock(spec=Consumer)
@@ -74,8 +74,8 @@ def fresh_handler_with_var(mock_consumer_and_thread_mgr, kafka_resistor_test):
     raw_config, _, _ = kafka_resistor_test
     _, consumer_instance, _, thread_manager_instance = mock_consumer_and_thread_mgr
 
-    # raw_config is suited for Coordinator which uses ConfigParser. 
-    # We manually parse raw config to adapt it to KafkaDataStreamHandler 
+    # raw_config is suited for Coordinator which uses ConfigParser.
+    # We manually parse raw config to adapt it to KafkaDataStreamHandler
     for arg in ("type", "id", "unit"):
         _ = raw_config.pop(arg)
     var_name = raw_config.pop("variable")
@@ -225,7 +225,7 @@ def test_consumer_thread_start_stop(fresh_handler_with_var):
 def test_thread_manager_received_correct_callback(fresh_handler_with_var):
     _, _, raw_config = fresh_handler_with_var
     with patch(
-        "cofmpy.data_stream_handler.kafka_data_stream_handler.KafkaThreadManager"
+        "cofmupy.data_stream_handler.kafka_data_stream_handler.KafkaThreadManager"
     ) as mock_tm:
         h = KafkaDataStreamHandler(**raw_config)
         callback = mock_tm.call_args[0][1]
