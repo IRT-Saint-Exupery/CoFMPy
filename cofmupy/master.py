@@ -470,6 +470,7 @@ class Master:
         while not converged and current_iteration < max_iteration:
             # Save inputs for check coherence
             inputs_before = copy.deepcopy(inputs)
+            targets = defaultdict(list)
             for fmu_id in fmu_ids:
                 fmu = self.fmu_handlers[fmu_id]
 
@@ -483,12 +484,16 @@ class Master:
 
                 # Update inputs into fmu loop, only for gauss-seidel algo
                 if algo == "gauss_seidel":
-                    self.apply_fmu_outputs_to_inputs(inputs, fmu_id, outputs[fmu_id])
+                    self.apply_fmu_outputs_to_inputs(
+                        inputs, fmu_id, outputs[fmu_id], targets
+                    )
 
             # Update inputs at the end of fmu loop, only for Jacobi algo
             if algo == "jacobi":
                 for fmu_id in fmu_ids:
-                    self.apply_fmu_outputs_to_inputs(inputs, fmu_id, outputs[fmu_id])
+                    self.apply_fmu_outputs_to_inputs(
+                        inputs, fmu_id, outputs[fmu_id], targets
+                    )
 
             # Exit loop if not iterative or only 1 FMU inside loop
             if not iterative or len(fmu_ids) == 1:
@@ -552,8 +557,11 @@ class Master:
                     self._output_dict[fmu_id][output_name] = value
 
         # update 1 for all inputs with outputs
+        targets = defaultdict(list)
         for fmu_id, fmu_output_dict in self._output_dict.items():
-            self.apply_fmu_outputs_to_inputs(self._input_dict, fmu_id, fmu_output_dict)
+            self.apply_fmu_outputs_to_inputs(
+                self._input_dict, fmu_id, fmu_output_dict, targets
+            )
         self.current_time += step_size
         # Return the output value for this step
         return self._output_dict
@@ -587,11 +595,12 @@ class Master:
                 fmu_ids, step_size, algo=self.cosim_method, iterative=self.iterative
             )
 
+            targets = defaultdict(list)
             for fmu_id, fmu_output_dict in out.items():
                 for output_name, value in fmu_output_dict.items():
                     # Update inputs connected to FMU outputs
                     self.update_connected_inputs(
-                        self._input_dict, fmu_id, output_name, value
+                        self._input_dict, fmu_id, output_name, value, targets
                     )
                     if record_outputs:
                         # add each output to the result dict, (FMU_ID + Var) as key
@@ -634,7 +643,7 @@ class Master:
         return residuals
 
     def apply_fmu_outputs_to_inputs(
-        self, input_to_update: dict, fmu_id: str, out_fmu: dict
+        self, input_to_update: dict, fmu_id: str, out_fmu: dict, targets: dict
     ):
         """
         Performs a copy of output values into input dict.
@@ -647,16 +656,24 @@ class Master:
             fmu_id: A String identifying FMU into system. Used to find connections with
                 outputs
             input_to_update: input dict to update
+            targets: memorized targets at sequence order level to apply sum if expected
 
         Returns:
             No return, at the end of the method, input_to_update is fill with updated
                 values.
         """
         for output_name, value in out_fmu.items():
-            self.update_connected_inputs(input_to_update, fmu_id, output_name, value)
+            self.update_connected_inputs(
+                input_to_update, fmu_id, output_name, value, targets
+            )
 
     def update_connected_inputs(
-        self, input_to_update: dict, fmu_id: str, output_name: str, value
+        self,
+        input_to_update: dict,
+        fmu_id: str,
+        output_name: str,
+        value: any,
+        targets: dict
     ):
         """
         Performs a copy of output value into input dict.
@@ -670,6 +687,7 @@ class Master:
                 connections with inputs
             value: the value to copy to inputs
             input_to_update: input dict to update
+            targets: memorized targets at sequence order level to apply sum if expected
 
         Returns:
             No return, at the end of the method, input_to_update is fill with updated
@@ -680,3 +698,13 @@ class Master:
             for target_fmu, target_variable in self.connections[(fmu_id, output_name)]:
                 if target_fmu in input_to_update:
                     input_to_update[target_fmu][target_variable] = value
+                    if (target_fmu, target_variable) in targets:
+                        new_value = [
+                            value[0] + targets[(target_fmu, target_variable)][0]]
+                        # print('Multiple target for '+target_fmu+'/'+target_variable+'/'+str(value)+'/'+str(targets[(target_fmu, target_variable)])+'/'+str(new_value))
+
+                        targets[(target_fmu, target_variable)] = new_value
+
+                        input_to_update[target_fmu][target_variable] = new_value
+                    else:
+                        targets[(target_fmu, target_variable)] = value

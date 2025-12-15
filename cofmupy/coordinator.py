@@ -245,7 +245,7 @@ class Coordinator:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
         # Format: [{(fmu1, var1): value}, {(fmu2, var2): value, (fmu3, var3): value}]
-        data = [dh.get_data(self.master.current_time) for dh in self.stream_handlers]
+        data = [dh.get_data(self.master.current_time+step_size) for dh in self.stream_handlers]
 
         # Format: {(fmu1, var1): value}, (fmu2, var2): value, (fmu3, var3): value}
         data = {k: v for d in data for k, v in d.items()}
