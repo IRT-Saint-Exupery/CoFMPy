@@ -27,7 +27,7 @@ A follow-up example: mixing an FMU with a Python proxy FMU
 ==========================================================
 
 This tutorial is a continuation of the "A first example: an AC voltage source and a resistor".
-The goal here is to show how **CoFMPy** allows you to mix **compiled FMUs** and
+The goal here is to show how **CoFmuPy** allows you to mix **compiled FMUs** and
 **Python proxy FMUs** (`fmuproxy`) in the same co-simulation.
 
 - The AC voltage source is provided as a compiled FMU (`source.fmu`)
@@ -48,7 +48,7 @@ import os
 import urllib.request
 import zipfile
 
-url = "https://share-is.pf.irt-saintexupery.com/s/39zaG9HkQWnePbi/download"
+url = "https://share-is.pf.irt-saintexupery.com/s/HSNSeteJPoJjyXx/download"
 resources_path = "example1.zip"
 
 urllib.request.urlretrieve(url, resources_path)
@@ -64,7 +64,7 @@ print("Resources unzipped in example1 folder!")
 # As in the previous tutorial, the base object is the `Coordinator`.
 # It manages the master algorithm, the FMUs, the proxies, the data handlers, etc.
 
-from cofmpy import Coordinator
+from cofmupy import Coordinator
 
 coordinator = Coordinator()
 
@@ -141,7 +141,7 @@ results.plot(x="time", grid=True)
 # ## Conclusion
 #
 # This example shows how easy it is to integrate a Python proxy FMU (`fmuproxy`)
-# alongside compiled FMUs in CoFMPy.
+# alongside compiled FMUs in CoFmuPy.
 #
 # This workflow is ideal when:
 # - you want to test new logic (e.g., AI model) quickly in Python

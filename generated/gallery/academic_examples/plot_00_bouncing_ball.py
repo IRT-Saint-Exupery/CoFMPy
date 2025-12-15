@@ -2,7 +2,7 @@
 The "Bouncing Ball"
 ===================
 
-This example demonstrates how to use CoFMPy to run the famous **Bouncing Ball** example.
+This example demonstrates how to use CoFmuPy to run the famous **Bouncing Ball** example.
 The FMU simulates a ball bouncing on the ground.
 
 """
@@ -15,17 +15,21 @@ The FMU simulates a ball bouncing on the ground.
 # First, let's define the configuration for the Bouncing Ball system. Instead of using a
 # JSON file, we will directly create the configuration in a Python dictionary.
 
-from cofmpy import Coordinator
+from cofmupy import Coordinator
 
-# We define a simple CoFMPy config dictionary with a single FMU and no connection
-config = {"fmus": [{"id": "bouncing_ball", "path": "../fmus/BouncingBall.fmu"}]}
+# We define a simple CoFmuPy config dictionary with a single FMU and no connection
+config = {
+    "fmus": [
+        {"id": "bouncing_ball", "path": "../../../resources/fmus/BouncingBall.fmu"}
+    ]
+}
 
 # We create a Coordinator object and start it with the config dictionary
 coordinator = Coordinator()
 coordinator.start(config)
 
 # Let's check the default value of the coefficient of restitution `e` in the FMU.
-# A variable in CoFMPy is identified by a tuple (fmu_id, variable_name).
+# A variable in CoFmuPy is identified by a tuple (fmu_id, variable_name).
 e = coordinator.get_variable(("bouncing_ball", "e"))
 print("Default value of coefficient of restitution 'e' (from the FMU):", e)
 
@@ -81,7 +85,7 @@ config = {
     "fmus": [
         {
             "id": "bouncing_ball",
-            "path": "../fmus/BouncingBall.fmu",
+            "path": "../../../resources/fmus/BouncingBall.fmu",
             "initialization": {"e": 0.5},  # Set initial value
         }
     ]
@@ -103,7 +107,7 @@ config = {
     "fmus": [
         {
             "id": "bouncing_ball",
-            "path": "../fmus/BouncingBall.fmu",
+            "path": "../../../resources/fmus/BouncingBall.fmu",
             "initialization": {"e": 0.5, "h": 5},
         }
     ]
@@ -120,7 +124,7 @@ plot_height(results)
 # %%
 # # Comparison with the analytical solution
 #
-# To validate the simulation with CoFMPy, we compare the results with the analytical
+# To validate the simulation with CoFmuPy, we compare the results with the analytical
 # solution of the bouncing ball model as defined in the
 # [reference FMU](https://github.com/modelica/Reference-FMUs/blob/v0.0.39/BouncingBall/readme.md).
 #
@@ -147,6 +151,7 @@ def analytical_solution(time_points, e=0.8, h0=1.0):
             v_bounce = e * v_bounce
     return h
 
+
 # %%
 
 # Calculate the analytical solution
@@ -162,13 +167,13 @@ plt.plot(
     linestyle="--",
     color="orange",
 )
-plt.title("Bouncing Ball Height: CoFMPy simulation vs Analytical solution")
-plt.legend(["CoFMPy simulation", "Analytical solution"])
+plt.title("Bouncing Ball Height: CoFmuPy simulation vs Analytical solution")
+plt.legend(["CoFmuPy simulation", "Analytical solution"])
 
 # %%
 # # Conclusion
 #
-# In this example, we have seen how to use CoFMPy to run the Bouncing Ball FMU. We
+# In this example, we have seen how to use CoFmuPy to run the Bouncing Ball FMU. We
 # have learnt how to:
 #
 # - Load the FMU and run a simulation
