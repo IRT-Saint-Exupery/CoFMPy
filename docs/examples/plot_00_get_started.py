@@ -118,9 +118,9 @@ print("FMUs in Master:", list(coordinator.master.fmu_handlers.keys()))
 print(f"Cosimulation method: {coordinator.master.cosim_method}")
 
 # ... and the stream handlers (here, the CSV source). Keys are (fmu_name, var_name)
-print("\nCSV data stream handler key:", list(coordinator.stream_handlers.keys())[0])
+print("\nCSV data stream handler key:", coordinator.stream_handlers[0])
 
-csv_data_handler = coordinator.stream_handlers[("resistor", "R")]
+csv_data_handler = coordinator.stream_handlers[0]
 print("CSV path for resistance value R:", csv_data_handler.path)
 print("CSV data for R (as Pandas dataframe):\n", csv_data_handler.data.head())
 
