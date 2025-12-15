@@ -32,7 +32,7 @@ with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 # Get the version from the VERSION file
-with open(os.path.join(this_directory, "cofmpy/VERSION")) as f:
+with open(os.path.join(this_directory, "cofmupy/VERSION")) as f:
     version = f.read().strip()
 
 
@@ -70,8 +70,9 @@ dev_requirements = [
 ]
 
 setuptools.setup(
-    name="cofmpy",
-    version="0.1.0",
+    name="cofmupy",
+    version=version,
+    obsoletes=["cofmpy"],
     author="IRT Saint Exupéry - HECATE project team",
     description="FMUs co-simulation in Python",
     long_description=long_description,
@@ -89,7 +90,7 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "cofmpy-extract-fmu = cofmpy.helpers.extract_fmu:main",
+            "cofmupy-extract-fmu = cofmupy.helpers.extract_fmu:main",
         ]
     },
 )

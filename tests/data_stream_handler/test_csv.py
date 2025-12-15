@@ -24,7 +24,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pytest
 
-from cofmpy.data_stream_handler.csv_data_stream_handler import CsvDataStreamHandler
+from cofmupy.data_stream_handler.csv_data_stream_handler import CsvDataStreamHandler
 
 TEST_DATA_PREVIOUS = [(2, 30), (1.5, 20), (3, 40)]
 TEST_DATA_OO_RANGE = [(0, 10), (3.5, 40), (5, 40)]

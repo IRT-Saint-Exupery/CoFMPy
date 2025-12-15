@@ -27,7 +27,7 @@ from unittest.mock import patch
 
 import pytest
 
-from cofmpy.data_stream_handler.kafka_utils import KafkaThreadManager
+from cofmupy.data_stream_handler.kafka_utils import KafkaThreadManager
 
 
 @pytest.fixture
@@ -49,11 +49,11 @@ def test_start_initializes_thread(mock_consumer, mock_callback):
     # Patch logger to check logging without printing to console
     # Patch time.time to control the start_time deterministically
     with patch(
-        "cofmpy.data_stream_handler.kafka_utils.threading.Thread"
+        "cofmupy.data_stream_handler.kafka_utils.threading.Thread"
     ) as mock_thread, patch(
-        "cofmpy.data_stream_handler.kafka_utils.logger"
+        "cofmupy.data_stream_handler.kafka_utils.logger"
     ) as mock_logger, patch(
-        "cofmpy.data_stream_handler.kafka_utils.time.time", return_value=100
+        "cofmupy.data_stream_handler.kafka_utils.time.time", return_value=100
     ):
 
         thread_instance = MagicMock()
@@ -70,12 +70,12 @@ def test_start_initializes_thread(mock_consumer, mock_callback):
 
 def test_consume_loop_stops_after_lifetime(mock_consumer, mock_callback):
     manager = KafkaThreadManager(mock_consumer, mock_callback, thread_lifetime=1)
-    
+
     # Patch time.time to simulate elapsed time exceeding thread_lifetime
     # Patch logger to capture log calls
     with patch(
-        "cofmpy.data_stream_handler.kafka_utils.time.time", side_effect=[0, 2]
-    ), patch("cofmpy.data_stream_handler.kafka_utils.logger") as mock_logger:
+        "cofmupy.data_stream_handler.kafka_utils.time.time", side_effect=[0, 2]
+    ), patch("cofmupy.data_stream_handler.kafka_utils.logger") as mock_logger:
         manager.running = True
         manager.start_time = 0
 
@@ -91,19 +91,21 @@ def test_consume_loop_processes_messages(mock_consumer, mock_callback):
     mock_consumer.poll = MagicMock(side_effect=[msg, None, Exception("fail")])
 
     manager = KafkaThreadManager(mock_consumer, mock_callback, thread_lifetime=5)
-    
+
     # Patch time.time to control elapsed time during the loop
     # Patch logger to capture info/error messages
     with patch(
-        "cofmpy.data_stream_handler.kafka_utils.time.time", side_effect=[0, 0, 0, 6]
-    ), patch("cofmpy.data_stream_handler.kafka_utils.logger") as mock_logger:
+        "cofmupy.data_stream_handler.kafka_utils.time.time", side_effect=[0, 0, 0, 6]
+    ), patch("cofmupy.data_stream_handler.kafka_utils.logger") as mock_logger:
         manager.running = True
         manager.start_time = 0
 
         manager._consume_loop()
 
         mock_callback.assert_called_once_with(msg)
-        mock_logger.error.assert_called_with("Consumer error when polling message: fail")
+        mock_logger.error.assert_called_with(
+            "Consumer error when polling message: fail"
+        )
         mock_consumer.close.assert_called_once()
 
 
@@ -114,7 +116,7 @@ def test_stop_joins_thread(mock_consumer, mock_callback):
     manager.running = True
 
     # Patch logger to verify log message when stopping thread
-    with patch("cofmpy.data_stream_handler.kafka_utils.logger") as mock_logger:
+    with patch("cofmupy.data_stream_handler.kafka_utils.logger") as mock_logger:
         manager.stop()
 
         assert manager.running is False

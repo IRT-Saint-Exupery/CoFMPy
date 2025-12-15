@@ -30,10 +30,10 @@ from fmpy.fmi2 import FMU2Slave
 from fmpy.fmi3 import FMU3Slave
 from fmpy.model_description import ModelDescription
 
-from cofmpy.wrappers import Fmu2Handler
-from cofmpy.wrappers import Fmu3Handler
-from cofmpy.wrappers import FmuProxyHandler
-from cofmpy.wrappers import FmuHandlerFactory
+from cofmupy.wrappers import Fmu2Handler
+from cofmupy.wrappers import Fmu3Handler
+from cofmupy.wrappers import FmuProxyHandler
+from cofmupy.wrappers import FmuHandlerFactory
 
 description_keys = [
     "fmiVersion",

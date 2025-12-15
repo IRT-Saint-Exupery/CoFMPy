@@ -1,6 +1,6 @@
-# ✒️ Contributing to CoFMPy
+# ✒️ Contributing to CoFmuPy
 
-First off, thank you for considering contributing to **CoFMPy**! By contributing, you
+First off, thank you for considering contributing to **CoFmuPy**! By contributing, you
 help improve this project and make it available to many others. We welcome contributions
 in various forms, whether it’s through code, documentation, bug reports, or feature
 suggestions.
@@ -52,28 +52,28 @@ below.
 To get started with contributing to this project, you'll need to set up your development
 environment.
 
-1. Clone the repo: `git clone https://github.com/blabla/cofmpy.git`
-2. Go to the root of the repo: `cd cofmpy`
+1. Clone the repo: `git clone https://github.com/blabla/cofmupy.git`
+2. Go to the root of the repo: `cd cofmupy`
 3. Create a new virtual environement:
     - using `venv` on Linux:
 
       ```bash
-      python3 -m venv env_cofmpy
-      source env_cofmpy/bin/activate
+      python3 -m venv env_cofmupy
+      source env_cofmupy/bin/activate
       ```
 
     - using `venv` on Windows:
 
       ```powershell
-      python3 -m venv env_cofmpy
-      env_cofmpy/Scripts/activate.bat
+      python3 -m venv env_cofmupy
+      env_cofmupy/Scripts/activate.bat
       ```
 
     - using `conda`:
 
       ```bash
-      conda create -n env_cofmpy python=3.10
-      conda activate env_cofmpy
+      conda create -n env_cofmupy python=3.10
+      conda activate env_cofmupy
       ```
 
 4. Install dependencies using `pip`:
@@ -105,7 +105,7 @@ environment is set up correctly.
 
   ```bash
   python -m black --check --diff
-  python -m pylint cofmpy
+  python -m pylint cofmupy
   pytest
   ```
 

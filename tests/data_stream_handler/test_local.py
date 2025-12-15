@@ -27,7 +27,7 @@ import logging
 import pandas as pd
 import pytest
 
-from cofmpy.data_stream_handler import LocalDataStreamHandler
+from cofmupy.data_stream_handler import LocalDataStreamHandler
 
 SAMPLE_VALUES = {"1": 10, "2": 20, "3": 30}
 VAR_NAME = ("fmu", "variable")
@@ -35,6 +35,7 @@ CONFIG = {"values": SAMPLE_VALUES}
 EXPECTED_TIMES = [1.0, 2.0, 3.0]
 EXPECTED_VALUES = [10.0, 20.0, 30.0]
 TEST_CASE = list(zip(EXPECTED_TIMES, EXPECTED_VALUES))
+
 
 @pytest.fixture
 def handler():
@@ -51,7 +52,7 @@ def test_local_initialization(caplog, handler):
 
     assert isinstance(handler.data, pd.DataFrame)
     assert list(handler.data["t"]) == EXPECTED_TIMES
-    assert list(handler.data["values"]) ==  EXPECTED_VALUES
+    assert list(handler.data["values"]) == EXPECTED_VALUES
 
 
 def test_local_add_variable(handler, caplog):
@@ -74,10 +75,10 @@ def test_local_empty(caplog):
     with caplog.at_level(logging.DEBUG):
         LocalDataStreamHandler({})
         assert "Given dict is empty, no value will be used" in caplog.text
-        
+
+
 def test_is_equivalent_stream(handler, caplog):
     with caplog.at_level(logging.DEBUG):
         res = handler.is_equivalent_stream(**CONFIG)
         assert res == False
         assert "Each handler is unique. Returning False." in caplog.text
-

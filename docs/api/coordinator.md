@@ -1,4 +1,4 @@
-::: cofmpy.coordinator.Coordinator
+::: cofmupy.coordinator.Coordinator
     options:
       show_root_toc_entry: true
       show_signature: true

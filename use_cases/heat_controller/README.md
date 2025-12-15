@@ -58,10 +58,10 @@ and `heat_controller.py`.
 ## Run notebook
 
 **First and simple use case :** :
-The `config.json` file contains the configuration for the CoFMPy simulation. You can
+The `config.json` file contains the configuration for the CoFmuPy simulation. You can
 execute the notebook `heat_controller.ipynb` to run the co-simulation.
 
 **Second and more complex use case :**
-The `config_gauss_seidel.json` and `config_jacobi.json` files contains the configurations for the CoFMPy
+The `config_gauss_seidel.json` and `config_jacobi.json` files contains the configurations for the CoFmuPy
 simulation. You can execute the notebook `test_heater_gauss_seidel.py` and `test_heater_jacobi.py` 
 to run the co-simulation.

@@ -28,7 +28,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from cofmpy.config_parser import ConfigParser
+from cofmupy.config_parser import ConfigParser
 
 
 @contextmanager
@@ -65,7 +65,9 @@ def test_load_config_from_file(tmp_path):
     config_file.write_text(json.dumps(config_data))
 
     parser = ConfigParser(
-        str(config_file), cosim_method="test_solver_default", edge_sep="test_sep_default"
+        str(config_file),
+        cosim_method="test_solver_default",
+        edge_sep="test_sep_default",
     )
     assert parser.config_dict == config_data
 
@@ -88,7 +90,12 @@ def test_apply_defaults():
     assert parser.config_dict["iterative"] == False
 
     config_data = {"fmus": [], "connections": []}
-    parser2 = ConfigParser(config_data, cosim_method="test_solver_default", edge_sep="test_sep_default", iterative=True)
+    parser2 = ConfigParser(
+        config_data,
+        cosim_method="test_solver_default",
+        edge_sep="test_sep_default",
+        iterative=True,
+    )
     assert parser2.config_dict["cosim_method"] == "test_solver_default"
     assert parser2.config_dict["edge_sep"] == "test_sep_default"
     assert parser2.config_dict["iterative"] == True
@@ -142,7 +149,7 @@ def test_build_master_config(algo_name):
                 "target": {"id": "FMU2", "variable": "y", "type": "fmu", "unit": ""},
             }
         ],
-        "cosim_method": algo_name
+        "cosim_method": algo_name,
     }
     parser = ConfigParser(config_data)
     assert "fmus" in parser.master_config

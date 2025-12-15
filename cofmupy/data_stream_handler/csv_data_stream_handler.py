@@ -50,7 +50,7 @@ class CsvDataStreamHandler(BaseDataStreamHandler):
             path (str): path to the CSV file.
             interpolation (str): type of interpolation to use when data is requested at
                 a timestamp other than available data values. The extrapolation behaviour
-                depends on the chosen method: see cofmpy.utils.Interpolator.
+                depends on the chosen method: see cofmupy.utils.Interpolator.
                 Available methods are given by `Interpolator()._registry.keys()`.
                 Usually: 'linear', 'cubic', 'quadratic', 'previous', 'nearest', 'spline'.
                 Defaults to 'previous.

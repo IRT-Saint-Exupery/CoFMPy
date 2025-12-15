@@ -26,7 +26,7 @@ import unittest
 
 import numpy as np
 
-from cofmpy.utils import Interpolator
+from cofmupy.utils import Interpolator
 
 
 class TestInterpolator(unittest.TestCase):

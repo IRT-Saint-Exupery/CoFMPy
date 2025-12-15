@@ -22,15 +22,39 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""
-CoFMPy is a Python package for co-simulation of FMUs.
-"""
-from os import path
+import os
+import subprocess
+import sys
+from pathlib import Path
 
-with open(path.join(path.dirname(__file__), "VERSION"), encoding="utf-8") as f:
-    __version__ = f.read().strip()
 
-from . import data_stream_handler
-from .data_stream_handler import BaseDataStreamHandler
-from .data_storage import BaseDataStorage
-from .coordinator import Coordinator
+def test_mkdocs_build_no_exception(tmp_path):
+    mkdocs_yml = "./mkdocs.yml"
+    assert Path(mkdocs_yml).exists(), "mkdocs.yml not found at repo root"
+
+    env = os.environ.copy()
+    # To avoid warnings related to UTF-8 encoding
+    env["PYTHONUTF8"] = "1"
+
+    # We run `mkdocs build` in a subprocess to ensure no exceptions are raised
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "mkdocs",
+            "build",
+            "--site-dir",
+            str(tmp_path / "site"),
+        ],
+        cwd=str(Path(".")),
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
+    # Check that the command completed successfully
+    assert result.returncode == 0, (
+        "mkdocs build failed.\n"
+        f"STDOUT:\n{result.stdout}\n"
+        f"STDERR:\n{result.stderr}\n"
+    )

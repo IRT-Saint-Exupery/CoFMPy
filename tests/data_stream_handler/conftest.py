@@ -27,7 +27,7 @@ import pandas as pd
 import pytest
 
 from .two_resistor_values import TWO_RESISTORS_RESULTS
-from cofmpy.coordinator import Coordinator
+from cofmupy.coordinator import Coordinator
 from tests.data_stream_handler.mock_producer import MockProducerThreaded
 
 # ====== Constants ======
@@ -169,6 +169,7 @@ def make_producer(
         send_delay=send_delay,
         retry_delay=retry_delay,
     )
+
 
 # ====== Integration tests fixtures ======
 @pytest.fixture

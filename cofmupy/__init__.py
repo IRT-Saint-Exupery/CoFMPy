@@ -23,5 +23,14 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-This package contains helper functions and classes for the CoFMPy library.
+CoFmuPy is a Python package for co-simulation of FMUs.
 """
+from os import path
+
+with open(path.join(path.dirname(__file__), "VERSION"), encoding="utf-8") as f:
+    __version__ = f.read().strip()
+
+from . import data_stream_handler
+from .data_stream_handler import BaseDataStreamHandler
+from .data_storage import BaseDataStorage
+from .coordinator import Coordinator

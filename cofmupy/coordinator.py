@@ -37,13 +37,13 @@ from .master import Master
 
 class Coordinator:
     """
-    The **Coordinator** is the main class in CoFMPy. It controls the blocks internally
+    The **Coordinator** is the main class in CoFmuPy. It controls the blocks internally
     in order to ease the usage of the library. For end users, this is the only interface
     to start with: from a JSON configuration file, the coordinator will instantiate and
     monitor all the required components.
 
     ```python
-    from cofmpy import Coordinator
+    from cofmupy import Coordinator
 
     # Instantiate the Coordinator
     my_coordinator = Coordinator()

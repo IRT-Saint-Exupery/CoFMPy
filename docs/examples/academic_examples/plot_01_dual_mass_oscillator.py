@@ -2,7 +2,7 @@
 The "Dual Mass Oscillator"
 =========================
 
-This example demonstrates how to use CoFMPy to run the well-known **Dual Mass
+This example demonstrates how to use CoFmuPy to run the well-known **Dual Mass
 Oscillator** example. The system simulates two masses connected with three springs and
 dampers on two walls.
 
@@ -21,7 +21,7 @@ repo](https://github.com/OpenModelica/OMSimulator/tree/master/testsuite/resource
 # %%
 # # Description of the system
 #
-# ![Duall Mass Oscillator](https://raw.githubusercontent.com/IRT-Saint-Exupery/CoFMPy/refs/heads/main/docs/examples/academic_examples/assets/dual_mass_oscillator.png)
+# ![Duall Mass Oscillator](https://raw.githubusercontent.com/IRT-Saint-Exupery/CoFmuPy/refs/heads/main/docs/examples/academic_examples/assets/dual_mass_oscillator.png)
 #
 # The Dual Mass Oscillator is a mechanical system composed of two masses, each connected
 # to a wall by a spring and a damper. The first mass is connected to the second mass by
@@ -100,14 +100,14 @@ connections = [
 config = {"fmus": fmus, "connections": connections}
 
 # %%
-from cofmpy import Coordinator
+from cofmupy import Coordinator
 
 # We create a Coordinator object and start it with the config dictionary
 coordinator = Coordinator()
 coordinator.start(config)
 
 # Let's check the default value of the mass of Mass1 in the FMU.
-# A variable in CoFMPy is identified by a tuple (fmu_id, variable_name).
+# A variable in CoFmuPy is identified by a tuple (fmu_id, variable_name).
 mass_val = coordinator.get_variable(("mass1", "m1"))
 print("Value of mass1 'm1' (from the FMU):", mass_val)
 
@@ -127,8 +127,8 @@ print("Results keys:", list(results.keys()))
 import matplotlib.pyplot as plt
 import pandas as pd
 
-plt.plot(results["time"], results[("mass1", "x1")], label="Position (CoFMPy)")
-plt.plot(results["time"], results[("mass1", "v1")], label="Velocity (CoFMPy)")
+plt.plot(results["time"], results[("mass1", "x1")], label="Position (CoFmuPy)")
+plt.plot(results["time"], results[("mass1", "v1")], label="Velocity (CoFmuPy)")
 
 # Load the results from OpenModelica for comparison
 df = pd.read_csv("./assets/results_OpenModelica_DualMassOscillator.csv")
@@ -143,5 +143,5 @@ plt.grid()
 # %%
 # # Conclusion
 #
-# In this example, we have seen how to use CoFMPy to run the Dual Mass Oscillator system
+# In this example, we have seen how to use CoFmuPy to run the Dual Mass Oscillator system
 # with two interconnected FMUs.

@@ -2,7 +2,7 @@ import pytest
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type
 
-from cofmpy.utils.proxy import (
+from cofmupy.utils.proxy import (
     FmuProxy,
     Variable,
     FmiCausality,
