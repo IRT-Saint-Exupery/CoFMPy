@@ -278,6 +278,11 @@ class FmuXHandler(ABC):
         """Sets the variable matching the given name with the given value."""
         raise NotImplementedError
 
+    @abstractmethod
+    def _get_variable(self, name):
+        """Gets the value of the variable matching the given name."""
+        raise NotImplementedError
+
     def get_variable(self, name: str) -> list:
         """
         Gets the variable matching the given name.
@@ -421,6 +426,12 @@ class FmuProxyHandler(FmuXHandler):
         else:
             setattr(self._proxy, name, value)
 
+    # Override _get_variable inherited from FmuXHandler.
+    # Allows to not specify variable type in method call
+    def _get_variable(self, name: str) -> list:
+        # Return the value as a single-element list to match the API
+        return [getattr(self._proxy, name)]
+
     def set_variables(self, input_dict: Dict[str, Any]):
         for k, v in (input_dict or {}).items():
             if k in self.var_name2attr:
@@ -472,7 +483,40 @@ class Fmu2Handler(FmuXHandler):
             value (float): The desired value to set the variable with
         """
         variable = self.var_name2attr[name]
-        self.fmu.setReal([variable.valueReference], value)
+
+
+        # Use correct getter pending type, some types not implemented yet
+        if variable.type == "Boolean":
+            self.fmu.setBoolean([variable.valueReference], value)
+        elif variable.type == "Real":
+            self.fmu.setReal([variable.valueReference], value)
+        elif variable.type == "Integer":
+            self.fmu.setInteger([variable.valueReference], value)
+
+        else:
+            print(f"Unsuccessful fmu.set{variable.type}, unknown type")
+
+    def _get_variable(self, name: str):
+        """
+        Gets the variable matching the given name.
+
+        Args:
+            name (str): The name of the input variable to retrieve
+        """
+        variable = self.var_name2attr[name]
+        # Use correct getter pending type, some types not implemented yet
+        if variable.type == "UInt8":
+            return [0]
+        elif variable.type == "Boolean":
+            return self.fmu.getBoolean([variable.valueReference])
+        elif variable.type == "Real":
+            return self.fmu.getReal([variable.valueReference])
+        elif variable.type == "Integer":
+            return self.fmu.getInteger([variable.valueReference])
+
+        else:
+            print(f"Unsuccessful fmu.get{variable.type}, unknown type")
+            return [0]
 
     def reset(self):
         """Resets the FMU to its initial state and sets up the experiment."""
@@ -497,14 +541,13 @@ class Fmu2Handler(FmuXHandler):
         """
         # Set all the input variable that are given
         for name, value in input_dict.items():
-            self.fmu.setReal([self.var_name2attr[name].valueReference], value)
-            # print(f"{name} : {value}")
+            self._set_variable(name, value)
 
         self.fmu.doStep(
             currentCommunicationPoint=current_time, communicationStepSize=step_size
         )
         result = {
-            name: self.fmu.getReal([self.var_name2attr[name].valueReference])
+            name: self._get_variable(name)
             for name in self.get_output_names()
         }
         return result
@@ -524,14 +567,40 @@ class Fmu3Handler(FmuXHandler):
             value (float/int/bool/...): The desired value to set the variable with
         """
         variable = self.var_name2attr[name]
-        # this is a hack to dynamically call the correct setter function
-        # based on the variable type. For example, if the variable type
-        # is "Float64", then the setter function is "setFloat64"
-        try:
-            setter = eval("self.fmu.set" + variable.type)  # pylint: disable=eval-used
-            setter([variable.valueReference], value)
-        except Exception as e:
-            raise ValueError(f"Variable type {variable.type} not supported") from e
+        # Use correct setter pending type, some types not implemented yet
+        if variable.type == "UInt8":
+            self.fmu.setUInt8([variable.valueReference], value)
+        elif variable.type == "Boolean":
+            self.fmu.setBoolean([variable.valueReference], value)
+        elif variable.type == "Int32":
+            self.fmu.setInt32([variable.valueReference], value)
+        elif variable.type == "Float64":
+            self.fmu.setFloat64([variable.valueReference], value)
+
+        else:
+            print(f"Unsuccessful fmu.set{variable.type}, unknown type")
+
+    def _get_variable(self, name: str):
+        """
+        Gets the variable matching the given name.
+
+        Args:
+            name (str): The name of the input variable to retrieve
+        """
+        variable = self.var_name2attr[name]
+        # Use correct getter pending type, some types not implemented yet
+        if variable.type == "UInt8":
+            return [0]
+        elif variable.type == "Boolean":
+            return self.fmu.getBoolean([variable.valueReference])
+        elif variable.type == "Float64":
+            return self.fmu.getFloat64([variable.valueReference])
+        elif variable.type == "Integer":
+            return self.fmu.getInteger([variable.valueReference])
+
+        else:
+            print(f"Unsuccessful fmu.get{variable.type}, unknown type")
+            return [0]
 
     def reset(self):
         """Resets the FMU to its initial state"""
@@ -555,17 +624,13 @@ class Fmu3Handler(FmuXHandler):
         """
         # Set all the input variable that are given
         for name, value in input_dict.items():
-            if self.var_name2attr[name].type == "Boolean":
-                self.fmu.setBoolean([self.var_name2attr[name].valueReference], value)
-            else:
-                self.fmu.setFloat64([self.var_name2attr[name].valueReference], value)
-            # print(f"{name} : {value}")
+            self._set_variable(name, value)
 
         self.fmu.doStep(
             currentCommunicationPoint=current_time, communicationStepSize=step_size
         )
         result = {
-            name: self.fmu.getFloat64([self.var_name2attr[name].valueReference])
+            name: self._get_variable(name)
             for name in self.output_var_names
         }
         return result
