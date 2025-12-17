@@ -77,7 +77,7 @@ setuptools.setup(
     description="FMUs co-simulation in Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/IRT-Saint-Exupery/CoFMPy",
+    url="https://github.com/IRT-Saint-Exupery/CoFmuPy",
     license="BSD-2-Clause",
     packages=setuptools.find_namespace_packages(),
     include_package_data=True,

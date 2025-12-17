@@ -63,7 +63,7 @@ Building on the [FMPy library](https://github.com/CATIA-Systems/FMPy) as an FMI-
 
 - **Declarative and reproducible configuration**: Co-simulation systems are fully defined through a structured JSON configuration file, making experiments easy to reproduce, modify, and extend.
 
-- **Graphical interface (coming soon)**: A user-friendly graphical interface will enable drag-and-drop system construction, FMU interconnection, remote interfaces configuration, algorithm selection, and co-simulation control. 
+- **Graphical interface (coming soon)**: A user-friendly graphical interface will enable drag-and-drop system construction, FMU interconnection, remote interfaces configuration, algorithm selection, and co-simulation control.
 
 
 ## 📚 Citation
@@ -71,7 +71,7 @@ Building on the [FMPy library](https://github.com/CATIA-Systems/FMPy) as an FMI-
 If you use CoFmuPy in your research or publications, please cite:
 
 ```bibtex
-@inproceedings{friedrich2025cofmpy,
+@inproceedings{friedrich2025cofmupy,
   title={CoFmuPy: A Python Framework for Rapid Prototyping of FMI-based Digital Twins},
   author={Friedrich, Corentin and Lombana, Andr{\'e}s and Fasquel, J{\'e}r{\^o}me and Schlick, Charlie and Bennani, Nora and Mendil, Mouhcine},
   booktitle={The 2nd International Conference on Engineering Digital Twins},
