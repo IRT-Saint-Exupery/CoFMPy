@@ -33,7 +33,7 @@ The tests are based on the following use cases:
 import os
 import pytest
 
-from cofmpy.helpers import extract_fmu
+from cofmupy.helpers import extract_fmu
 
 use_cases = [
     {  # Use case 1: source fmu

@@ -91,6 +91,7 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "cofmupy-extract-fmu = cofmupy.helpers.extract_fmu:main",
+            "cofmupy-construct-config = cofmupy.helpers.construct_config:main",
         ]
     },
 )

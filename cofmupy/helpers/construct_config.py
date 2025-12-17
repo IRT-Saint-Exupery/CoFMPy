@@ -70,7 +70,7 @@ def check_fmu_variable(fmu_file, variable_name, from_to):
     return False
 
 
-def check_fmus(csvfile_connections: any, csvfile_initializations: any = None):
+def check_fmus(csvfile_connections, csvfile_initializations=None):
     """
     Check input files, connections list and initialisation list :
         - Check expected fmus exist
@@ -78,14 +78,24 @@ def check_fmus(csvfile_connections: any, csvfile_initializations: any = None):
         log all found error in console and raise an Exception at the end
 
     Args:
-        csvfile_connections: connection list file (csv).
+        csvfile_connections: connection list file (csv). Expected columns are :
+            - 'from_path' : path of the source fmu
+            - 'from_id' : id of the source fmu
+            - 'from_name' : expected name of the source fmu
+            - 'from_var_name' : name of the source variable
+            - 'to_path' : path of the target fmu
+            - 'to_id' : id of the target fmu
+            - 'to_name' : expected name of the target fmu
+            - 'to_var_name' : name of the target variable
         csvfile_initializations: initialisation list file (csv). Default is None
+        Expected columns are :
+            - 'Fmu_id' : id of the concerned fmu
+            - 'Variable' : name of the variable to initialize
+            - 'Value' : value of the variable
 
     Returns:
         Result of the check : true if all is ok.
     """
-    console = Console()
-    error = False
     fmu_file_dict = {}
 
     csvfile_connections.seek(0)
@@ -94,19 +104,16 @@ def check_fmus(csvfile_connections: any, csvfile_initializations: any = None):
         # Check fmu files exists
         from_fmu_file = row["from_path"] + "/" + row["from_name"]
         if not os.path.isfile(from_fmu_file):
-            console.print(f"❌ Error: FMU file '{from_fmu_file}' not found.")
-            error = True
+            raise Exception(f"Error: FMU file '{from_fmu_file}' not found.")
+
         to_fmu_file = row["to_path"] + "/" + row["to_name"]
         if not os.path.isfile(to_fmu_file):
-            console.print(f"❌ Error: FMU file '{to_fmu_file}' not found.")
-            error = True
+            raise Exception(f"Error: FMU file '{to_fmu_file}' not found.")
 
         if row["from_id"] not in fmu_file_dict:
             fmu_file_dict[row["from_id"]] = from_fmu_file
         if row["to_id"] not in fmu_file_dict:
             fmu_file_dict[row["to_id"]] = to_fmu_file
-        if error:
-            raise Exception("Problems occurs on check FMUs, see details above")
 
         # Check from :
         #   - Variable name exists
@@ -127,7 +134,7 @@ def check_fmus(csvfile_connections: any, csvfile_initializations: any = None):
         for row in initialisation_itr:
             # check fmu id exists into connections list
             if row["Fmu_id"] not in fmu_file_dict:
-                console.print(
+                Console().print(
                     f"❌ Error: FMU id {row['Fmu_id']} not found in connections."
                 )
                 error = True
@@ -149,6 +156,10 @@ def find_initialisations_for_fmu(csvfile_initializations, fmu_id):
 
     Args:
         csvfile_initializations: initialisation list file (csv).
+        Expected columns are :
+            - 'Fmu_id' : id of the concerned fmu
+            - 'Variable' : name of the variable to initialize
+            - 'Value' : value of the variable
         fmu_id : id of the fmu for which we are looking for the initialisations
 
     Returns:
@@ -167,15 +178,27 @@ def find_initialisations_for_fmu(csvfile_initializations, fmu_id):
     return initialisation_dict
 
 
-def construct_fmu_list(csvfile_connections: any, csvfile_initializations: any = None):
+def construct_fmu_list(csvfile_connections, csvfile_initializations=None):
     """
     Construct fmu list (config format) from connection list (tabular format) and
         initialisation list : Parse information from connections iterator to construct
         "fmus" section. If expected, append with initialisations on each fmu.
 
     Args:
-        csvfile_connections: connection list file (csv).
+        csvfile_connections: connection list file (csv). Expected columns are :
+            - 'from_path' : path of the source fmu
+            - 'from_id' : id of the source fmu
+            - 'from_name' : expected name of the source fmu
+            - 'from_var_name' : name of the source variable
+            - 'to_path' : path of the target fmu
+            - 'to_id' : id of the target fmu
+            - 'to_name' : expected name of the target fmu
+            - 'to_var_name' : name of the target variable
         csvfile_initializations: initialisation list file (csv). Default is None
+        Expected columns are :
+            - 'Fmu_id' : id of the concerned fmu
+            - 'Variable' : name of the variable to initialize
+            - 'Value' : value of the variable
 
     Returns:
         Object list of FMUs (config file format).
@@ -214,7 +237,15 @@ def construct_exported_outputs_list(csvfile_connections):
     Construct exported output list from connection list : all sources
 
     Args:
-        csvfile_connections: connection list file (csv).
+        csvfile_connections: connection list file (csv). Expected columns are :
+            - 'from_path' : path of the source fmu
+            - 'from_id' : id of the source fmu
+            - 'from_name' : expected name of the source fmu
+            - 'from_var_name' : name of the source variable
+            - 'to_path' : path of the target fmu
+            - 'to_id' : id of the target fmu
+            - 'to_name' : expected name of the target fmu
+            - 'to_var_name' : name of the target variable
 
     Returns:
         Dictionary of all exported signals.
@@ -236,7 +267,15 @@ def construct_connection_list(csvfile_connections):
             section ready to integrate into config file
 
     Args:
-        csvfile_connections: connection list file (csv).
+        csvfile_connections: connection list file (csv). Expected columns are :
+            - 'from_path' : path of the source fmu
+            - 'from_id' : id of the source fmu
+            - 'from_name' : expected name of the source fmu
+            - 'from_var_name' : name of the source variable
+            - 'to_path' : path of the target fmu
+            - 'to_id' : id of the target fmu
+            - 'to_name' : expected name of the target fmu
+            - 'to_var_name' : name of the target variable
 
     Returns:
         Object list of FMU connections (config file format).
@@ -277,19 +316,18 @@ def construct_config(connections_path, initializations_path):
         connections_path (str): Path to the connections file.
         initializations_path (str): Path to the optional initializations file
     """
-    console = Console()
     has_init_file = False
 
     # Ensure files exists
     if not os.path.isfile(connections_path):
-        console.print(f"❌ Error: Connection list '{connections_path}' not found.")
+        Console().print(f"❌ Error: Connection list '{connections_path}' not found.")
         return
 
     # check initializations file provided, and exists
     if initializations_path is not None:
         has_init_file = True
         if not os.path.isfile(initializations_path):
-            console.print(
+            Console().print(
                 f"❌ Error: Initialization list '{initializations_path}' not found."
             )
             return
@@ -323,11 +361,11 @@ def construct_config(connections_path, initializations_path):
             "cosim_method": "jacobi",
         }
 
-        # pretty print final config file into the console (json format)
+        # Pretty print final config file into the console (json format)
         pprint.pp(config, compact=False)
-        print(f"Found {len(fmus)} fmus")
+        Console().print(f"Found {len(fmus)} fmus")
         if connections is not None:
-            print(f"Found {len(connections)} connections")
+            Console().print(f"Found {len(connections)} connections")
 
         with open("config.json", "w", encoding="utf-8") as fp:
             json.dump(config, fp, indent=4)
