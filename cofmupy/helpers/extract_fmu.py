@@ -13,7 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -89,45 +89,6 @@ def display_fmu_info(fmu_path):
 
     # Print the whole table in the console
     Console().print(table)
-
-
-def retrieve_fmu_info(fmu_path):
-    """
-    Retrieve information from an FMU file and return variable list.
-
-    Args:
-        fmu_path (str): Path to the FMU file.
-    """
-
-    # Ensure FMU exists
-    if not os.path.isfile(fmu_path):
-        Console().print(f"[red]❌ Error: FMU file '{fmu_path}' not found.[/red]")
-        return []
-
-    # Extract FMU content
-    model_desc = fmpy.read_model_description(fmu_path)
-
-    # Iterate through variables
-    variables = []
-    for model_variable in model_desc.modelVariables:
-        category = (
-            "Parameter"
-            if model_variable.causality == "parameter"
-            else model_variable.causality.capitalize()
-        )
-
-        if category != "Local":
-            variable = {
-                "name": model_variable.name,
-                "type": model_variable.variability.capitalize(),
-                "start": (
-                    model_variable.start if model_variable.start is not None else "-"
-                ),
-                "category": category,
-            }
-            variables.append(variable)
-
-    return variables
 
 
 def export_fmu_info(fmu_path, output_file):
