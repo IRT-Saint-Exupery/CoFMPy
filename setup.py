@@ -71,7 +71,7 @@ dev_requirements = [
 
 setuptools.setup(
     name="cofmpy",
-    version="0.1.0",
+    version="0.2.0",
     author="IRT Saint Exupéry - HECATE project team",
     description="FMUs co-simulation in Python",
     long_description=long_description,
