@@ -157,9 +157,7 @@ def export_fmu_info(fmu_path, output_file):
         csv_writer = csv.writer(
             csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL
         )
-        csv_writer.writerow(
-            ["Category", "name", "type", "type", "unit", "start_value"]
-        )
+        csv_writer.writerow(["Category", "name", "type", "type", "unit", "start_value"])
 
         # FMU version
         fmu_version = model_desc.fmiVersion if model_desc.fmiVersion else "N/A"
