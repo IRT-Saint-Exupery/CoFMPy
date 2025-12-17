@@ -97,6 +97,7 @@ def check_fmus(csvfile_connections, csvfile_initializations=None):
         Result of the check : true if all is ok.
     """
     fmu_file_dict = {}
+    error = False
 
     csvfile_connections.seek(0)
     connection_itr = csv.DictReader(csvfile_connections)
