@@ -314,7 +314,7 @@ class ConfigFmu:
         id: str,
         path: str,
         name: str = "",
-        initialization: dict = None,
+        initialization: dict = defaultdict(dict),
         **kwargs,
     ):
         """
