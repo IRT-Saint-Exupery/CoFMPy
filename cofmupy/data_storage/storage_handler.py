@@ -46,20 +46,20 @@ class StorageHandler:
         """
         self._storage: list[BaseDataStorage] = []
 
-    def register_storage(self, type: str, config: dict) -> None:
+    def register_storage(self, type_storage: str, config: dict) -> None:
         """
         Register given storage as an available data storage
 
         Args:
-            type (str): type of the storage, should be used to filter events.
+            type_storage (str): type of the storage, should be used to filter events.
             config (dict): config of the data storage, specific to storage type
         """
         data_storage = BaseDataStorage.create_data_storage(
-            {"type": type, "config": config}
+            {"type": type_storage, "config": config}
         )
         self._storage.append(data_storage)
 
-    def notify_results(self, type: str, time: float, data, metadata=None) -> None:
+    def notify_results(self, type_storage: str, time: float, data, metadata=None) -> None:
         """
         Notify results to concerned data storage
 
@@ -70,5 +70,5 @@ class StorageHandler:
             metadata (any) : optional data to send
         """
         for storage in self._storage:
-            if storage.type_name == type:
+            if storage.type_name == type_storage:
                 storage.save("", time, data, metadata)

@@ -30,7 +30,6 @@ This module contains the class to save data to CSV files.
 import os
 import pandas as pd
 from .base_data_storage import BaseDataStorage
-from collections import defaultdict
 
 
 class FileDataStorage(BaseDataStorage):

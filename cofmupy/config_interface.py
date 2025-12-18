@@ -51,6 +51,7 @@ class ConfigConnectionFmu(ConfigConnectionBase):
     variable: str
     unit: str
 
+    # pylint: disable=W0622
     def __init__(
         self, id: str, variable: str, unit: str = "", type: str = FMU_TYPE, **kwargs
     ):
@@ -95,6 +96,7 @@ class ConfigConnectionLocalStream(ConfigConnectionBase):
     interpolation: str
     variable: str = ""
 
+    # pylint: disable=W0622
     def __init__(self, type: str, values: Dict, interpolation="previous", **kwargs):
         """
         Init method to instantiate connection extremity
@@ -135,6 +137,7 @@ class ConfigConnectionCsvStream(ConfigConnectionBase):
     variable: str = ""
     interpolation: str
 
+    # pylint: disable=W0622
     def __init__(
         self, type: str, path: str, variable: str, interpolation="previous", **kwargs
     ):
@@ -179,6 +182,7 @@ class ConfigConnectionStorage(ConfigConnectionBase):
     variable: str = ""
     alias: str
 
+    # pylint: disable=W0622
     def __init__(self, id: str, alias: str, type: str, **kwargs):
         """
         Init method to instantiate connection extremity
@@ -219,6 +223,7 @@ class ConfigDataStorage:
     type: str
     config: Dict
 
+    # pylint: disable=W0622
     def __init__(self, name: str, type: str, config: Dict, **kwargs):
         """
         Init method to instantiate data storage
@@ -309,6 +314,7 @@ class ConfigFmu:
     path: str
     initialization: Dict = {}
 
+    # pylint: disable=W0622
     def __init__(
         self,
         id: str,

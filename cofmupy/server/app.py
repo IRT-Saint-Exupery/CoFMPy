@@ -468,7 +468,7 @@ def delete_fmu():
     config = transform_config_from_frontend(config)
     with open(os.path.join(project_path, "config.json"), "w", encoding="utf-8") as file:
         json.dump(config, file, ensure_ascii=False, indent=4)
-    return project
+    return config
 
 
 @app.route("/api/fmu/initialization/edit", methods=["GET", "POST"])
