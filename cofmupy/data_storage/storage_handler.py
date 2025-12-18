@@ -59,7 +59,9 @@ class StorageHandler:
         )
         self._storage.append(data_storage)
 
-    def notify_results(self, type_storage: str, time: float, data, metadata=None) -> None:
+    def notify_results(
+        self, type_storage: str, time: float, data, metadata=None
+    ) -> None:
         """
         Notify results to concerned data storage
 
