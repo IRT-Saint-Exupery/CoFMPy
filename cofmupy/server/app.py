@@ -29,41 +29,63 @@ from flask import request
 from markupsafe import escape
 from flask import Flask
 
-from .config_interface import ConfigObject
-from .utils import fmu_utils
-from .config_parser import ConfigParser
-from .coordinator import Coordinator
+from ..config_interface import ConfigObject
+from ..utils import fmu_utils
+from ..utils import types
+from ..config_parser import ConfigParser
+from ..coordinator import Coordinator
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
+from .services import transform_config_from_frontend
+from .services import transform_config_for_frontend
+from .services import retrieve_project_from_params
 import shutil
 import os
 import uuid
 import json
 import pprint
 
-app = Flask("server")
-app.secret_key = "super secret key"
+app = Flask(__name__)
+app.secret_key = "CoFmuPy secret key"
+
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
-socketio.run(app)
+socketio = SocketIO(app, cors_allowed_origins="*")  # Allow all requesters
 
 ROOT_PATH_PROJECT = "./projects"
 
-
 @socketio.on("message")
-def handle_message(data):
+def handle_message(data: str):
+    """
+    Manage socket message sent from external tool (Hmi)
+
+    Args:
+        data (str): Message from external tool. Bidirectional communication is working,
+            it should be improved with more consistent messages and according actions
+    """
     print("received message: " + data)
     emit("message", data, broadcast=True)
 
 
 @app.route("/api/ping")
 def hello():
+    """
+    Route for test purpose. Navigate or request to url http://localhost:5000/api/ping
+        to check application is alive
+    """
     name = request.args.get("name", "Flask")
     return f"Hello, {escape(name)}!"
 
 
 @app.route("/api/project/list")
 def get_project_list():
+    """
+    Retrieve project list managed by the server, for each sub-directories, parse
+        metadata and append config information to construct response.
+    Root project path is defined into global variable ROOT_PATH_PROJECT.
+
+    Returns:
+        list: List of dict containing projects information.
+    """
     project_list = []
     if not os.path.exists(ROOT_PATH_PROJECT):
         os.mkdir(ROOT_PATH_PROJECT)  # Create root project directory
@@ -90,6 +112,18 @@ def get_project_list():
 
 @app.route("/api/project/create", methods=["GET", "POST"])
 def create_project():
+    """
+    End-point to create project, this method makes sub-directory into root project path,
+        create metadata.json with inputs parameters and create empty config.json file.
+
+    Args (included into form's request) :
+        projectName (str): project name to create.
+        projectDescription (str): project description to create.
+    Returns:
+        dict:
+            - On success : return created project.
+            - On project exists : return response including error message
+    """
     project_name = request.form["projectName"]
     project_description = request.form["projectDescription"]
     if os.path.exists(os.path.join(ROOT_PATH_PROJECT, project_name)):
@@ -122,8 +156,18 @@ def create_project():
 
 @app.route("/api/project/delete", methods=["GET", "POST"])
 def remove_project():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    End-point to delete project, this method deletes all project directory with
+        all contained files.
+
+    Args (included into form's request) :
+        projectName (str): project name eto delet, corresponding to sub-directory name
+        projectId (str): project id to delete. Used to check consistency
+    Returns:
+        dict: return response including delete status
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
@@ -135,8 +179,18 @@ def remove_project():
 
 @app.route("/api/project/load", methods=["GET", "POST"])
 def load_project():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    End-point to load project, this method retrieves expected project, concatenates
+        information and returns to requester.
+
+    Args (included into form's request) :
+        projectName (str): project name to load, corresponding to sub-directory name
+        projectId (str): project id to load. Used to check consistency
+    Returns:
+        dict: return project containing all information
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
@@ -144,14 +198,25 @@ def load_project():
     config = use_case_config.get_config_dict()
 
     # transform data to interface with frontend
-    project["config"] = _transform_config_for_frontend(config, str(project_path))
+    project["config"] = transform_config_for_frontend(config, str(project_path))
     return project
 
 
 @app.route("/api/project/save", methods=["GET", "POST"])
 def save_project():
+    """
+    End-point to save project, take project parameters, refactor to save in json files.
+
+    Args (included into form's request) :
+        project (dict): project with all information to save
+        projectId (str): project id to create. Used to check consistency
+    Returns:
+        dict: return project containing all information
+    """
     project = json.loads(request.form["project"])
-    project_loaded = _retrieve_project_from_params(project["name"], project["id"])
+    project_loaded = retrieve_project_from_params(
+        project["name"], project["id"], ROOT_PATH_PROJECT
+    )
     project_path = os.path.join(ROOT_PATH_PROJECT, project_loaded["name"])
 
     # Save metadata file
@@ -170,7 +235,7 @@ def save_project():
         )
 
     # Save config file
-    config = _transform_config_from_frontend(project["config"])
+    config = transform_config_from_frontend(project["config"])
     with open(os.path.join(project_path, "config.json"), "w", encoding="utf-8") as file:
         json.dump(config, file, ensure_ascii=False, indent=4)
 
@@ -179,13 +244,23 @@ def save_project():
 
 @app.route("/api/project/autoconnection", methods=["GET", "POST"])
 def auto_connect_project():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    Algorithm to auto-connect fmus together. Nominal auto-connection is the same
+        name for input/output, should be improved with more complex algorithm
+
+    Args (included into form's request) :
+        projectName (str): project name, corresponding to sub-directory name
+        projectId (str): project id. Used to check consistency
+    Returns:
+        dict: return connections list
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
     use_case_config = ConfigParser(os.path.join(project_path, "config.json"))
-    config = _transform_config_for_frontend(
+    config = transform_config_for_frontend(
         use_case_config.get_config_dict(), project_path
     )
     fmus = config["fmus"]
@@ -240,7 +315,7 @@ def auto_connect_project():
                         }
                     )
     config["connections"] = new_connections
-    config = _transform_config_from_frontend(config)
+    config = transform_config_from_frontend(config)
     with open(os.path.join(project_path, "config.json"), "w", encoding="utf-8") as file:
         json.dump(config, file, ensure_ascii=False, indent=4)
     return config["connections"]
@@ -248,8 +323,19 @@ def auto_connect_project():
 
 @app.route("/api/fmu/information2", methods=["GET", "POST"])
 def get_fmu_information2():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    Retrieve fmu information and format information as string (only variable table)
+    Should be used to display copy or copy to clipboard
+
+    Args (included into form's request) :
+        projectName (str): project name, corresponding to sub-directory name
+        projectId (str): project id. Used to check consistency
+        fmu (dict): fmu for which retrieve information
+    Returns:
+        dict: return response object containing fmu information as string
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])
@@ -273,8 +359,18 @@ def get_fmu_information2():
 
 @app.route("/api/fmu/information3", methods=["GET", "POST"])
 def get_fmu_information3():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    Retrieve all fmu information : model, cosimulation, variables
+
+    Args (included into form's request) :
+        projectName (str): project name, corresponding to sub-directory name
+        projectId (str): project id. Used to check consistency
+        fmu (dict): fmu for which retrieve information
+    Returns:
+        dict: return response object containing all fmu information
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])
@@ -338,8 +434,20 @@ def get_fmu_information3():
 
 @app.route("/api/fmu/delete", methods=["GET", "POST"])
 def delete_fmu():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    Delete fmu function. Remove file and all information on the fmu into config file :
+        - fmu into "fmus" sections
+        - all connections from or to fmu into "connections" section
+
+    Args (included into form's request) :
+        projectName (str): project name, corresponding to sub-directory name
+        projectId (str): project id. Used to check consistency
+        fmu (dict): fmu for which retrieve information
+    Returns:
+        return project containing all information
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])
@@ -367,7 +475,7 @@ def delete_fmu():
     ]
 
     config["connections"] = connections
-    config = _transform_config_from_frontend(config)
+    config = transform_config_from_frontend(config)
     with open(os.path.join(project_path, "config.json"), "w", encoding="utf-8") as file:
         json.dump(config, file, ensure_ascii=False, indent=4)
     return project
@@ -375,8 +483,21 @@ def delete_fmu():
 
 @app.route("/api/fmu/initialization/edit", methods=["GET", "POST"])
 def edit_initialization_fmu():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    Edit variable initialization into "fmus" section of the config file.
+    1 request for each modified variable
+
+    Args (included into form's request) :
+        projectName (str): project name to edit, corresponding to sub-directory name
+        projectId (str): project id to edit. Used to check consistency
+        fmuId (str): fmu id to edit
+        fmuName (str): fmu id to edit
+        variable (dict): variable to edit, including id, name, value
+    Returns:
+        return project containing all information
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_id = request.form["fmuId"]
@@ -395,49 +516,34 @@ def edit_initialization_fmu():
         if fmu["id"] == fmu_id and fmu["name"] == fmu_name:
             # Cast String value to correct type : Float, boolean or int
             if variable_type == "Real":
-                fmu["initialization"][variable_name] = get_float(variable_value)
+                fmu["initialization"][variable_name] = types.get_float(variable_value)
             if variable_type == "Integer":
-                fmu["initialization"][variable_name] = get_int(variable_value)
+                fmu["initialization"][variable_name] = types.get_int(variable_value)
             if variable_type == "Boolean":
-                fmu["initialization"][variable_name] = get_boolean(variable_value)
+                fmu["initialization"][variable_name] = types.get_boolean(variable_value)
             break
 
     config["fmus"] = fmus
-    config = _transform_config_from_frontend(config)
+    config = transform_config_from_frontend(config)
     with open(os.path.join(project_path, "config.json"), "w", encoding="utf-8") as file:
         json.dump(config, file, ensure_ascii=False, indent=4)
     return project
 
 
-def get_int(value, default=0) -> int:
-    try:
-        value_return = int(value)
-        return value_return
-    except ValueError:
-        return default
-
-
-def get_float(value, default=0.0) -> float:
-    try:
-        value_return = float(value)
-        return value_return
-    except ValueError:
-        return default
-
-
-def get_boolean(value, default=False) -> bool:
-    try:
-        value_return = bool(value)
-        return value_return
-    except ValueError:
-        return default
-
-
 @socketio.on("start_simulation")
 def start_simulation(data: any):
-    """project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
-    )"""
+    """
+    Start simulation with web socket protocol, permits bidirectional communication
+        while execution running
+
+    Args :
+        data (dict): variable containing all data to start simulation
+            project (dict): project object containing all characteristics
+            communication_time_step (str): step size for the simulation
+            simulation_time (str): time of the simulation
+    Returns:
+        return progress messages as socket protocol all along the execution
+    """
     project = data["project"]
     communication_time_step = data["communication_time_step"]
     simulation_time = data["simulation_time"]
@@ -479,8 +585,18 @@ def start_simulation(data: any):
 
 @app.route("/api/simulation/start", methods=["GET", "POST"])
 def start_simulation():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    Start simulation with http protocol, used to test simulation execution with
+        fixed parameters : time step=0.1s and time=30s
+
+    Args (included into form's request) :
+        projectName (str): project name, corresponding to sub-directory name
+        projectId (str): project id. Used to check consistency
+    Returns:
+        return object with simulation execution result
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
@@ -515,8 +631,18 @@ def start_simulation():
 
 @app.route("/api/fmu/edit", methods=["GET", "POST"])
 def edit_fmu():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    Edit information into "fmus" section of the config file.
+
+    Args (included into form's request) :
+        projectName (str): project name to edit, corresponding to sub-directory name
+        projectId (str): project id to edit. Used to check consistency
+        fmus (dict): dict containing all information on fmus section of the config
+    Returns:
+        return project containing all information
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmus = json.loads(request.form["fmus"])
@@ -525,7 +651,7 @@ def edit_fmu():
     config = use_case_config.get_config_dict()
 
     config["fmus"] = fmus
-    config = _transform_config_from_frontend(config)
+    config = transform_config_from_frontend(config)
     with open(os.path.join(project_path, "config.json"), "w", encoding="utf-8") as file:
         json.dump(config, file, ensure_ascii=False, indent=4)
     return project
@@ -533,8 +659,19 @@ def edit_fmu():
 
 @app.route("/api/fmu/upload", methods=["GET", "POST"])
 def upload_file():
-    project = _retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"]
+    """
+    Upload fmu file, include into project directory and add fmu in "fmus" section
+        of the config
+
+    Args (included into form's request) :
+        projectName (str): project name to edit, corresponding to sub-directory name
+        projectId (str): project id to edit. Used to check consistency
+        fmu (dict): fmu object to add in config
+    Returns:
+        return project containing all information
+    """
+    project = retrieve_project_from_params(
+        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])
@@ -575,78 +712,5 @@ def upload_file():
     return config
 
 
-def _retrieve_project_from_params(project_name, project_id):
-    if not os.path.exists(os.path.join(ROOT_PATH_PROJECT, project_name)):
-        raise Exception("Project doesn't exist")
-
-    with open(
-        os.path.join(ROOT_PATH_PROJECT, project_name, "metadata.json"),
-        "r",
-        encoding="utf-8",
-    ) as file:
-        project = json.load(file)
-        # Check project id
-        if project["id"] != project_id:
-            raise Exception("Bad project id")
-
-    return project
-
-
-def _transform_config_for_frontend(config: any, project_path: str):
-    # Complete fmu sections with fmu details (input and output ports)
-    for fmu in config["fmus"]:
-        table_result = fmu_utils.retrieve_fmu_info(os.path.join(project_path, fmu["path"]))
-        input_ports = []
-        output_ports = []
-        if table_result is not None:
-            for line in table_result:
-                excluded = False
-                """for exclude_pattern in exclude_ports_patterns:
-                    if line["name"].find(exclude_pattern) != -1:
-                        excluded = True"""
-                if not excluded:
-                    if line["category"] == "Input":
-                        input_ports.append(line)
-                    if line["category"] == "Output":
-                        output_ports.append(line)
-        fmu["inputPorts"] = input_ports
-        fmu["outputPorts"] = output_ports
-    return config
-
-
-def _transform_config_from_frontend(config: any):
-    # Refactor connections
-    #     target as an array
-    factorized_connections = []
-    for connection in config["connections"]:
-        # Look for existing item with same source
-        found_source = False
-        for fact_connection in factorized_connections:
-            fact_source = fact_connection["source"]
-            if (
-                fact_source["id"] == connection["source"]["id"]
-                and fact_source["variable"] == connection["source"]["variable"]
-            ):
-                fact_connection["target"].extend([connection["target"]])
-                found_source = True
-        if not found_source:
-            factorized_connections.append(
-                {"source": connection["source"], "target": [connection["target"]]}
-            )
-    config["connections"] = factorized_connections
-
-    # Refactor fmu to remove inputPorts and outputPorts
-    for fmu in config["fmus"]:
-        if "inputPorts" in fmu:
-            del fmu["inputPorts"]
-        if "outputPorts" in fmu:
-            del fmu["outputPorts"]
-        if "info" in fmu:
-            del fmu["info"]
-
-    # Refactor data_storages before save : remove config.items and config.labels
-    for storage in config["data_storages"]:
-        del storage["config"]["items"]
-        del storage["config"]["labels"]
-
-    return config
+if __name__ == '__main__':
+    socketio.run(app)

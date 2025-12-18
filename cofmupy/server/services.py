@@ -1,0 +1,112 @@
+
+import os
+import json
+from cofmupy.utils import fmu_utils
+
+
+def retrieve_project_from_params(project_name: str, project_id: str, root_path: str):
+    """
+    Retrieve project from name and id. find project sub-directory of the root path,
+        and check consistency with project id
+
+    Args:
+        project_name (str): name of the project, correspond to sub-directory
+        project_id (str): project id. Used to check consistency
+        root_path (str): root path of the projects
+
+    Returns:
+        dict: config dictionary amended with additional data.
+    """
+    if not os.path.exists(os.path.join(root_path, project_name)):
+        raise Exception("Project doesn't exist")
+
+    with open(
+        os.path.join(root_path, project_name, "metadata.json"),
+        "r",
+        encoding="utf-8",
+    ) as file:
+        project = json.load(file)
+        # Check project id
+        if project["id"] != project_id:
+            raise Exception("Bad project id")
+
+    return project
+
+
+def transform_config_for_frontend(config: dict, project_path: str):
+    """
+    Complete config fmu sections with fmu details (input and output ports)
+
+    Args:
+        config (dict): dictionary with configuration sections.
+        project_path (str): path of the project
+
+    Returns:
+        dict: config dictionary amended with additional data.
+    """
+    for fmu in config["fmus"]:
+        table_result = fmu_utils.retrieve_fmu_info(
+            os.path.join(project_path, fmu["path"])
+        )
+        input_ports = []
+        output_ports = []
+        if table_result is not None:
+            for line in table_result:
+                excluded = False
+                """for exclude_pattern in exclude_ports_patterns:
+                    if line["name"].find(exclude_pattern) != -1:
+                        excluded = True"""
+                if not excluded:
+                    if line["category"] == "Input":
+                        input_ports.append(line)
+                    if line["category"] == "Output":
+                        output_ports.append(line)
+        fmu["inputPorts"] = input_ports
+        fmu["outputPorts"] = output_ports
+    return config
+
+
+def transform_config_from_frontend(config: dict):
+    """
+    Refactor configuration dict
+
+    Args:
+        config (dict): dictionary with configuration sections.
+
+    Returns:
+        dict: refactored config dictionary, ready to save in json file.
+    """
+    # Refactor connections to expected format
+    factorized_connections = []
+    for connection in config["connections"]:
+        # Look for existing item with same source
+        found_source = False
+        for fact_connection in factorized_connections:
+            fact_source = fact_connection["source"]
+            if (
+                fact_source["id"] == connection["source"]["id"]
+                and fact_source["variable"] == connection["source"]["variable"]
+            ):
+                fact_connection["target"].extend([connection["target"]])
+                found_source = True
+        if not found_source:
+            factorized_connections.append(
+                {"source": connection["source"], "target": [connection["target"]]}
+            )
+    config["connections"] = factorized_connections
+
+    # Refactor fmu to remove inputPorts and outputPorts
+    for fmu in config["fmus"]:
+        if "inputPorts" in fmu:
+            del fmu["inputPorts"]
+        if "outputPorts" in fmu:
+            del fmu["outputPorts"]
+        if "info" in fmu:
+            del fmu["info"]
+
+    # Refactor data_storages before save : remove config.items and config.labels
+    for storage in config["data_storages"]:
+        del storage["config"]["items"]
+        del storage["config"]["labels"]
+
+    return config
