@@ -38,7 +38,7 @@ class FileDataStorage(BaseDataStorage):
 
     type_name = "file"
 
-    def __init__(self, path, overwrite=True, labels: list = None, items: list = None):
+    def __init__(self, path, overwrite=True, labels: list = [], items: list = []):
         self.output_dir = os.path.dirname(path)
         self.file_path = path
         self.items = items

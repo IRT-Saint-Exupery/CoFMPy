@@ -368,7 +368,7 @@ class ConfigObject:
         self,
         fmus: list[ConfigFmu],
         connections: list[ConfigConnection],
-        data_storages: list[ConfigDataStorage] = None,
+        data_storages: list[ConfigDataStorage] = [],
         root: str = "",
         edge_sep: str = " -> ",
         cosim_method: str = "jacobi",
