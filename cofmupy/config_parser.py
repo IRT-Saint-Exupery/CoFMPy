@@ -37,7 +37,6 @@ redundant endpoints, and orphaned connections.
 import json
 import logging
 import os
-from copy import deepcopy
 from typing import Dict
 from typing import List
 from typing import Union
@@ -73,10 +72,7 @@ class ConfigParser:
         error_in_config (bool): Indicates whether errors exist in the configuration.
     """
 
-    def __init__(
-        self,
-        file_path: Union[str, Dict]
-    ) -> None:
+    def __init__(self, file_path: Union[str, Dict]) -> None:
         # Arguments
         self.file_path = file_path
 
@@ -93,31 +89,20 @@ class ConfigParser:
         # ------------ 2. Apply defaults and perform validation ------------
         self._validate_configuration()
 
-        # ------------ 3. Prepend 'root' dir to present paths ------------
-        #self._update_paths_in_dict()
-
-        # ------------ 4. Build configurations ---------------------------
+        # ------------ 3. Build configurations ---------------------------
         self._build_storage_config()
         self._build_master_config()
         self._build_handlers_config()
         self._build_graph_config()
 
     def get_config_dict(self):
+        """
+        Construct and return dict from protected _config_object
+
+        Returns:
+            config (dict): config formatted as a dict
+        """
         return self._config_object.asdict()
-
-        """config_dict = self._config_object.__dict__
-        config_dict["fmus"] = [fmu.__dict__ for fmu in config_dict["fmus"]]
-
-        connections = []
-        for connection in self._config_object.connections:
-            for target in connection.target:
-                connections.append({
-                    "source": connection.source.__dict__,
-                    "target": target.__dict__
-                })
-        config_dict["connections"] = connections
-        config_dict["data_storages"] = [storage.__dict__ for storage in self._config_object.data_storages]
-        return config_dict"""
 
     def _load_config(self, file_check: bool) -> ConfigObject:
         """Load JSON configuration from a file or dictionary."""
@@ -240,47 +225,57 @@ class ConfigParser:
             for target in connection.target:
 
                 # source is external data
-                if isinstance(source, ConfigConnectionLocalStream) or isinstance(source, ConfigConnectionCsvStream):
+                if isinstance(
+                    source, (ConfigConnectionLocalStream, ConfigConnectionCsvStream)
+                ):
+                    if isinstance(source, ConfigConnectionLocalStream):
+                        handler_val = {
+                            "type": source.type,
+                            "config": {
+                                "values": source.values,
+                                "interpolation": source.interpolation,
+                            },
+                        }
+                    else:
+                        handler_val = {
+                            "type": source.type,
+                            "config": {
+                                "path": source.path,
+                                "variable": source.variable,
+                                "interpolation": source.interpolation,
+                            },
+                        }
                     # If target is FMU => it's a stream handler
                     if isinstance(target, ConfigConnectionFmu):
                         handler_key = (target.id, target.variable)
-                        if isinstance(source, ConfigConnectionLocalStream):
-                            handler_val = {
-                                "type": source.type,
-                                "config": {
-                                    "values": source.values,
-                                    "interpolation": source.interpolation
-                                },
-                            }
-                        else:
-                            handler_val = {
-                                "type": source.type,
-                                "config": {
-                                    "path": source.path,
-                                    "variable": source.variable,
-                                    "interpolation": source.interpolation
-                                },
-                            }
                         if handler_key not in self.stream_handlers:
                             self.stream_handlers[handler_key] = handler_val
                     # Si ce n'est pas un fmu, c'est un input à stocker dans les storages
                     elif isinstance(target, ConfigConnectionStorage):
-                        for target2 in connection.target:
-                            if isinstance(target2, ConfigConnectionFmu):
-                                self.data_storages[target.id]["config"]["labels"].append(
-                                    target.alias
-                                )
-                                self.data_storages[target.id]["config"]["items"].append(
-                                    (target2.id, target2.variable)
-                                )
+                        self.fill_data_storage(
+                            connection.target, target.id, target.alias
+                        )
 
                 # target is external data
                 elif isinstance(target, ConfigConnectionStorage):
                     # Add item to data_storage items
-                    self.data_storages[target.id]["config"]["labels"].append(target.alias)
+                    self.data_storages[target.id]["config"]["labels"].append(
+                        target.alias
+                    )
                     self.data_storages[target.id]["config"]["items"].append(
                         (source.id, source.variable)
                     )
+
+    def fill_data_storage(self, targets: list, storage_id: str, storage_title: str):
+        """
+        Fill data storage with labels and items
+        """
+        for target2 in targets:
+            if isinstance(target2, ConfigConnectionFmu):
+                self.data_storages[storage_id]["config"]["labels"].append(storage_title)
+                self.data_storages[storage_id]["config"]["items"].append(
+                    (target2.id, target2.variable)
+                )
 
     def _add_symbolic_nodes(self) -> List:
         """
@@ -316,7 +311,9 @@ class ConfigParser:
                     connection.source.variable = "na"
                 id_ = f"source_{connection.source.type}_{connection.source.variable}"
                 id_as_list_ = [
-                    "source", connection.source.type, connection.source.variable
+                    "source",
+                    connection.source.type,
+                    connection.source.variable,
                 ]
                 symbolic_node = {
                     "id": id_,

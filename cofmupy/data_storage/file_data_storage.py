@@ -28,10 +28,9 @@ File data storage module.
 This module contains the class to save data to CSV files.
 """
 import os
-
 import pandas as pd
-
 from .base_data_storage import BaseDataStorage
+from collections import defaultdict
 
 
 class FileDataStorage(BaseDataStorage):
@@ -39,7 +38,7 @@ class FileDataStorage(BaseDataStorage):
 
     type_name = "file"
 
-    def __init__(self, path, overwrite=True, labels: list = [], items: list = []):
+    def __init__(self, path, overwrite=True, labels: list = None, items: list = None):
         self.output_dir = os.path.dirname(path)
         self.file_path = path
         self.items = items

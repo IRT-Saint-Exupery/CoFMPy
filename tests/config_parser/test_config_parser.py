@@ -28,7 +28,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from cofmpy.config_parser import ConfigParser
+from cofmupy.config_parser import ConfigParser
 
 
 @contextmanager
@@ -57,11 +57,13 @@ def test_load_config_from_dict():
 
 def test_load_config_from_file(tmp_path):
     config_data = {
-        "fmus": [{"id": "FMU1", "initialization": {}, "path": "fmu1.fmu"}],
+        "fmus": [
+            {"id": "FMU1", "initialization": {}, "path": "fmu1.fmu"}
+        ],
         "connections": [
             {
                 "source": {"id": "A", "variable": "x", "type": "fmu", "unit": ""},
-                "target": [{"id": "B", "variable": "y", "type": "fmu", "unit": ""}],
+                "target": {"id": "B", "variable": "y", "type": "fmu", "unit": ""},
             }
         ],
         "edge_sep": "test_sep",

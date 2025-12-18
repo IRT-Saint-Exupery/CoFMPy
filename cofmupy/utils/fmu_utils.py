@@ -80,7 +80,7 @@ def get_model_description(fmu_path):
     # Ensure FMU exists
     if not os.path.isfile(fmu_path):
         Console().print(f"[red]❌ Error: FMU file '{fmu_path}' not found.[/red]")
-        return
+        return None
 
     # Extract FMU content
     model_desc = fmpy.read_model_description(fmu_path)

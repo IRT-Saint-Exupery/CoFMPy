@@ -25,17 +25,17 @@
 """
 Flask Server class
 """
-from flask import request
 from markupsafe import escape
+from flask import request
 from flask import Flask
+from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 
 from ..config_interface import ConfigObject
 from ..utils import fmu_utils
 from ..utils import types
 from ..config_parser import ConfigParser
 from ..coordinator import Coordinator
-from flask_cors import CORS
-from flask_socketio import SocketIO, emit
 from .services import transform_config_from_frontend
 from .services import transform_config_for_frontend
 from .services import retrieve_project_from_params
@@ -52,6 +52,7 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")  # Allow all requesters
 
 ROOT_PATH_PROJECT = "./projects"
+
 
 @socketio.on("message")
 def handle_message(data: str):
@@ -92,17 +93,17 @@ def get_project_list():
         return []
 
     for root, dirs, files in os.walk(ROOT_PATH_PROJECT):
-        for dir in dirs:
+        for directory in dirs:
             with open(
-                os.path.join(ROOT_PATH_PROJECT, dir, "metadata.json"),
+                os.path.join(ROOT_PATH_PROJECT, directory, "metadata.json"),
                 "r",
                 encoding="utf-8",
             ) as file:
                 project = json.load(file)
                 with open(
-                    os.path.join(ROOT_PATH_PROJECT, dir, "config.json"),
+                    os.path.join(ROOT_PATH_PROJECT, directory, "config.json"),
                     "r",
-                    encoding="utf-8"
+                    encoding="utf-8",
                 ) as file_config:
                     project["config"] = json.load(file_config)
                 project_list.append(project)
@@ -265,52 +266,52 @@ def auto_connect_project():
     )
     fmus = config["fmus"]
     new_connections = []
-    for indexFmu in range(len(fmus) - 1):
-        for inPort in fmus[indexFmu]["inputPorts"]:
-            for indexFmu2 in range(indexFmu + 1, len(fmus)):
+    for index_fmu in range(len(fmus) - 1):
+        for in_port in fmus[index_fmu]["inputPorts"]:
+            for index_fmu_2 in range(index_fmu + 1, len(fmus)):
                 outports = [
-                    outPort
-                    for outPort in fmus[indexFmu2]["outputPorts"]
-                    if outPort["name"] == inPort["name"]
+                    out_port
+                    for out_port in fmus[index_fmu_2]["outputPorts"]
+                    if out_port["name"] == in_port["name"]
                 ]
-                for outPort2 in outports:
+                for out_port_2 in outports:
                     new_connections.append(
                         {
                             "source": {
-                                "id": fmus[indexFmu2]["id"],
+                                "id": fmus[index_fmu_2]["id"],
                                 "type": "fmu",
                                 "unit": "",
-                                "variable": outPort2["name"],
+                                "variable": out_port_2["name"],
                             },
                             "target": {
-                                "id": fmus[indexFmu]["id"],
+                                "id": fmus[index_fmu]["id"],
                                 "type": "fmu",
                                 "unit": "",
-                                "variable": inPort["name"],
+                                "variable": in_port["name"],
                             },
                         }
                     )
-        for outPort in fmus[indexFmu]["outputPorts"]:
-            for indexFmu2 in range(indexFmu + 1, len(fmus)):
+        for out_port in fmus[index_fmu]["outputPorts"]:
+            for index_fmu_2 in range(index_fmu + 1, len(fmus)):
                 inports = [
-                    inPort
-                    for inPort in fmus[indexFmu2]["inputPorts"]
-                    if inPort["name"] == outPort["name"]
+                    in_port
+                    for in_port in fmus[index_fmu_2]["inputPorts"]
+                    if in_port["name"] == out_port["name"]
                 ]
-                for inPort2 in inports:
+                for in_port_2 in inports:
                     new_connections.append(
                         {
                             "source": {
-                                "id": fmus[indexFmu]["id"],
+                                "id": fmus[index_fmu]["id"],
                                 "type": "fmu",
                                 "unit": "",
-                                "variable": outPort["name"],
+                                "variable": out_port["name"],
                             },
                             "target": {
-                                "id": fmus[indexFmu2]["id"],
+                                "id": fmus[index_fmu_2]["id"],
                                 "type": "fmu",
                                 "unit": "",
-                                "variable": inPort2["name"],
+                                "variable": in_port_2["name"],
                             },
                         }
                     )
@@ -340,17 +341,19 @@ def get_fmu_information2():
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])
 
-    information = fmu_utils.retrieve_fmu_info(os.path.join(project_path, fmu_info["path"]))
+    information = fmu_utils.retrieve_fmu_info(
+        os.path.join(project_path, fmu_info["path"])
+    )
     string_result = "Category;name;start;type\n"
     for information_line in information:
         string_result += (
-            str(information_line['category'])
+            str(information_line["category"])
             + ";"
-            + str(information_line['name'])
+            + str(information_line["name"])
             + ";"
-            + str(information_line['start'])
+            + str(information_line["start"])
             + ";"
-            + str(information_line['type'])
+            + str(information_line["type"])
             + "\n"
         )
 
@@ -392,25 +395,12 @@ def get_fmu_information3():
                 "startTime": model_description.defaultExperiment.startTime,
                 "stopTime": model_description.defaultExperiment.stopTime,
                 "tolerance": model_description.defaultExperiment.tolerance,
-                "stepSize": model_description.defaultExperiment.stepSize
+                "stepSize": model_description.defaultExperiment.stepSize,
             }
             if model_description.defaultExperiment
             else None
         ),
-        "coSimulation": {
-            "canHandleVariableCommunicationStepSize": model_description.coSimulation.canHandleVariableCommunicationStepSize,
-            "fixedInternalStepSize": model_description.coSimulation.fixedInternalStepSize,
-            "maxOutputDerivativeOrder": model_description.coSimulation.maxOutputDerivativeOrder,
-            "recommendedIntermediateInputSmoothness": model_description.coSimulation.recommendedIntermediateInputSmoothness,
-            "canInterpolateInputs": model_description.coSimulation.canInterpolateInputs,
-            "providesIntermediateUpdate": model_description.coSimulation.providesIntermediateUpdate,
-            "canReturnEarlyAfterIntermediateUpdate": model_description.coSimulation.canReturnEarlyAfterIntermediateUpdate,
-            "hasEventMode": model_description.coSimulation.hasEventMode,
-            "providesEvaluateDiscreteStates": model_description.coSimulation.providesEvaluateDiscreteStates,
-            "canRunAsynchronuously": model_description.coSimulation.canRunAsynchronuously,
-            "canGetAndSetFMUstate": model_description.coSimulation.canGetAndSetFMUstate,
-            "canSerializeFMUstate": model_description.coSimulation.canSerializeFMUstate
-        },
+        "coSimulation": {**model_description.coSimulation.__dict__},
         "modelVariables": [
             {
                 "name": modelVariable.name,
@@ -422,7 +412,7 @@ def get_fmu_information3():
                 "initial": modelVariable.initial,
                 "unit": modelVariable.unit,
                 "nominal": modelVariable.nominal,
-                "start": modelVariable.start
+                "start": modelVariable.start,
             }
             for modelVariable in model_description.modelVariables
             if modelVariable.causality != "local"
@@ -567,24 +557,23 @@ def start_simulation(data: any):
     pprint.pp(coordinator.config_parser.master_config["connections"], compact=False)
 
     coordinator.graph_engine.plot_graph()
-    config = coordinator.config_parser.get_config_dict()
 
     emit("message", {"message": "Simulation start"})
     coordinator.run_simulation(communication_time_step, simulation_time, save_data=True)
 
-    results = coordinator.get_results()
     coordinator.save_results(os.path.join(project_path, "results_simulation.csv"))
 
     emit(
         "message",
         {
-            "message": f"Simulation end with step size {communication_time_step} and time {simulation_time}"
-        }
+            "message": f"Simulation end with step size "
+            f"{communication_time_step} and time {simulation_time}"
+        },
     )
 
 
 @app.route("/api/simulation/start", methods=["GET", "POST"])
-def start_simulation():
+def start_simulation_sync():
     """
     Start simulation with http protocol, used to test simulation execution with
         fixed parameters : time step=0.1s and time=30s
@@ -616,12 +605,10 @@ def start_simulation():
     pprint.pp(coordinator.config_parser.master_config["connections"], compact=False)
 
     coordinator.graph_engine.plot_graph()
-    config = coordinator.config_parser.get_config_dict()
 
     communication_time_step = 0.1
     coordinator.run_simulation(communication_time_step, 30, save_data=True)
 
-    results = coordinator.get_results()
     coordinator.save_results(os.path.join(project_path, "results_simulation.csv"))
 
     emit("message", {"message": "Simulation ended"}, broadcast=True)
@@ -712,5 +699,5 @@ def upload_file():
     return config
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     socketio.run(app)

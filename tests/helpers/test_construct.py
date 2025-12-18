@@ -84,8 +84,8 @@ def test_construct_config_without_init(connection_path, initialization_path):
     assert os.path.isfile("./config.json")
 
     parser = ConfigParser("./config.json")
-    assert len(parser.config_dict["fmus"]) == 2
-    assert len(parser.config_dict["connections"]) == 1
+    assert len(parser.get_config_dict()["fmus"]) == 2
+    assert len(parser.get_config_dict()["connections"]) == 1
 
 
 def test_construct_config(connection_path, initialization_path):
@@ -96,8 +96,8 @@ def test_construct_config(connection_path, initialization_path):
     assert os.path.isfile(f"./config.json")
 
     parser = ConfigParser("./config.json")
-    assert len(parser.config_dict["fmus"]) == 2
-    assert len(parser.config_dict["connections"]) == 1
+    assert len(parser.get_config_dict()["fmus"]) == 2
+    assert len(parser.get_config_dict()["connections"]) == 1
 
-    assert len(parser.config_dict["fmus"][0]["initialization"].keys()) == 0
-    assert len(parser.config_dict["fmus"][1]["initialization"].keys()) == 1
+    assert len(parser.get_config_dict()["fmus"][0]["initialization"].keys()) == 0
+    assert len(parser.get_config_dict()["fmus"][1]["initialization"].keys()) == 1

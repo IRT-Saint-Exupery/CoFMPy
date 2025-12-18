@@ -29,7 +29,6 @@ from collections import defaultdict
 import pandas as pd
 
 from .config_parser import ConfigParser
-from .data_storage import BaseDataStorage
 from .data_storage.storage_handler import StorageHandler
 from .data_stream_handler import BaseDataStreamHandler
 from .graph_engine import GraphEngine
@@ -74,7 +73,7 @@ class Coordinator:
         self.graph_engine = None
         self.master = None
         self.stream_handlers = None
-        self.storage_handler:StorageHandler
+        self.storage_handler: StorageHandler
 
     def start(self, conf_path: str, fixed_point_init=False, fixed_point_kwargs=None):
         """
@@ -238,14 +237,16 @@ class Coordinator:
 
         # Save results and data
         if save_data:
-            for input_key in data_for_master.keys():
-                for input_variable_name in data_for_master[input_key].keys():
-                    outputs[input_key][input_variable_name] = data_for_master[input_key][input_variable_name]
+            for input_key, input_value in data_for_master.items():
+                for variable_name, variable_value in input_value.items():
+                    outputs[input_key][variable_name] = variable_value
             self.storage_handler.notify_results(
                 "file", self.master.current_time, outputs
             )
 
-    def run_simulation(self, step_size: float, end_time: float, save_data:bool = False):
+    def run_simulation(
+        self, step_size: float, end_time: float, save_data: bool = False
+    ):
         """
         Run the simulation until the given end time.
 
@@ -257,12 +258,8 @@ class Coordinator:
         if self.master is None:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
-        count = 0;
         while self.master.current_time < end_time:
             self.do_step(step_size, save_data=save_data)
-            count += 1
-            if count % 10 == 0:
-                print(f"Current step is {self.master.current_time}")
 
     def save_results(self, filename: str):
         """

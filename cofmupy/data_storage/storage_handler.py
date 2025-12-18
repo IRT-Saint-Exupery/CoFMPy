@@ -22,20 +22,53 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+Storage handler module :
+- Store available data storage
+- notify data storage on results events
+"""
 from .base_data_storage import BaseDataStorage
 
 
 class StorageHandler:
+    """
+    Manages Storage handlers :
+        - Store available data storage
+        - notify data storage on results events
+    Attributes:
+        _storage (list): List of available storages
+
+    """
+
     def __init__(self):
+        """
+        Initializes the StorageHandler class
+        """
         self._storage: list[BaseDataStorage] = []
 
     def register_storage(self, type: str, config: dict) -> None:
+        """
+        Register given storage as an available data storage
+
+        Args:
+            type (str): type of the storage, should be used to filter events.
+            config (dict): config of the data storage, specific to storage type
+        """
         data_storage = BaseDataStorage.create_data_storage(
             {"type": type, "config": config}
         )
         self._storage.append(data_storage)
 
-    def notify_results(self, type, time: float, data, metadata=None) -> None:
+    def notify_results(self, type: str, time: float, data, metadata=None) -> None:
+        """
+        Notify results to concerned data storage
+
+        Args:
+            type (str): type of the storage, should be used to filter events.
+            time (float): time of the results
+            data (any): data to send
+            metadata (any) : optional data to send
+        """
         for storage in self._storage:
             if storage.type_name == type:
-                storage.save("", time, data, metadata=None)
+                storage.save("", time, data, metadata)
