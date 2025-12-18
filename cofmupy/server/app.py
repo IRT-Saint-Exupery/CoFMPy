@@ -92,6 +92,7 @@ def get_project_list():
         os.mkdir(ROOT_PATH_PROJECT)  # Create root project directory
         return []
 
+    # pylint: disable=W0612
     for root, dirs, files in os.walk(ROOT_PATH_PROJECT):
         for directory in dirs:
             with open(
