@@ -1,3 +1,3 @@
 # The Cosimulation Master
 
-::: cofmupy.master
+::: cofmupy.master.default_master
