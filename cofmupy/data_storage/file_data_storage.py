@@ -37,10 +37,14 @@ class FileDataStorage(BaseDataStorage):
 
     type_name = "file"
 
-    def __init__(self, path, overwrite=True, labels: list = [], items: list = []):
+    def __init__(self, path, overwrite=True, labels: list = None, items: list = None):
         self.output_dir = os.path.dirname(path)
         self.file_path = path
+        if items is None:
+            items = []
         self.items = items
+        if labels is None:
+            labels = []
 
         # Raise error if directory already exists and overwrite is False
         if overwrite is False:

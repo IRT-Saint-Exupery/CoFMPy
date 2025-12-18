@@ -404,16 +404,11 @@ class ConfigParser:
 
     def _update_paths_in_dict(
         self,
-        target_key: str = "path",
     ) -> None:
         """
         Update the relative paths in the configuration dictionary to ensure they are
         located within or below the directory of `self.file_path`. This method is used
         to correct paths for FMUs.
-
-        Args:
-            target_key (str): The key in the configuration dictionary to update.
-                Defaults to "path".
         """
 
         for fmu_dict in self._config_object.fmus:

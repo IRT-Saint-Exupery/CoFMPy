@@ -320,7 +320,7 @@ class ConfigFmu:
         id: str,
         path: str,
         name: str = "",
-        initialization: dict = defaultdict(dict),
+        initialization: dict = None,
         **kwargs,
     ):
         """
@@ -337,6 +337,8 @@ class ConfigFmu:
         if name == "":
             self.name = id
         self.path = path
+        if initialization is None:
+            initialization = {}
         self.initialization = initialization
 
         # Add warning for not used properties
@@ -374,7 +376,7 @@ class ConfigObject:
         self,
         fmus: list[ConfigFmu],
         connections: list[ConfigConnection],
-        data_storages: list[ConfigDataStorage] = [],
+        data_storages: list[ConfigDataStorage] = None,
         root: str = "",
         edge_sep: str = " -> ",
         cosim_method: str = "jacobi",
@@ -397,6 +399,8 @@ class ConfigObject:
         self.connections = [
             ConfigConnection(**connection_dict) for connection_dict in connections
         ]
+        if data_storages is None:
+            data_storages = []
         self.data_storages = [
             ConfigDataStorage(**storage_dict) for storage_dict in data_storages
         ]
