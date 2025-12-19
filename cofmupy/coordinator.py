@@ -29,7 +29,7 @@ from collections import defaultdict
 import pandas as pd
 
 from .config_parser import ConfigParser
-from .data_storage import BaseDataStorage
+from .data_storage.storage_handler import StorageHandler
 from .data_stream_handler import BaseDataStreamHandler
 from .graph_engine import GraphEngine
 from .master import DefaultMaster
@@ -73,9 +73,7 @@ class Coordinator:
         self.graph_engine = None
         self.master = None
         self.stream_handlers = None
-        self.data_storages = None
-
-        self.config_data = None
+        self.storage_handler: StorageHandler
 
     def start(self, conf_path: str, fixed_point_init=False, fixed_point_kwargs=None):
         """
@@ -92,8 +90,6 @@ class Coordinator:
 
         # 1. Start ConfigParser and parse the configuration file
         self.parse_config(conf_path)
-
-        # print(self.config_parser.config_dict)
 
         # 2. Start GraphEngine
         self.start_graph_engine(self.config_parser.graph_config)
@@ -112,24 +108,8 @@ class Coordinator:
         self.load_stream_handlers(self.config_parser.stream_handlers)
 
         # 5. Create DataStorages
+        self.storage_handler = StorageHandler()
         self.load_data_storages(self.config_parser.data_storages)
-
-        # 6. Save all results in a CSV file (additional data storage)
-        self.data_storages["results"] = BaseDataStorage.create_data_storage(
-            {
-                "type": "file",
-                "config": {"output_dir": "./storage", "overwrite": True},
-            }
-        )
-        # write the header for the results file
-        output_names = []
-        for fmu_id, outputs in self.master.get_outputs().items():
-            for output_name in outputs:
-                output_names.append(f"{fmu_id}.{output_name}")
-        for handler in self.stream_handlers:
-            for (fmu, variable), _ in handler.alias_mapping.items():
-                output_names.append(f"{fmu}.{variable}")
-        self.data_storages["results"].save("results", [["t"] + output_names])
 
     def get_results(self) -> dict:
         """
@@ -151,7 +131,6 @@ class Coordinator:
         """
 
         self.config_parser = ConfigParser(config_path)
-        self.config_data = self.config_parser.config_dict
 
     def start_graph_engine(self, config: dict):
         """
@@ -227,10 +206,8 @@ class Coordinator:
             data_storages_config (dict): dictionary containing the configurations for
                 the data storages.
         """
-        self.data_storages = {
-            key: BaseDataStorage.create_data_storage(config)
-            for key, config in data_storages_config.items()
-        }
+        for storage in data_storages_config.values():
+            self.storage_handler.register_storage(storage["type"], storage["config"])
 
     def do_step(self, step_size: float, save_data=False):
         """
@@ -260,29 +237,29 @@ class Coordinator:
 
         # Save results and data
         if save_data:
-            results = [self.master.current_time]
-            for _, fmu_output_dict in outputs.items():
-                for _, output_value in fmu_output_dict.items():
-                    results.append(output_value[0])
-            for d in data.values():
-                results.append(d)
-            self.data_storages["results"].save("results", [results])
+            for input_key, input_value in data_for_master.items():
+                for variable_name, variable_value in input_value.items():
+                    outputs[input_key][variable_name] = variable_value
+            self.storage_handler.notify_results(
+                "file", self.master.current_time, outputs
+            )
 
-        # Send data to outbound data stream handlers
-
-    def run_simulation(self, step_size: float, end_time: float):
+    def run_simulation(
+        self, step_size: float, end_time: float, save_data: bool = False
+    ):
         """
         Run the simulation until the given end time.
 
         Args:
             step_size (float): simulation step size
             end_time (float): simulation end time
+            save_data (boolean) : whether to save data into configured storages or not
         """
         if self.master is None:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
         while self.master.current_time < end_time:
-            self.do_step(step_size)
+            self.do_step(step_size, save_data=save_data)
 
     def save_results(self, filename: str):
         """

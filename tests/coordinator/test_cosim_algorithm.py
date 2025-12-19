@@ -42,11 +42,11 @@ fmu_definitions = [
 fmu_connections = [
     {
         "source": {"id": "math1", "variable": "y"},
-        "target": {"id": "math2", "variable": "x"},
+        "target": [{"id": "math2", "variable": "x"}],
     },
     {
         "source": {"id": "math2", "variable": "y"},
-        "target": {"id": "math1", "variable": "x"},
+        "target": [{"id": "math1", "variable": "x"}],
     },
 ]
 # Use case with interconnected FMUs, and various options

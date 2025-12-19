@@ -44,12 +44,22 @@ def temp_cwd(path):
 def test_load_config_from_dict():
     config_data = {"fmus": [], "connections": []}
     parser = ConfigParser(config_data)
+
+    # Add default values to expected result
+    config_data["cosim_method"] = "jacobi"
+    config_data["edge_sep"] = " -> "
+    config_data["iterative"] = False
+    config_data["root"] = ""
+    config_data["data_storages"] = []
+
     assert parser.config_dict == config_data
 
 
 def test_load_config_from_file(tmp_path):
     config_data = {
-        "fmus": [{"id": "FMU1", "initialization": {}, "path": "fmu1.fmu"}],
+        "fmus": [
+            {"id": "FMU1", "initialization": {}, "path": "fmu1.fmu"}
+        ],
         "connections": [
             {
                 "source": {"id": "A", "variable": "x", "type": "fmu", "unit": ""},
@@ -60,15 +70,16 @@ def test_load_config_from_file(tmp_path):
         "cosim_method": "test_solver",
         "iterative": True,
         "root": "",
+        "data_storages": []
     }
     config_file = tmp_path / "config.json"
     config_file.write_text(json.dumps(config_data))
 
-    parser = ConfigParser(
-        str(config_file),
-        cosim_method="test_solver_default",
-        edge_sep="test_sep_default",
-    )
+    parser = ConfigParser(str(config_file))
+
+    # Append with default name value for fmus
+    for fmu in config_data["fmus"]:
+        fmu["name"] = fmu["id"]
     assert parser.config_dict == config_data
 
 
@@ -89,25 +100,23 @@ def test_apply_defaults():
     assert parser.config_dict["edge_sep"] == " -> "
     assert parser.config_dict["iterative"] == False
 
-    config_data = {"fmus": [], "connections": []}
-    parser2 = ConfigParser(
-        config_data,
-        cosim_method="test_solver_default",
-        edge_sep="test_sep_default",
-        iterative=True,
-    )
-    assert parser2.config_dict["cosim_method"] == "test_solver_default"
-    assert parser2.config_dict["edge_sep"] == "test_sep_default"
-    assert parser2.config_dict["iterative"] == True
-
 
 def test_missing_keys():
     config_data = {"fmus": []}  # Missing "connections"
     parser = ConfigParser(config_data)
+    assert parser.config_dict != config_data
+
+    # Add default properties and check equality
+    config_data["connections"] = []
+    config_data["cosim_method"] = "jacobi"
+    config_data["data_storages"] = []
+    config_data["edge_sep"] = " -> "
+    config_data["iterative"] = False
+    config_data["root"] = ""
     assert parser.config_dict == config_data
 
     config_data = {"connections": []}  # Missing "fmus"
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ConfigParser(config_data)
 
 
@@ -128,7 +137,7 @@ def test_build_graph_config():
 
 
 def test_update_paths_in_dict(tmp_path):
-    config_data = {"fmus": [{"path": "model.fmu"}], "connections": []}
+    config_data = {"fmus": [{"id": "A", "path": "model.fmu"}], "connections": []}
     model_file = tmp_path / "model.fmu"
     model_file.touch()
 
@@ -149,7 +158,7 @@ def test_build_master_config(algo_name):
                 "target": {"id": "FMU2", "variable": "y", "type": "fmu", "unit": ""},
             }
         ],
-        "cosim_method": algo_name,
+        "cosim_method": algo_name
     }
     parser = ConfigParser(config_data)
     assert "fmus" in parser.master_config
@@ -164,10 +173,9 @@ def test_build_handlers_config():
         "connections": [
             {
                 "source": {
-                    "id": "ext_source",
+                    "path": "ext_source",
                     "variable": "data",
-                    "type": "csv",
-                    "unit": "",
+                    "type": "csv"
                 },
                 "target": {"id": "FMU1", "variable": "x", "type": "fmu", "unit": ""},
             }
@@ -183,7 +191,7 @@ def test_add_symbolic_nodes():
         "fmus": [],
         "connections": [
             {
-                "source": {"type": "csv", "variable": "data"},
+                "source": {"path": "ext_source", "type": "csv", "variable": "data"},
                 "target": {"id": "FMU1", "variable": "x", "type": "fmu"},
             }
         ],
