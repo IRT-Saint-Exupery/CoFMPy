@@ -13,7 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -77,7 +77,7 @@ setuptools.setup(
     description="FMUs co-simulation in Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/IRT-Saint-Exupery/CoFMPy",
+    url="https://github.com/IRT-Saint-Exupery/CoFmuPy",
     license="BSD-2-Clause",
     packages=setuptools.find_namespace_packages(),
     include_package_data=True,

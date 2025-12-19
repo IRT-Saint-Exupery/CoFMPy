@@ -22,15 +22,7 @@
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-import plotly.io as pio
-
-pio.renderers.default = "sphinx_gallery"
-
-conf = {
-    "within_subsection_order": "FileNameSortKey",
-}
-# conf = {
-#     "examples_dirs": ["docs/examples"],
-#     "gallery_dirs": ["docs/generated/gallery"],
-#     "ignore_pattern": "/plot_",
-# }
+"""
+Module for Master algorithms.
+"""
+from .default_master import DefaultMaster

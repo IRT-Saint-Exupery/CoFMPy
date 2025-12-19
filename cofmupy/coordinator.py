@@ -13,7 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -32,7 +32,7 @@ from .config_parser import ConfigParser
 from .data_storage import BaseDataStorage
 from .data_stream_handler import BaseDataStreamHandler
 from .graph_engine import GraphEngine
-from .master import Master
+from .master import DefaultMaster
 
 
 class Coordinator:
@@ -183,7 +183,7 @@ class Coordinator:
                 case the default values are used "solver": "fsolve",
                 "time_step": minimum_default_step_size, and "xtol": 1e-5.
         """
-        self.master = Master(
+        self.master = DefaultMaster(
             fmu_config_list=config["fmus"],
             connections=config["connections"],
             sequence_order=config["sequence_order"],
@@ -335,12 +335,7 @@ class Coordinator:
         """
         if self.master is None:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
-
-        var_names = []
-        for fmu_id, fmu in self.master.fmu_handlers.items():
-            var_names += [(fmu_id, var) for var in fmu.get_variable_names()]
-
-        return var_names
+        return self.master.variable_names
 
     def get_variable(self, name: tuple) -> list:
         """
@@ -355,8 +350,7 @@ class Coordinator:
         if self.master is None:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
-        fmu_id, var_name = name
-        return self.master.fmu_handlers[fmu_id].get_variable(var_name)
+        return self.master.get_variable(name)
 
     def get_variables(self, names: list) -> dict:
         """
@@ -391,8 +385,7 @@ class Coordinator:
         if self.master is None:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
-        fmu_id, var_name = name
-        return self.master.fmu_handlers[fmu_id].get_causality(var_name)
+        return self.master.get_causality(name)
 
     def get_variable_type(self, name: tuple) -> str:
         """
@@ -407,5 +400,4 @@ class Coordinator:
         if self.master is None:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
-        fmu_id, var_name = name
-        return self.master.fmu_handlers[fmu_id].get_variable_type(var_name)
+        return self.master.get_variable_type(name)

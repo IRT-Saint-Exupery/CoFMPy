@@ -308,7 +308,7 @@ def construct_connection_list(csvfile_connections):
 
 def construct_config(connections_path, initializations_path):
     """
-    Construct global config file for CofmPy :
+    Construct global config file for CoFmuPy :
         Parse information from connections file to construct "fmus" and "connections"
             sections
         parse initializations file to append to "fmus" section
