@@ -194,7 +194,7 @@ def load_project():
     """
     project = retrieve_project_from_params(
         os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
-        request.form["projectId"]
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
@@ -267,9 +267,7 @@ def auto_connect_project():
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
     use_case_config = ConfigParser(os.path.join(project_path, "config.json"))
-    config = transform_config_for_frontend(
-        use_case_config.config_dict, project_path
-    )
+    config = transform_config_for_frontend(use_case_config.config_dict, project_path)
     fmus = config["fmus"]
     new_connections = []
     for index_fmu in range(len(fmus) - 1):
