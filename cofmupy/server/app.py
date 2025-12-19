@@ -169,7 +169,8 @@ def remove_project():
         dict: return response including delete status
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
@@ -192,12 +193,13 @@ def load_project():
         dict: return project containing all information
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"]
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
     use_case_config = ConfigParser(os.path.join(project_path, "config.json"))
-    config = use_case_config.get_config_dict()
+    config = use_case_config.config_dict
 
     # transform data to interface with frontend
     project["config"] = transform_config_for_frontend(config, str(project_path))
@@ -216,8 +218,10 @@ def save_project():
         dict: return project containing all information
     """
     project = json.loads(request.form["project"])
+
     project_loaded = retrieve_project_from_params(
-        project["name"], project["id"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, project["name"]),
+        project["id"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project_loaded["name"])
 
@@ -257,13 +261,14 @@ def auto_connect_project():
         dict: return connections list
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
     use_case_config = ConfigParser(os.path.join(project_path, "config.json"))
     config = transform_config_for_frontend(
-        use_case_config.get_config_dict(), project_path
+        use_case_config.config_dict, project_path
     )
     fmus = config["fmus"]
     new_connections = []
@@ -324,7 +329,7 @@ def auto_connect_project():
 
 
 @app.route("/api/fmu/information2", methods=["GET", "POST"])
-def get_fmu_information2():
+def get_fmu_information():
     """
     Retrieve fmu information and format information as string (only variable table)
     Should be used to display copy or copy to clipboard
@@ -337,7 +342,8 @@ def get_fmu_information2():
         dict: return response object containing fmu information as string
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])
@@ -362,7 +368,7 @@ def get_fmu_information2():
 
 
 @app.route("/api/fmu/information3", methods=["GET", "POST"])
-def get_fmu_information3():
+def get_fmu_information_complete():
     """
     Retrieve all fmu information : model, cosimulation, variables
 
@@ -374,7 +380,8 @@ def get_fmu_information3():
         dict: return response object containing all fmu information
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])
@@ -438,7 +445,8 @@ def delete_fmu():
         return project containing all information
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])
@@ -447,7 +455,7 @@ def delete_fmu():
     os.remove(os.path.join(project_path, fmu_info["path"]))
 
     use_case_config = ConfigParser(os.path.join(project_path, "config.json"))
-    config = use_case_config.get_config_dict()
+    config = use_case_config.config_dict
 
     # Delete from fmus list
     fmus = [fmu for fmu in config["fmus"] if fmu["id"] != fmu_info["id"]]
@@ -488,7 +496,8 @@ def edit_initialization_fmu():
         return project containing all information
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_id = request.form["fmuId"]
@@ -499,7 +508,7 @@ def edit_initialization_fmu():
     variable_type = variable["type"]
 
     use_case_config = ConfigParser(os.path.join(project_path, "config.json"))
-    config = use_case_config.get_config_dict()
+    config = use_case_config.config_dict
 
     # Find fmu from fmus list
     fmus = config["fmus"]
@@ -586,7 +595,8 @@ def start_simulation_sync():
         return object with simulation execution result
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
 
@@ -630,13 +640,14 @@ def edit_fmu():
         return project containing all information
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmus = json.loads(request.form["fmus"])
 
     use_case_config = ConfigParser(os.path.join(project_path, "config.json"))
-    config = use_case_config.get_config_dict()
+    config = use_case_config.config_dict
 
     config["fmus"] = fmus
     config = transform_config_from_frontend(config)
@@ -659,7 +670,8 @@ def upload_file():
         return project containing all information
     """
     project = retrieve_project_from_params(
-        request.form["projectName"], request.form["projectId"], ROOT_PATH_PROJECT
+        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
+        request.form["projectId"],
     )
     project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
     fmu_info = json.loads(request.form["fmu"])

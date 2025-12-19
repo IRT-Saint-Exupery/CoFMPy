@@ -30,24 +30,24 @@ import json
 from cofmupy.utils import fmu_utils
 
 
-def retrieve_project_from_params(project_name: str, project_id: str, root_path: str):
+def retrieve_project_from_params(project_path: str, project_id: str):
     """
     Retrieve project from name and id. find project sub-directory of the root path,
         and check consistency with project id
 
     Args:
-        project_name (str): name of the project, correspond to sub-directory
+        project_path (str): path of the project, correspond to sub-directory
+            inside root directory
         project_id (str): project id. Used to check consistency
-        root_path (str): root path of the projects
 
     Returns:
         dict: config dictionary amended with additional data.
     """
-    if not os.path.exists(os.path.join(root_path, project_name)):
+    if not os.path.exists(project_path):
         raise Exception("Project doesn't exist")
 
     with open(
-        os.path.join(root_path, project_name, "metadata.json"),
+        os.path.join(project_path, "metadata.json"),
         "r",
         encoding="utf-8",
     ) as file:
@@ -79,9 +79,6 @@ def transform_config_for_frontend(config: dict, project_path: str):
         if table_result is not None:
             for line in table_result:
                 excluded = False
-                """for exclude_pattern in exclude_ports_patterns:
-                    if line["name"].find(exclude_pattern) != -1:
-                        excluded = True"""
                 if not excluded:
                     if line["category"] == "Input":
                         input_ports.append(line)

@@ -64,16 +64,15 @@ class FileDataStorage(BaseDataStorage):
             f.write("time,")
             f.write(",".join(labels) + "\n")
 
-    def save(self, variable_name, time, data, metadata=None):
+    def save(self, time: float, data: dict, metadata=None):
         """Save data to a file for the given variable.
 
         The data must be a list of lists, where each list contains the data for a row
         (time t, value at t).
 
         Args:
-            variable_name (str): variable name.
-            time (any): current time
-            data (list): list of lists with the data to save
+            time (float): current time
+            data (dict): 2 levels dictionary with all fmu(id) and associated variables
             metadata (dict, optional): metadata associated with the data.
         """
         with open(self.file_path, mode="a", encoding="utf-8") as f:

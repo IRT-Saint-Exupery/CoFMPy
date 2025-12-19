@@ -89,8 +89,7 @@ config = {
             "path": "../../../resources/fmus/BouncingBall.fmu",
             "initialization": {"e": 0.5},  # Set initial value
         }
-    ],
-    "connections": []
+    ]
 }
 
 coordinator = Coordinator()

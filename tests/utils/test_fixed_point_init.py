@@ -109,11 +109,11 @@ use_cases = [
             "connections": [
                 {
                     "source": {"id": "internal_state", "variable": "y"},
-                    "target": [{"id": "double", "variable": "u"}],
+                    "target": {"id": "double", "variable": "u"},
                 },
                 {
                     "source": {"id": "double", "variable": "y"},
-                    "target": [{"id": "internal_state", "variable": "u"}],
+                    "target": {"id": "internal_state", "variable": "u"},
                 },
             ],
         },

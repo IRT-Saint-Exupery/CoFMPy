@@ -97,7 +97,7 @@ class ConfigConnectionLocalStream(ConfigConnectionBase):
     variable: str = ""
 
     # pylint: disable=W0622
-    def __init__(self, type: str, values: Dict, interpolation="previous", **kwargs):
+    def __init__(self, values: Dict, type: str, interpolation="previous", **kwargs):
         """
         Init method to instantiate connection extremity
         Args:
@@ -139,7 +139,7 @@ class ConfigConnectionCsvStream(ConfigConnectionBase):
 
     # pylint: disable=W0622
     def __init__(
-        self, type: str, path: str, variable: str, interpolation="previous", **kwargs
+        self, path: str, variable: str, type: str, interpolation="previous", **kwargs
     ):
         """
         Init method to instantiate connection extremity
@@ -224,7 +224,7 @@ class ConfigDataStorage:
     config: Dict
 
     # pylint: disable=W0622
-    def __init__(self, name: str, type: str, config: Dict, **kwargs):
+    def __init__(self, name: str, config: Dict, type: str, **kwargs):
         """
         Init method to instantiate data storage
         Args:
@@ -375,7 +375,7 @@ class ConfigObject:
     def __init__(
         self,
         fmus: list[ConfigFmu],
-        connections: list[ConfigConnection],
+        connections: list[ConfigConnection] = None,
         data_storages: list[ConfigDataStorage] = None,
         root: str = "",
         edge_sep: str = " -> ",
@@ -396,6 +396,8 @@ class ConfigObject:
             kwargs (any): additional arguments, not used
         """
         self.fmus = [ConfigFmu(**fmu_dict) for fmu_dict in fmus]
+        if connections is None:
+            connections = []
         self.connections = [
             ConfigConnection(**connection_dict) for connection_dict in connections
         ]

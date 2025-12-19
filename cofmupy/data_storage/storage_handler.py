@@ -66,11 +66,11 @@ class StorageHandler:
         Notify results to concerned data storage
 
         Args:
-            type (str): type of the storage, should be used to filter events.
+            type_storage (str): type of the storage, should be used to filter events.
             time (float): time of the results
             data (any): data to send
             metadata (any) : optional data to send
         """
         for storage in self._storage:
             if storage.type_name == type_storage:
-                storage.save("", time, data, metadata)
+                storage.save(time, data, metadata)

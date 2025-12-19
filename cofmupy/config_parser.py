@@ -95,7 +95,8 @@ class ConfigParser:
         self._build_handlers_config()
         self._build_graph_config()
 
-    def get_config_dict(self):
+    @property
+    def config_dict(self):
         """
         Construct and return dict from protected _config_object
 
