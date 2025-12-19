@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../../assets/favicon_cofmupy_light.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1326,7 +1326,7 @@ The FMU simulates a ball bouncing on the ground.</p>
 <p>We will load and run the simulation of the Bouncing Ball FMU.</p>
 <p>First, let's define the configuration for the Bouncing Ball system. Instead of using a
 JSON file, we will directly create the configuration in a Python dictionary.</p>
-<!-- GENERATED FROM PYTHON SOURCE LINES 17-36 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 17-37 -->
 
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">cofmupy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Coordinator</span>
 
@@ -1334,7 +1334,8 @@ JSON file, we will directly create the configuration in a Python dictionary.</p>
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;fmus&quot;</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;bouncing_ball&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;../../../resources/fmus/BouncingBall.fmu&quot;</span><span class="p">}</span>
-    <span class="p">]</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="p">[]</span>
 <span class="p">}</span>
 
 <span class="c1"># We create a Coordinator object and start it with the config dictionary</span>
@@ -1350,11 +1351,11 @@ JSON file, we will directly create the configuration in a Python dictionary.</p>
 <div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>Skipping<span class="w"> </span>Fixed<span class="w"> </span>Point<span class="w"> </span>Initialization
 Default<span class="w"> </span>value<span class="w"> </span>of<span class="w"> </span>coefficient<span class="w"> </span>of<span class="w"> </span>restitution<span class="w"> </span><span class="s1">&#39;e&#39;</span><span class="w"> </span><span class="o">(</span>from<span class="w"> </span>the<span class="w"> </span>FMU<span class="o">)</span>:<span class="w"> </span><span class="o">[</span><span class="m">0</span>.7<span class="o">]</span>
 </code></pre></div>
-<!-- GENERATED FROM PYTHON SOURCE LINES 37-39 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 38-40 -->
 
 <p>We now run the simulation for 2.8 seconds with a 10 ms time step. We retrieve the
 results and plot the height of the ball over time.</p>
-<!-- GENERATED FROM PYTHON SOURCE LINES 39-49 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 40-50 -->
 
 <div class="highlight"><pre><span></span><code><span class="n">step_size</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># 10 ms time step</span>
 <span class="n">end_time</span> <span class="o">=</span> <span class="mf">2.8</span>  <span class="c1"># Simulation time in seconds</span>
@@ -1368,7 +1369,7 @@ results and plot the height of the ball over time.</p>
 <p class="mkd-glr-script-out">Out:</p>
 <div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>Results<span class="w"> </span>keys:<span class="w"> </span>dict_keys<span class="o">([</span><span class="s1">&#39;time&#39;</span>,<span class="w"> </span><span class="o">(</span><span class="s1">&#39;bouncing_ball&#39;</span>,<span class="w"> </span><span class="s1">&#39;h&#39;</span><span class="o">)</span>,<span class="w"> </span><span class="o">(</span><span class="s1">&#39;bouncing_ball&#39;</span>,<span class="w"> </span><span class="s1">&#39;v&#39;</span><span class="o">)])</span>
 </code></pre></div>
-<!-- GENERATED FROM PYTHON SOURCE LINES 50-64 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 51-65 -->
 
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
@@ -1384,12 +1385,12 @@ results and plot the height of the ball over time.</p>
 <span class="n">plot_height</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="Bouncing Ball Height over time" class="mkd-glr-single-img" src="../images/mkd_glr_plot_00_bouncing_ball_001.png" srcset="../images/mkd_glr_plot_00_bouncing_ball_001.png" /></p>
-<!-- GENERATED FROM PYTHON SOURCE LINES 65-69 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 66-70 -->
 
 <h1 id="variable-initialization">Variable initialization<a class="headerlink" href="#variable-initialization" title="Permanent link">&para;</a></h1>
 <p>We will now see how to set the initial values of the FMU variables. First, let's
 look at the variables in the Bouncing Ball FMU and their causality.</p>
-<!-- GENERATED FROM PYTHON SOURCE LINES 69-76 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 70-77 -->
 
 <div class="highlight"><pre><span></span><code><span class="n">variables</span> <span class="o">=</span> <span class="n">coordinator</span><span class="o">.</span><span class="n">get_variable_names</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Variables in the Bouncing Ball FMU (and their causality):&quot;</span><span class="p">)</span>
@@ -1407,14 +1408,14 @@ look at the variables in the Bouncing Ball FMU and their causality.</p>
 -<span class="w"> </span><span class="s1">&#39;e&#39;</span>:<span class="w"> </span>parameter
 -<span class="w"> </span><span class="s1">&#39;v_min&#39;</span>:<span class="w"> </span><span class="nb">local</span>
 </code></pre></div>
-<!-- GENERATED FROM PYTHON SOURCE LINES 77-83 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 78-84 -->
 
 <p>In the following, we will set the coefficient of restitution <code>e</code> to 0.5, meaning that
 the ball will bounce less high than in the reference simulation.</p>
 <p>The initialization of the FMU variables is done in the configuration file (or in the
 dictionary here). The <code>initialization</code> key is used to set the initial values of the
 FMU variables. The values are set before the simulation starts.</p>
-<!-- GENERATED FROM PYTHON SOURCE LINES 83-102 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 84-103 -->
 
 <div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;fmus&quot;</span><span class="p">:</span> <span class="p">[</span>
@@ -1438,11 +1439,11 @@ FMU variables. The values are set before the simulation starts.</p>
 <p class="mkd-glr-script-out">Out:</p>
 <div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>Skipping<span class="w"> </span>Fixed<span class="w"> </span>Point<span class="w"> </span>Initialization
 </code></pre></div>
-<!-- GENERATED FROM PYTHON SOURCE LINES 103-105 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 104-106 -->
 
 <p>We can also set the initial height <code>h</code> of the ball to 5 meters. <code>h</code> is an output
 variable but its start value can be set at initialization of the FMU.</p>
-<!-- GENERATED FROM PYTHON SOURCE LINES 105-124 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 106-126 -->
 
 <div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;fmus&quot;</span><span class="p">:</span> <span class="p">[</span>
@@ -1451,7 +1452,8 @@ variable but its start value can be set at initialization of the FMU.</p>
             <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;../../../resources/fmus/BouncingBall.fmu&quot;</span><span class="p">,</span>
             <span class="s2">&quot;initialization&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
         <span class="p">}</span>
-    <span class="p">]</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="p">[]</span>
 <span class="p">}</span>
 
 <span class="n">coordinator</span> <span class="o">=</span> <span class="n">Coordinator</span><span class="p">()</span>
@@ -1466,13 +1468,13 @@ variable but its start value can be set at initialization of the FMU.</p>
 <p class="mkd-glr-script-out">Out:</p>
 <div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>Skipping<span class="w"> </span>Fixed<span class="w"> </span>Point<span class="w"> </span>Initialization
 </code></pre></div>
-<!-- GENERATED FROM PYTHON SOURCE LINES 125-131 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 127-133 -->
 
 <h1 id="comparison-with-the-analytical-solution">Comparison with the analytical solution<a class="headerlink" href="#comparison-with-the-analytical-solution" title="Permanent link">&para;</a></h1>
 <p>To validate the simulation with CoFmuPy, we compare the results with the analytical
 solution of the bouncing ball model as defined in the
 <a href="https://github.com/modelica/Reference-FMUs/blob/v0.0.39/BouncingBall/readme.md">reference FMU</a>.</p>
-<!-- GENERATED FROM PYTHON SOURCE LINES 131-155 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 133-157 -->
 
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -1497,7 +1499,7 @@ solution of the bouncing ball model as defined in the
             <span class="n">v_bounce</span> <span class="o">=</span> <span class="n">e</span> <span class="o">*</span> <span class="n">v_bounce</span>
     <span class="k">return</span> <span class="n">h</span>
 </code></pre></div>
-<!-- GENERATED FROM PYTHON SOURCE LINES 156-173 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 158-175 -->
 
 <div class="highlight"><pre><span></span><code><span class="c1"># Calculate the analytical solution</span>
 <span class="n">time_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
@@ -1517,9 +1519,9 @@ solution of the bouncing ball model as defined in the
 </code></pre></div>
 <p><img alt="Bouncing Ball Height: CoFmuPy simulation vs Analytical solution" class="mkd-glr-single-img" src="../images/mkd_glr_plot_00_bouncing_ball_004.png" srcset="../images/mkd_glr_plot_00_bouncing_ball_004.png" /></p>
 <p class="mkd-glr-script-out">Out:</p>
-<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>&lt;matplotlib.legend.Legend<span class="w"> </span>object<span class="w"> </span>at<span class="w"> </span>0x7fa410302c00&gt;
+<div class="mkd-glr-script-out-disp highlight"><pre><span></span><code>&lt;matplotlib.legend.Legend<span class="w"> </span>object<span class="w"> </span>at<span class="w"> </span>0x7f14f79da780&gt;
 </code></pre></div>
-<!-- GENERATED FROM PYTHON SOURCE LINES 174-182 -->
+<!-- GENERATED FROM PYTHON SOURCE LINES 176-184 -->
 
 <h1 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h1>
 <p>In this example, we have seen how to use CoFmuPy to run the Bouncing Ball FMU. We
@@ -1529,7 +1531,7 @@ have learnt how to:</p>
 <li>Retrieve and plot the results</li>
 <li>Modify the initial values of the FMU variables</li>
 </ul>
-<p><strong>Total running time of the script:</strong> ( 0 minutes  0.298 seconds)</p>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.306 seconds)</p>
 <div id="download_links"></div>
 
 <p><a class="md-button center" href="../plot_00_bouncing_ball.py"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M256 32c0-17.7-14.3-32-32-32s-32 14.3-32 32v210.7l-41.4-41.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c12.5 12.5 32.8 12.5 45.3 0l96-96c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 242.7zM64 320c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64v-32c0-35.3-28.7-64-64-64h-46.9l-56.6 56.6c-31.2 31.2-81.9 31.2-113.1 0L110.9 320zm304 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48"/></svg></span> Download Python source code: plot_00_bouncing_ball.py</a></p>
@@ -1584,10 +1586,10 @@ have learnt how to:</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.indexes"], "search": "../../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.indexes"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
       

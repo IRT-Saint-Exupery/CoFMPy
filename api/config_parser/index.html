@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../assets/favicon_cofmupy_light.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1250,6 +1250,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ConfigParser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cofmupy.config_parser.ConfigParser.config_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        config_dict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cofmupy.config_parser.ConfigParser.fill_data_storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fill_data_storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1369,6 +1397,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ConfigParser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cofmupy.config_parser.ConfigParser.config_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        config_dict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cofmupy.config_parser.ConfigParser.fill_data_storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fill_data_storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1436,12 +1492,7 @@ redundant endpoints, and orphaned connections.</p>
 
 
 <a href="#cofmupy.config_parser.ConfigParser" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ConfigParser</span><span class="p">(</span>
-    <span class="n">file_path</span><span class="p">,</span>
-    <span class="n">edge_sep</span><span class="o">=</span><span class="s2">&quot; -&gt; &quot;</span><span class="p">,</span>
-    <span class="n">cosim_method</span><span class="o">=</span><span class="s2">&quot;jacobi&quot;</span><span class="p">,</span>
-    <span class="n">iterative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">ConfigParser</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1479,43 +1530,16 @@ without using a JSON file.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code><span title="cofmupy.config_parser.ConfigParser.edge_sep">edge_sep</span></code></td>
+            <td><code><span title="cofmupy.config_parser.ConfigParser._config_object">_config_object</span></code></td>
             <td class="doc-attribute-details">
               <div class="doc-md-description">
-                <p>Edge separator for connections. Defaults to " -&gt; ".</p>
+                <p>The parsed configuration object (type
+ConfigObject)</p>
               </div>
               <p>
                   <span class="doc-attribute-annotation">
                     <b>TYPE:</b>
-                      <code><span title="str">str</span></code>
-                  </span>
-              </p>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="cofmupy.config_parser.ConfigParser.cosim_method">cosim_method</span></code></td>
-            <td class="doc-attribute-details">
-              <div class="doc-md-description">
-                <p>Method used to solve algebrauc loops. Defaults to "jacobi".</p>
-              </div>
-              <p>
-                  <span class="doc-attribute-annotation">
-                    <b>TYPE:</b>
-                      <code><span title="str">str</span></code>
-                  </span>
-              </p>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code><span title="cofmupy.config_parser.ConfigParser.config_dict">config_dict</span></code></td>
-            <td class="doc-attribute-details">
-              <div class="doc-md-description">
-                <p>The parsed configuration dictionary.</p>
-              </div>
-              <p>
-                  <span class="doc-attribute-annotation">
-                    <b>TYPE:</b>
-                      <code><span title="typing.Dict">Dict</span></code>
+                      <code><span title="cofmupy.config_interface.ConfigObject">ConfigObject</span></code>
                   </span>
               </p>
             </td>
@@ -1602,64 +1626,46 @@ without using a JSON file.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>cofmupy/config_parser.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
-    <span class="n">edge_sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot; -&gt; &quot;</span><span class="p">,</span>
-    <span class="n">cosim_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;jacobi&quot;</span><span class="p">,</span>
-    <span class="n">iterative</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="c1"># Arguments</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">config_dict</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_config_object</span><span class="p">:</span> <span class="n">ConfigObject</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">graph_config</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">master_config</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">data_storages</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">stream_handlers</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">error_in_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="c1"># ------------ 1. Load config: self.config_dict ------------------</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">config_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_config</span><span class="p">(</span><span class="n">file_check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># ------------ 1. Load config: self._config_object ------------------</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_config_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_config</span><span class="p">(</span><span class="n">file_check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># ------------ 2. Apply defaults and perform validation ------------</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_apply_defaults</span><span class="p">(</span><span class="n">edge_sep</span><span class="p">,</span> <span class="n">cosim_method</span><span class="p">,</span> <span class="n">iterative</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_validate_configuration</span><span class="p">()</span>
 
-    <span class="c1"># ------------ 3. Prepend &#39;root&#39; dir to present paths ------------</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_update_paths_in_dict</span><span class="p">()</span>
-
-    <span class="c1"># ------------ 4. Build configurations ---------------------------</span>
+    <span class="c1"># ------------ 3. Build configurations ---------------------------</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_build_storage_config</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_build_master_config</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_build_handlers_config</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_build_graph_config</span><span class="p">()</span>
@@ -1676,8 +1682,103 @@ without using a JSON file.</p>
 
 
 
+<div class="doc doc-object doc-attribute">
 
 
+
+<h3 id="cofmupy.config_parser.ConfigParser.config_dict" class="doc doc-heading">
+            <span class="doc doc-object-name doc-attribute-name">config_dict</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#cofmupy.config_parser.ConfigParser.config_dict" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">config_dict</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Construct and return dict from protected _config_object</p>
+
+
+<table>
+      <thead>
+        <tr>
+          <th><span class="doc-section-title">RETURNS</span></th>
+          <th><span>DESCRIPTION</span></th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td class="doc-returns-details">
+              <div class="doc-md-description">
+                <p>config formatted as a dict</p>
+              </div>
+                <p>
+                  <span class="doc-returns-annotation">
+                    <b>TYPE:</b>
+                      <code><span title="dict">dict</span></code>
+                  </span>
+                </p>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="cofmupy.config_parser.ConfigParser.fill_data_storage" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fill_data_storage</span>
+
+
+<a href="#cofmupy.config_parser.ConfigParser.fill_data_storage" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">fill_data_storage</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">storage_id</span><span class="p">,</span> <span class="n">storage_title</span><span class="p">)</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Fill data storage with labels and items</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>cofmupy/config_parser.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fill_data_storage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">storage_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">storage_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fill data storage with labels and items</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">target2</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target2</span><span class="p">,</span> <span class="n">ConfigConnectionFmu</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_storages</span><span class="p">[</span><span class="n">storage_id</span><span class="p">][</span><span class="s2">&quot;config&quot;</span><span class="p">][</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">storage_title</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_storages</span><span class="p">[</span><span class="n">storage_id</span><span class="p">][</span><span class="s2">&quot;config&quot;</span><span class="p">][</span><span class="s2">&quot;items&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">target2</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">target2</span><span class="o">.</span><span class="n">variable</span><span class="p">)</span>
+            <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 
@@ -1744,10 +1845,10 @@ without using a JSON file.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
       

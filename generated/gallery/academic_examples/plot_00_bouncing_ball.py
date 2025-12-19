@@ -21,7 +21,8 @@ from cofmupy import Coordinator
 config = {
     "fmus": [
         {"id": "bouncing_ball", "path": "../../../resources/fmus/BouncingBall.fmu"}
-    ]
+    ],
+    "connections": []
 }
 
 # We create a Coordinator object and start it with the config dictionary
@@ -110,7 +111,8 @@ config = {
             "path": "../../../resources/fmus/BouncingBall.fmu",
             "initialization": {"e": 0.5, "h": 5},
         }
-    ]
+    ],
+    "connections": []
 }
 
 coordinator = Coordinator()

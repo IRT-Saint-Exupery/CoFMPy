@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="assets/favicon_cofmupy_light.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
@@ -344,10 +344,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#python-interface" class="md-nav__link">
+  <a href="#key-keatures" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🐍 Python interface
+        🐍 Key Keatures
       
     </span>
   </a>
@@ -359,6 +359,17 @@
     <span class="md-ellipsis">
       
         📜 JSON configuration file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Citation
       
     </span>
   </a>
@@ -1417,10 +1428,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#python-interface" class="md-nav__link">
+  <a href="#key-keatures" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🐍 Python interface
+        🐍 Key Keatures
       
     </span>
   </a>
@@ -1432,6 +1443,17 @@
     <span class="md-ellipsis">
       
         📜 JSON configuration file
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Citation
       
     </span>
   </a>
@@ -1529,27 +1551,41 @@ data exchange between FMUs.</p>
 <p>CoFmuPy is available on PyPI and can be installed using <code>pip</code>:</p>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>cofmupy
 </code></pre></div>
-<h2 id="python-interface">🐍 Python interface<a class="headerlink" href="#python-interface" title="Permanent link">&para;</a></h2>
-<p>The Python interface allows users to use CoFmuPy and run co-simulation. A high-level
-API is provided to easily run and visualize a co-simulation system.
-Advanced users can also dive deeper into the structure of CoFmuPy for a more advanced
-control of the components.</p>
-<p>Under the hood, CoFmuPy is controlled by a component called the <em>Coordinator</em>. It is the
-entry point of CoFmuPy and it manages all the other components:</p>
+<h2 id="key-keatures">🐍 Key Keatures<a class="headerlink" href="#key-keatures" title="Permanent link">&para;</a></h2>
+<p>CoFmuPy provides a Python interface (with a graphical user interface under development) for configuring and running co-simulations of FMI-based systems, with a focus on coordinating interacting FMUs within complex digital twin architectures.</p>
+<p>A high-level API allows users to easily define, execute, and visualize digital twins scenarios, while still enabling more advanced control when needed.</p>
+<p>Building on the <a href="https://github.com/CATIA-Systems/FMPy">FMPy library</a> as an FMI-compliant execution backend, CoFmuPy focuses on system-level co-simulation capabilities and advanced coordination logic. In particular, CoFmuPy provides the following key features:</p>
 <ul>
-<li>the Master algorithm which is the engine that runs the co-simulation of FMUs.</li>
-<li>the Graph Engine that builds the connections and interactions between the FMUs and the
-  data sources and sinks.</li>
-<li>the data stream handlers that control the input data required by the co-simulation
-  system.</li>
-<li>the data storages that allow to store or send the outputs of the simulation.</li>
-<li>the GUI as the frontend of CoFmuPy.</li>
+<li>
+<p><strong>Advanced master coordination for coupled FMUs</strong>: Native master algorithms orchestrate the execution of multiple interacting FMUs, ensuring coherent time advancement and stable system-level simulation across heterogeneous subsystems. Cyclic dependencies between FMUs (algebraic loops) are automatically detected and resolved using fixed-point strategies, supporting both Jacobi and Gauss–Seidel co-simulation schemes, with or without rollback. This enables the simulation of tightly coupled systems without manual intervention or model restructuring.</p>
+</li>
+<li>
+<p><strong>Explicit data exchange and synchronization mechanisms</strong>: CoFmuPy provides fine-grained control over data routing, synchronization, and signal propagation between FMUs, as well as between FMUs and external data sources or sinks.</p>
+</li>
+<li>
+<p><strong>Native integration of Python and AI components</strong>: Python-based models (e.g., machine learning or control logic) can be directly integrated into the co-simulation loop without immediate FMU export while still being FMI-compliant, enabling full integration of AI frameworks.</p>
+</li>
+<li>
+<p><strong>Declarative and reproducible configuration</strong>: Co-simulation systems are fully defined through a structured JSON configuration file, making experiments easy to reproduce, modify, and extend.</p>
+</li>
+<li>
+<p><strong>Graphical interface (coming soon)</strong>: A user-friendly graphical interface will enable drag-and-drop system construction, FMU interconnection, remote interfaces configuration, algorithm selection, and co-simulation control.</p>
+</li>
 </ul>
 <h2 id="json-configuration-file">📜 JSON configuration file<a class="headerlink" href="#json-configuration-file" title="Permanent link">&para;</a></h2>
 <p>To properly define the co-simulation system, a JSON configuration file must be created.
 This file is the only information required by CoFmuPy to run the simulation. It must
 respect a specific syntax in order to define the FMUs, the interactions between them,
 the data sources and sinks, etc.</p>
+<h2 id="citation">📚 Citation<a class="headerlink" href="#citation" title="Permanent link">&para;</a></h2>
+<p>If you use CoFmuPy in your research or publications, please cite:</p>
+<div class="highlight"><pre><span></span><code><span class="nc">@inproceedings</span><span class="p">{</span><span class="nl">friedrich2025cofmupy</span><span class="p">,</span>
+<span class="w">  </span><span class="na">title</span><span class="p">=</span><span class="s">{CoFmuPy: A Python Framework for Rapid Prototyping of FMI-based Digital Twins}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">author</span><span class="p">=</span><span class="s">{Friedrich, Corentin and Lombana, Andr{\&#39;e}s and Fasquel, J{\&#39;e}r{\^o}me and Schlick, Charlie and Bennani, Nora and Mendil, Mouhcine}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">booktitle</span><span class="p">=</span><span class="s">{The 2nd International Conference on Engineering Digital Twins}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">year</span><span class="p">=</span><span class="s">{2025}</span>
+<span class="p">}</span>
+</code></pre></div>
 <h2 id="contributing">✒️ Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
 <p>Feel free to propose your ideas or come and contribute with us on the CoFmuPy library!</p>
 <h2 id="acknowledgments">🙏 Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permanent link">&para;</a></h2>
@@ -1616,10 +1652,10 @@ supported by the Clean Aviation Joint Undertaking and its Members.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.indexes"], "search": "assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.indexes"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
       
