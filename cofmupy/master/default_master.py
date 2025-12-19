@@ -13,7 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -29,20 +29,20 @@
 """
 Module for managing and executing co-simulations involving multiple FMUs.
 
-This module provides a `Master` class that handles FMU initialization, input setting,
-stepping, and result collection during simulation.
+This module provides a `DefaultMaster` class that handles FMU initialization, input
+setting, stepping, and result collection during simulation.
 
 """
 from collections import defaultdict
 
 import numpy as np
 
-from .utils import FixedPointInitializer
-from .wrappers import FmuHandlerFactory
+from ..utils import FixedPointInitializer
+from ..wrappers import FmuHandlerFactory
 import copy
 
 
-class Master:
+class DefaultMaster:
     """
     Manages and executes the co-simulation involving multiple FMUs.
 
@@ -282,6 +282,58 @@ class Master:
                 )
 
         return fmu_handlers
+
+    @property
+    def variable_names(self) -> list[tuple[str, str]]:
+        """
+        Get the names of all variables in the system.
+
+        Returns:
+            list: list of variable names as (fmu_id, var_name) tuples.
+        """
+        var_names = []
+        for fmu_id, fmu in self.fmu_handlers.items():
+            var_names += [(fmu_id, var) for var in fmu.get_variable_names()]
+        return var_names
+
+    def get_variable(self, name: tuple[str, str]):
+        """
+        Get the value of the given tuple fmu/variable.
+
+        Args:
+            name (tuple): variable name as (fmu_id, var_name).
+
+        Returns:
+            list: value of the variable, as a list.
+        """
+        fmu_id, var_name = name
+        return self.fmu_handlers[fmu_id].get_variable(var_name)
+
+    def get_causality(self, name: tuple[str, str]) -> str:
+        """
+        Gets the causality of the given variable.
+
+        Args:
+            name (tuple): variable name as (fmu_id, var_name).
+
+        Returns:
+            str: causality of the variable.
+        """
+        fmu_id, var_name = name
+        return self.fmu_handlers[fmu_id].get_causality(var_name)
+
+    def get_variable_type(self, name: tuple[str, str]) -> str:
+        """
+        Get the type of the given variable.
+
+        Args:
+            name (tuple): variable name as (fmu_id, var_name).
+
+        Returns:
+            str: type of the variable.
+        """
+        fmu_id, var_name = name
+        return self.fmu_handlers[fmu_id].get_variable_type(var_name)
 
     def initialize_values_from_config(self):
         """

@@ -1,0 +1,2 @@
+from_path,from_id,from_name,from_var_name,to_path,to_id,to_name,to_var_name
+resources/fmus,source,source.fmu,V,resources/fmus,resistor,resistor.fmu,V

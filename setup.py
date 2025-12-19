@@ -13,7 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -40,6 +40,9 @@ requirements = [
     "altair==4.0.0",
     "confluent-kafka",
     "dotmap==1.3.30",
+    "flask==3.1.2",
+    "flask-cors==6.0.1",
+    "flask-socketio==5.5.1",
     "fmpy==0.3.20",
     "joblib",
     "matplotlib",
@@ -77,7 +80,7 @@ setuptools.setup(
     description="FMUs co-simulation in Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/IRT-Saint-Exupery/CoFMPy",
+    url="https://github.com/IRT-Saint-Exupery/CoFmuPy",
     license="BSD-2-Clause",
     packages=setuptools.find_namespace_packages(),
     include_package_data=True,
@@ -91,6 +94,7 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "cofmupy-extract-fmu = cofmupy.helpers.extract_fmu:main",
+            "cofmupy-construct-config = cofmupy.helpers.construct_config:main",
         ]
     },
 )

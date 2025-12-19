@@ -47,29 +47,38 @@ CoFmuPy is available on PyPI and can be installed using `pip`:
 pip install cofmupy
 ```
 
-## 🐍 Python interface
+## 🐍 Key Keatures
 
-The Python interface allows users to use CoFmuPy and run co-simulation. A high-level
-API is provided to easily run and visualize a co-simulation system.
-Advanced users can also dive deeper into the structure of CoFmuPy for a more advanced
-control of the components.
+CoFmuPy provides a Python interface (with a graphical user interface under development) for configuring and running co-simulations of FMI-based systems, with a focus on coordinating interacting FMUs within complex digital twin architectures.
 
-Under the hood, CoFmuPy is controlled by a component called the _Coordinator_. It is the
-entry point of CoFmuPy and it manages all the other components:
+A high-level API allows users to easily define, execute, and visualize digital twins scenarios, while still enabling more advanced control when needed.
 
-- the Master algorithm which is the engine that runs the co-simulation of FMUs.
-- the Graph Engine that builds the connections and interactions between the FMUs and the
-  data sources and sinks.
-- the data stream handlers that control the input data required by the co-simulation
-  system.
-- the data storages that allow to store or send the outputs of the simulation.
+Building on the [FMPy library](https://github.com/CATIA-Systems/FMPy) as an FMI-compliant execution backend, CoFmuPy focuses on system-level co-simulation capabilities and advanced coordination logic. In particular, CoFmuPy provides the following key features:
 
-## 📜 JSON configuration file
+- **Advanced master coordination for coupled FMUs**: Native master algorithms orchestrate the execution of multiple interacting FMUs, ensuring coherent time advancement and stable system-level simulation across heterogeneous subsystems. Cyclic dependencies between FMUs (algebraic loops) are automatically detected and resolved using fixed-point strategies, supporting both Jacobi and Gauss–Seidel co-simulation schemes, with or without rollback. This enables the simulation of tightly coupled systems without manual intervention or model restructuring.
 
-To properly define the co-simulation system, a JSON configuration file must be created.
-This file is the only information required by CoFmuPy to run the simulation. It must
-respect a specific syntax in order to define the FMUs, the interactions between them,
-the data sources and sinks, etc.
+- **Explicit data exchange and synchronization mechanisms**: CoFmuPy provides fine-grained control over data routing, synchronization, and signal propagation between FMUs, as well as between FMUs and external data sources or sinks.
+
+- **Native integration of Python and AI components**: Python-based models (e.g., machine learning or control logic) can be directly integrated into the co-simulation loop without immediate FMU export while still being FMI-compliant, enabling full integration of AI frameworks.
+
+- **Declarative and reproducible configuration**: Co-simulation systems are fully defined through a structured JSON configuration file, making experiments easy to reproduce, modify, and extend.
+
+- **Graphical interface (coming soon)**: A user-friendly graphical interface will enable drag-and-drop system construction, FMU interconnection, remote interfaces configuration, algorithm selection, and co-simulation control.
+
+
+## 📚 Citation
+
+If you use CoFmuPy in your research or publications, please cite:
+
+```bibtex
+@inproceedings{friedrich2025cofmupy,
+  title={CoFmuPy: A Python Framework for Rapid Prototyping of FMI-based Digital Twins},
+  author={Friedrich, Corentin and Lombana, Andr{\'e}s and Fasquel, J{\'e}r{\^o}me and Schlick, Charlie and Bennani, Nora and Mendil, Mouhcine},
+  booktitle={The 2nd International Conference on Engineering Digital Twins},
+  year={2025}
+}
+```
+
 
 ## ✒️ Contributing
 

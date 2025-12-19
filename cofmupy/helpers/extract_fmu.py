@@ -13,7 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -28,53 +28,49 @@ FMU file.
 """
 import argparse
 import os
-import shutil
 
-from fmpy import extract
-from fmpy import read_model_description
+import fmpy
 from rich.console import Console
 from rich.table import Table
 
+import csv
 
-def extract_fmu_info(fmu_path):
+
+def display_fmu_info(fmu_path):
     """
-    Extracts information from an FMU file and displays it in a structured format.
+    Display information from an FMU file and displays it in a structured format.
 
     Args:
         fmu_path (str): Path to the FMU file.
-
     """
-    console = Console()
 
     # Ensure FMU exists
     if not os.path.isfile(fmu_path):
-        console.print(f"[red]❌ Error: FMU file '{fmu_path}' not found.[/red]")
+        Console().print(f"[red]❌ Error: FMU file '{fmu_path}' not found.[/red]")
         return
 
-    # Extract FMU content
-    unpacked_fmu_dir = extract(fmu_path)
-    model_desc = read_model_description(fmu_path)
+    model_desc = fmpy.read_model_description(fmu_path)
 
-    # Prepare table
+    # FMU version
+    fmu_version = model_desc.fmiVersion if model_desc.fmiVersion else "N/A"
+    Console().print(f"📦 [bold]FMU Version:[/bold] {fmu_version}", style="blue")
+
+    # Integration step size (if available)
+    step_size = (
+        model_desc.defaultExperiment.stepSize if model_desc.defaultExperiment else "N/A"
+    )
+    Console().print(
+        f"🕒 [bold]Default Integration Step Size:[/bold] {step_size}\n", style="blue"
+    )
+
     table = Table(
         title=f"📜 FMU Information: {os.path.basename(fmu_path)}", show_lines=True
     )
     table.add_column("Category", style="cyan", no_wrap=True)
     table.add_column("Variable", style="magenta")
     table.add_column("Type", style="green")
+    table.add_column("Unit", style="green")
     table.add_column("Start Value", style="white")
-
-    # FMU version
-    fmu_version = model_desc.fmiVersion if model_desc.fmiVersion else "N/A"
-    console.print(f"📦 [bold]FMU Version:[/bold] {fmu_version}", style="blue")
-
-    # Integration step size (if available)
-    step_size = (
-        model_desc.defaultExperiment.stepSize if model_desc.defaultExperiment else "N/A"
-    )
-    console.print(
-        f"🕒 [bold]Default Integration Step Size:[/bold] {step_size}\n", style="blue"
-    )
 
     # Iterate through variables
     for variable in model_desc.modelVariables:
@@ -85,28 +81,103 @@ def extract_fmu_info(fmu_path):
         )
         name = variable.name
         var_type = variable.variability.capitalize()
+        var_unit = variable.unit
         start_value = variable.start if variable.start is not None else "-"
 
-        table.add_row(category, name, var_type, str(start_value))
+        # Append table row for console display
+        table.add_row(category, name, var_type, var_unit, str(start_value))
 
-    # Display table
-    console.print(table)
+    # Print the whole table in the console
+    Console().print(table)
 
-    # Cleanup extracted FMU folder
-    shutil.rmtree(unpacked_fmu_dir, ignore_errors=True)
+
+def export_fmu_info(fmu_path, output_file):
+    """
+    Extract information from an FMU file and export it in the given file.
+
+    Args:
+        fmu_path (str): Path to the FMU file.
+        output_file (str): Path to the output file (csv file)
+    """
+
+    # Check provided output file
+    if output_file is None:
+        Console().print("[red]❌ Error: Please provide a valid export file path.[/red]")
+        return
+
+    # Ensure FMU exists
+    if not os.path.isfile(fmu_path):
+        Console().print(f"[red]❌ Error: FMU file '{fmu_path}' not found.[/red]")
+        return
+
+    # Extract FMU content
+    model_desc = fmpy.read_model_description(fmu_path)
+
+    Console().print(f"Create file {output_file}")
+    with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
+        csv_writer = csv.writer(
+            csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL
+        )
+        csv_writer.writerow(["Category", "name", "type", "type", "unit", "start_value"])
+
+        # FMU version
+        fmu_version = model_desc.fmiVersion if model_desc.fmiVersion else "N/A"
+        Console().print(f"📦 [bold]FMU Version:[/bold] {fmu_version}", style="blue")
+
+        # Integration step size (if available)
+        step_size = (
+            model_desc.defaultExperiment.stepSize
+            if model_desc.defaultExperiment
+            else "N/A"
+        )
+        Console().print(
+            f"🕒 [bold]Default Integration Step Size:[/bold] {step_size}\n",
+            style="blue",
+        )
+
+        # Iterate through variables
+        for variable in model_desc.modelVariables:
+            category = (
+                "Parameter"
+                if variable.causality == "parameter"
+                else variable.causality.capitalize()
+            )
+
+            csv_writer.writerow(
+                [
+                    category,
+                    variable.name,
+                    variable.variability,
+                    variable.type,
+                    variable.unit,
+                    str(variable.start if variable.start is not None else "-"),
+                ]
+            )
+
+    Console().print(f"Information are exported to file {output_file}")
 
 
 def main():
     """
     Main function to parse command-line arguments and call the extraction function.
+
+    command line example to display info from my_fmu.fmu :
+        >> python extract_fmu.py my_fmu.fmu
+    command line example to extract info from my_fmu.fmu and export
+            to extract_infos.csv file :
+        >> python extract_fmu.py my_fmu.fmu --output_file ./extract_infos.csv
     """
     parser = argparse.ArgumentParser(
         description="Extracts and displays FMU information in a structured format."
     )
     parser.add_argument("fmu_file", help="Path to the FMU file")
+    parser.add_argument("--output_file", help="Path to the output file", required=False)
     args = parser.parse_args()
 
-    extract_fmu_info(args.fmu_file)
+    if args.output_file is None:
+        display_fmu_info(args.fmu_file)
+    else:
+        export_fmu_info(args.fmu_file, args.output_file)
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@
 #    of conditions and the following disclaimer in the documentation and/or other
 #    materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
 # THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
@@ -23,7 +23,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-Unit tests for the Master object.
+Unit tests for the DefaultMaster object.
 
 The tests are based on the following use cases:
     1. Single FMU bouncing ball.
@@ -36,7 +36,7 @@ from collections import defaultdict
 import numpy as np
 import pytest
 
-from cofmupy.master import Master
+from cofmupy.master import DefaultMaster
 
 use_cases = [
     {  # Use case 1: single FMU bouncing ball
@@ -143,13 +143,16 @@ def use_case(request):
     Fixture for the use cases.
 
     The fixture is parametrized to test different use cases. It returns a tuple with:
-    - an instance of the Master.
+    - an instance of the DefaultMaster.
     - the expected results (dictionary)
 
     Returns:
-        tuple: an instance of the Master class, and the expected results.
+        tuple: an instance of the DefaultMaster class, and the expected results.
     """
-    return Master(**request.param["master_config"]), request.param["expected_results"]
+    return (
+        DefaultMaster(**request.param["master_config"]),
+        request.param["expected_results"],
+    )
 
 
 @pytest.fixture
