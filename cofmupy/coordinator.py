@@ -378,3 +378,16 @@ class Coordinator:
             raise RuntimeError("Coordinator not initialized. Call start() first.")
 
         return self.master.get_variable_type(name)
+
+    def set_variable(self, name: tuple[str, str], value: list):
+        """
+        Set the value of the given variable.
+
+        Args:
+            name (tuple): variable name as (fmu_id, var_name).
+            value (list): value to set the variable to, as a list.
+        """
+        if self.master is None:
+            raise RuntimeError("Coordinator not initialized. Call start() first.")
+
+        self.master.set_variable(name, value)

@@ -335,6 +335,17 @@ class DefaultMaster:
         fmu_id, var_name = name
         return self.fmu_handlers[fmu_id].get_variable_type(var_name)
 
+    def set_variable(self, name: tuple[str, str], value: list):
+        """
+        Set the value of the given tuple fmu/variable.
+
+        Args:
+            name (tuple): variable name as (fmu_id, var_name).
+            value (list): value to set, as a list.
+        """
+        fmu_id, var_name = name
+        self.fmu_handlers[fmu_id].set_variables({var_name: value})
+
     def initialize_values_from_config(self):
         """
         Initializes the FMU variables (inputs/outputs/parameters) with the values
