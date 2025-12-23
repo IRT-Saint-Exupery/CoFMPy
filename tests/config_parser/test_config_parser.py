@@ -161,7 +161,7 @@ def test_build_master_config(algo_name):
         "cosim_method": algo_name
     }
     parser = ConfigParser(config_data)
-    assert "fmus" in parser.master_config["config"]
+    assert "fmu_config_list" in parser.master_config["config"]
     assert "connections" in parser.master_config["config"]
     assert len(parser.master_config["config"]["connections"]) == 1
     assert parser.master_config["config"]["cosim_method"] == algo_name

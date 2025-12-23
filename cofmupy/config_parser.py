@@ -185,7 +185,7 @@ class ConfigParser:
             fmu = fmu.asdict()
             fmu["path"] = self._find_corrected_relative_path(fmu["path"])
             fmus.append(fmu)
-        config["fmus"] = fmus
+        config["fmu_config_list"] = fmus
         config["connections"] = {}
         config["sequence_order"] = None
         config["cosim_method"] = self._config_object.cosim_method
