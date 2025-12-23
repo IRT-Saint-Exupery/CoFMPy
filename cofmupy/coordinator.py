@@ -32,7 +32,7 @@ from .config_parser import ConfigParser
 from .data_storage.storage_handler import StorageHandler
 from .data_stream_handler import BaseDataStreamHandler
 from .graph_engine import GraphEngine
-from .master import DefaultMaster
+from .master import BaseMaster
 
 
 class Coordinator:
@@ -95,14 +95,15 @@ class Coordinator:
         self.start_graph_engine(self.config_parser.graph_config)
 
         # 3. Start Master
-        self.config_parser.master_config["sequence_order"] = (
-            self.graph_engine.sequence_order
+        self.config_parser.master_config["config"].update(
+            {
+                "sequence_order": self.graph_engine.sequence_order,
+                "fixed_point": fixed_point_init,
+                "fixed_point_kwargs": fixed_point_kwargs,
+            }
         )
-        self.start_master(
-            self.config_parser.master_config,
-            fixed_point_init=fixed_point_init,
-            fixed_point_kwargs=fixed_point_kwargs,
-        )
+        self.master = BaseMaster.create_master(self.config_parser.master_config)
+        self.master.init_simulation(input_dict={})
 
         # 4. Create DataStreamHandlers
         self.load_stream_handlers(self.config_parser.stream_handlers)
@@ -146,32 +147,6 @@ class Coordinator:
             config["connections"],
             config["edge_sep"],
         )
-
-    def start_master(
-        self, config: dict, fixed_point_init=False, fixed_point_kwargs=None
-    ):
-        """
-        Start the master algorithm with the given configuration.
-
-        Args:
-            config (dict): configuration for the master algorithm containing the FMUs,
-                connections, sequence order, and loop method.
-            fixed_point_init (bool): whether to use the fixed-point initialization method.
-            fixed_point_kwargs (dict): keyword arguments for the fixed point initialization
-                method if fixed_point is set to True. Defaults to None, in which
-                case the default values are used "solver": "fsolve",
-                "time_step": minimum_default_step_size, and "xtol": 1e-5.
-        """
-        self.master = DefaultMaster(
-            fmu_config_list=config["fmus"],
-            connections=config["connections"],
-            sequence_order=config["sequence_order"],
-            cosim_method=config["cosim_method"],
-            iterative=config["iterative"],
-            fixed_point=fixed_point_init,
-            fixed_point_kwargs=fixed_point_kwargs,
-        )
-        self.master.init_simulation(input_dict={})
 
     def load_stream_handlers(self, stream_handlers: dict):
         """

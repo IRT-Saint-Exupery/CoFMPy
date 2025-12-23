@@ -178,16 +178,18 @@ class ConfigParser:
             None. Builds self.master_config.
         """
 
+        config = {}
+
         fmus = []
         for fmu in self._config_object.fmus:
             fmu = fmu.asdict()
             fmu["path"] = self._find_corrected_relative_path(fmu["path"])
             fmus.append(fmu)
-        self.master_config["fmus"] = fmus
-        self.master_config["connections"] = {}
-        self.master_config["sequence_order"] = None
-        self.master_config["cosim_method"] = self._config_object.cosim_method
-        self.master_config["iterative"] = self._config_object.iterative
+        config["fmu_config_list"] = fmus
+        config["connections"] = {}
+        config["sequence_order"] = None
+        config["cosim_method"] = self._config_object.cosim_method
+        config["iterative"] = self._config_object.iterative
 
         for connection in self._config_object.connections:
             source = connection.source
@@ -195,17 +197,16 @@ class ConfigParser:
 
                 if source.type == target.type == FMU_TYPE:
                     # Initialize list of connections from source if not yet present
-                    if (source.id, source.variable) not in self.master_config[
-                        "connections"
-                    ]:
-                        self.master_config["connections"][
-                            (source.id, source.variable)
-                        ] = []
+                    if (source.id, source.variable) not in config["connections"]:
+                        config["connections"][(source.id, source.variable)] = []
 
                     # Append target connection to the source
-                    self.master_config["connections"][
-                        (source.id, source.variable)
-                    ].append((target.id, target.variable))
+                    config["connections"][(source.id, source.variable)].append(
+                        (target.id, target.variable)
+                    )
+
+        self.master_config["type"] = "default"
+        self.master_config["config"] = config
 
     def _build_handlers_config(self) -> None:
         """

@@ -23,6 +23,26 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-Module for Master algorithms.
+Module for Master algorithms. This module contains the base class for master algorithm
+and the child classes for different masters.
+
+The master algorithms are used to run the co-simulation and handle the algebraic loops.
+The base class `BaseMaster` defines the interface for the Master subclasses.
 """
+from .base_master import BaseMaster
 from .default_master import DefaultMaster
+
+# Register all the master subclasses. This is necessary to be able to create the master
+# from configuration.
+# If a new master subclass is added, it must be imported here and registered.
+list_of_masters = [
+    DefaultMaster,
+]
+
+for master in list_of_masters:
+    BaseMaster.register_master(master)
+
+__all__ = [
+    "BaseMaster",
+    "DefaultMaster",
+]

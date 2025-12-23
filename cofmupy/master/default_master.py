@@ -33,16 +33,17 @@ This module provides a `DefaultMaster` class that handles FMU initialization, in
 setting, stepping, and result collection during simulation.
 
 """
+import copy
 from collections import defaultdict
 
 import numpy as np
 
 from ..utils import FixedPointInitializer
 from ..wrappers import FmuHandlerFactory
-import copy
+from .base_master import BaseMaster
 
 
-class DefaultMaster:
+class DefaultMaster(BaseMaster):
     """
     Manages and executes the co-simulation involving multiple FMUs.
 
@@ -97,6 +98,9 @@ class DefaultMaster:
     """
 
     # pylint: disable=too-many-instance-attributes
+
+    # Type name of the master (used in the configuration file and master registration)
+    type_name = "default"
 
     __keys = {
         "fmus": "FMUs",
