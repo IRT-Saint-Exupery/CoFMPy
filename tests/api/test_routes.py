@@ -36,7 +36,7 @@ from collections import defaultdict
 import numpy as np
 import pytest
 
-from cofmupy.server.app import app
+from cofmupy.api.app import create_app
 
 use_cases = [
     {  # Use case 1: single FMU bouncing ball
@@ -84,6 +84,7 @@ def use_case(request):
 
 @pytest.fixture
 def client():
+    app = create_app()
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
