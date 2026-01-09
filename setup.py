@@ -95,6 +95,8 @@ setuptools.setup(
         "console_scripts": [
             "cofmupy-extract-fmu = cofmupy.helpers.extract_fmu:main",
             "cofmupy-construct-config = cofmupy.helpers.construct_config:main",
+            "fetch-gui = tools.fetch_gui:main",
+            "start-gui = cofmupy.server:main"
         ]
     },
 )

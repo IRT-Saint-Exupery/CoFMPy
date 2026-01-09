@@ -23,51 +23,30 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-Flask Server class
+Flask routes script.
+Define all exposed Http APIs
 """
+from flask import Blueprint, send_from_directory, current_app, request
 from markupsafe import escape
-from flask import request
-from flask import Flask
-from flask_cors import CORS
-from flask_socketio import SocketIO, emit
+import os
+import uuid
+import json
 
+from .version import API_VERSION
 from ..config_interface import ConfigObject
 from ..utils import fmu_utils
 from ..utils import types
 from ..config_parser import ConfigParser
-from ..coordinator import Coordinator
 from .services import transform_config_from_frontend
 from .services import transform_config_for_frontend
 from .services import retrieve_project_from_params
+from .config import ROOT_PATH_PROJECT
 import shutil
-import os
-import uuid
-import json
-import pprint
 
-app = Flask(__name__)
-app.secret_key = "CoFmuPy secret key"
-
-CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")  # Allow all requesters
-
-ROOT_PATH_PROJECT = "./projects"
+api_bp = Blueprint("api", __name__)
 
 
-@socketio.on("message")
-def handle_message(data: str):
-    """
-    Manage socket message sent from external tool (Hmi)
-
-    Args:
-        data (str): Message from external tool. Bidirectional communication is working,
-            it should be improved with more consistent messages and according actions
-    """
-    print("received message: " + data)
-    emit("message", data, broadcast=True)
-
-
-@app.route("/api/ping")
+@api_bp.route("/api/ping")
 def hello():
     """
     Route for test purpose. Navigate or request to url http://localhost:5000/api/ping
@@ -77,7 +56,15 @@ def hello():
     return f"Hello, {escape(name)}!"
 
 
-@app.route("/api/project/list")
+@api_bp.route("/api/meta")
+def api_meta():
+    """
+    Retrieve metadata information, at least API Version, for compatibility check
+    """
+    return {"api_version": str(API_VERSION)}
+
+
+@api_bp.route("/api/project/list")
 def get_project_list():
     """
     Retrieve project list managed by the server, for each sub-directories, parse
@@ -112,7 +99,7 @@ def get_project_list():
     return project_list
 
 
-@app.route("/api/project/create", methods=["GET", "POST"])
+@api_bp.route("/api/project/create", methods=["GET", "POST"])
 def create_project():
     """
     End-point to create project, this method makes sub-directory into root project path,
@@ -156,7 +143,7 @@ def create_project():
     return project
 
 
-@app.route("/api/project/delete", methods=["GET", "POST"])
+@api_bp.route("/api/project/delete", methods=["GET", "POST"])
 def remove_project():
     """
     End-point to delete project, this method deletes all project directory with
@@ -180,7 +167,7 @@ def remove_project():
     return {"success": True, "message": "project deleted"}
 
 
-@app.route("/api/project/load", methods=["GET", "POST"])
+@api_bp.route("/api/project/load", methods=["GET", "POST"])
 def load_project():
     """
     End-point to load project, this method retrieves expected project, concatenates
@@ -206,7 +193,7 @@ def load_project():
     return project
 
 
-@app.route("/api/project/save", methods=["GET", "POST"])
+@api_bp.route("/api/project/save", methods=["GET", "POST"])
 def save_project():
     """
     End-point to save project, take project parameters, refactor to save in json files.
@@ -248,7 +235,7 @@ def save_project():
     return project
 
 
-@app.route("/api/project/autoconnection", methods=["GET", "POST"])
+@api_bp.route("/api/project/autoconnection", methods=["GET", "POST"])
 def auto_connect_project():
     """
     Algorithm to auto-connect fmus together. Nominal auto-connection is the same
@@ -326,7 +313,7 @@ def auto_connect_project():
     return config["connections"]
 
 
-@app.route("/api/fmu/information2", methods=["GET", "POST"])
+@api_bp.route("/api/fmu/information2", methods=["GET", "POST"])
 def get_fmu_information():
     """
     Retrieve fmu information and format information as string (only variable table)
@@ -365,7 +352,7 @@ def get_fmu_information():
     return {"success": True, "content": string_result}
 
 
-@app.route("/api/fmu/information3", methods=["GET", "POST"])
+@api_bp.route("/api/fmu/information3", methods=["GET", "POST"])
 def get_fmu_information_complete():
     """
     Retrieve all fmu information : model, cosimulation, variables
@@ -428,7 +415,7 @@ def get_fmu_information_complete():
     return my_model
 
 
-@app.route("/api/fmu/delete", methods=["GET", "POST"])
+@api_bp.route("/api/fmu/delete", methods=["GET", "POST"])
 def delete_fmu():
     """
     Delete fmu function. Remove file and all information on the fmu into config file :
@@ -478,7 +465,7 @@ def delete_fmu():
     return config
 
 
-@app.route("/api/fmu/initialization/edit", methods=["GET", "POST"])
+@api_bp.route("/api/fmu/initialization/edit", methods=["GET", "POST"])
 def edit_initialization_fmu():
     """
     Edit variable initialization into "fmus" section of the config file.
@@ -528,104 +515,7 @@ def edit_initialization_fmu():
     return project
 
 
-@socketio.on("start_simulation")
-def start_simulation(data: any):
-    """
-    Start simulation with web socket protocol, permits bidirectional communication
-        while execution running
-
-    Args :
-        data (dict): variable containing all data to start simulation
-            project (dict): project object containing all characteristics
-            communication_time_step (str): step size for the simulation
-            simulation_time (str): time of the simulation
-    Returns:
-        return progress messages as socket protocol all along the execution
-    """
-    project = data["project"]
-    communication_time_step = data["communication_time_step"]
-    simulation_time = data["simulation_time"]
-    project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
-
-    coordinator = Coordinator()
-    config_path = os.path.join(project_path, "config.json")
-    fsolve_kwargs = {
-        "solver": "fsolve",
-        "time_step": 1e-5,
-        "xtol": 1e-3,
-        "maxfev": 10000,
-    }
-    coordinator.start(
-        config_path, fixed_point_init=False, fixed_point_kwargs=fsolve_kwargs
-    )
-
-    emit("message", {"message": "Simulation initialized"})
-
-    print("\nConnections are : \n")
-    pprint.pp(coordinator.config_parser.master_config["connections"], compact=False)
-
-    coordinator.graph_engine.plot_graph()
-
-    emit("message", {"message": "Simulation start"})
-    coordinator.run_simulation(communication_time_step, simulation_time, save_data=True)
-
-    coordinator.save_results(os.path.join(project_path, "results_simulation.csv"))
-
-    emit(
-        "message",
-        {
-            "message": f"Simulation end with step size "
-            f"{communication_time_step} and time {simulation_time}"
-        },
-    )
-
-
-@app.route("/api/simulation/start", methods=["GET", "POST"])
-def start_simulation_sync():
-    """
-    Start simulation with http protocol, used to test simulation execution with
-        fixed parameters : time step=0.1s and time=30s
-
-    Args (included into form's request) :
-        projectName (str): project name, corresponding to sub-directory name
-        projectId (str): project id. Used to check consistency
-    Returns:
-        return object with simulation execution result
-    """
-    project = retrieve_project_from_params(
-        os.path.join(ROOT_PATH_PROJECT, request.form["projectName"]),
-        request.form["projectId"],
-    )
-    project_path = os.path.join(ROOT_PATH_PROJECT, project["name"])
-
-    coordinator = Coordinator()
-    config_path = os.path.join(project_path, "config.json")
-    fsolve_kwargs = {
-        "solver": "fsolve",
-        "time_step": 1e-5,
-        "xtol": 1e-3,
-        "maxfev": 10000,
-    }
-    coordinator.start(
-        config_path, fixed_point_init=False, fixed_point_kwargs=fsolve_kwargs
-    )
-
-    print("\nConnections are : \n")
-    pprint.pp(coordinator.config_parser.master_config["connections"], compact=False)
-
-    coordinator.graph_engine.plot_graph()
-
-    communication_time_step = 0.1
-    coordinator.run_simulation(communication_time_step, 30, save_data=True)
-
-    coordinator.save_results(os.path.join(project_path, "results_simulation.csv"))
-
-    emit("message", {"message": "Simulation ended"}, broadcast=True)
-
-    return {"succes": True}
-
-
-@app.route("/api/fmu/edit", methods=["GET", "POST"])
+@api_bp.route("/api/fmu/edit", methods=["GET", "POST"])
 def edit_fmu():
     """
     Edit information into "fmus" section of the config file.
@@ -654,7 +544,7 @@ def edit_fmu():
     return project
 
 
-@app.route("/api/fmu/upload", methods=["GET", "POST"])
+@api_bp.route("/api/fmu/upload", methods=["GET", "POST"])
 def upload_file():
     """
     Upload fmu file, include into project directory and add fmu in "fmus" section
@@ -710,5 +600,16 @@ def upload_file():
     return config
 
 
-if __name__ == "__main__":
-    socketio.run(app)
+@api_bp.route("/", defaults={"path": ""})
+@api_bp.route("/<path:path>")
+def serve_frontend(path):
+    """
+    Serve frontend application.
+    When user access to root application url => render frontend html file
+    """
+    dist = current_app.config["FRONTEND_DIST"]
+
+    if path and os.path.exists(os.path.join(dist, path)):
+        return send_from_directory(dist, path)
+
+    return send_from_directory(dist, "index.html")
